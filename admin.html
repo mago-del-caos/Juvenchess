@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>JUVENCHESS | Panel de Administración</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: #06152D;
+      color: #F8FAFC;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom);
+    }
+
+    .admin-container {
+      width: 100%;
+      max-width: 800px;
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0F294D;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(250, 204, 21, 0.3);
+    }
+
+    .header-info h1 {
+      font-family: 'Cinzel', serif;
+      color: #FACC15;
+      font-size: 1.8rem;
+    }
+
+    .header-info p { color: #94A3B8; font-size: 0.9rem; }
+
+    .btn-logout {
+      background: rgba(239,68,68,0.2);
+      color: #FCA5A5;
+      border: 1px solid rgba(239,68,68,0.4);
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.2s;
+    }
+    .btn-logout:hover { background: rgba(239,68,68,0.4); }
+
+    /* Paneles */
+    .panel {
+      background: #0F294D;
+      border-radius: 12px;
+      padding: 25px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .panel-title {
+      font-size: 1.2rem;
+      color: #10B981;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-size: 0.85rem; color: #94A3B8; margin-bottom: 5px; font-weight: 700; }
+    .input-group input, .input-group select {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #FFF;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: inherit;
+      outline: none;
+    }
+    .input-group input:focus, .input-group select:focus { border-color: #FACC15; }
+
+    /* Grid para Torneos */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+    .btn-submit {
+      background: #FACC15;
+      color: #000;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .btn-submit:active { transform: translateY(2px); }
+
+    .status-msg { margin-top: 15px; font-size: 0.85rem; min-height: 20px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <div class="admin-container">
+    
+    <div class="header">
+      <div class="header-info">
+        <h1>Centro de Mando</h1>
+        <p>Juvenchess Admin Panel</p>
+      </div>
+      <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+    </div>
+
+    <!-- PANEL 1: Crear Jugador Oficial -->
+    <div class="panel">
+      <h2 class="panel-title">👥 Crear Cuenta Oficial</h2>
+      <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 15px;">Las cuentas oficiales inician con 1000 de Elo y entran al Salón de la Fama.</p>
+      
+      <div class="input-group">
+        <label>Nombre de Usuario</label>
+        <input type="text" id="new-user" placeholder="Ej. JuanPerez">
+      </div>
+      <div class="input-group">
+        <label>Contraseña Temporal</label>
+        <input type="password" id="new-pass" placeholder="••••••••">
+      </div>
+      
+      <button class="btn-submit" onclick="crearUsuario()">Registrar Jugador</button>
+      <div class="status-msg" id="msg-user"></div>
+    </div>
+
+    <!-- PANEL 2: Crear Torneo -->
+    <div class="panel">
+      <h2 class="panel-title">🏆 Organizar Torneo</h2>
+      <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 15px;">Define los rangos para limitar quién puede participar.</p>
+      
+      <div class="input-group">
+        <label>Nombre del Torneo</label>
+        <input type="text" id="tour-name" placeholder="Ej. Copa Juvenchess 2026">
+      </div>
+
+      <div class="grid-2">
+        <div class="input-group">
+          <label>Rango Mínimo (Elo)</label>
+          <input type="number" id="tour-min" value="0" step="300">
+        </div>
+        <div class="input-group">
+          <label>Rango Máximo (Elo)</label>
+          <input type="number" id="tour-max" value="300" step="300">
+        </div>
+      </div>
+      
+      <button class="btn-submit" style="background: #10B981;" onclick="crearTorneo()">Abrir Torneo</button>
+      <div class="status-msg" id="msg-tour"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // Validar que realmente sea el admin quien ve esta pantalla
+    const sesion = JSON.parse(sessionStorage.getItem('juvenchess_session'));
+    if (!sesion || sesion.rol !== 'admin') {
+      window.location.href = 'login.html';
+    }
+
+    const API_URL = "https://juvenchess-api.adrian-camelot32.workers.dev"; // Cambiar al subir a Cloudflare
+
+    function cerrarSesion() {
+      sessionStorage.removeItem('juvenchess_session');
+      window.location.href = 'login.html';
+    }
+
+    async function crearUsuario() {
+      const user = document.getElementById('new-user').value.trim();
+      const pass = document.getElementById('new-pass').value.trim();
+      const msgBox = document.getElementById('msg-user');
+
+      if (!user || !pass) {
+        msgBox.style.color = "#EF4444";
+        msgBox.textContent = "Llena todos los campos.";
+        return;
+      }
+
+      msgBox.style.color = "#FACC15";
+      msgBox.textContent = "Procesando...";
+
+      // NOTA: Esta ruta la agregaremos al Worker (index.js) en el paso final
+      try {
+        const res = await fetch(`${API_URL}/admin/crear-usuario`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adminId: sesion.id, username: user, password: pass })
+        });
+        
+        const data = await res.json();
+        if (res.ok) {
+          msgBox.style.color = "#10B981";
+          msgBox.textContent = `¡Cuenta oficial '${user}' creada con éxito!`;
+          document.getElementById('new-user').value = '';
+          document.getElementById('new-pass').value = '';
+        } else {
+          msgBox.style.color = "#EF4444";
+          msgBox.textContent = data.error || "Error al crear cuenta.";
+        }
+      } catch (e) {
+        msgBox.style.color = "#EF4444";
+        msgBox.textContent = "Error de conexión con el servidor.";
+      }
+    }
+
+    async function crearTorneo() {
+      const nombre = document.getElementById('tour-name').value.trim();
+      const min = document.getElementById('tour-min').value;
+      const max = document.getElementById('tour-max').value;
+      const msgBox = document.getElementById('msg-tour');
+
+      if (!nombre) {
+        msgBox.style.color = "#EF4444";
+        msgBox.textContent = "El torneo necesita un nombre.";
+        return;
+      }
+
+      msgBox.style.color = "#FACC15";
+      msgBox.textContent = "Abriendo torneo...";
+
+      // NOTA: Esta ruta la agregaremos al Worker (index.js) en el paso final
+      try {
+        const res = await fetch(`${API_URL}/admin/torneos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adminId: sesion.id, nombre, rango_min: min, rango_max: max })
+        });
+        
+        const data = await res.json();
+        if (res.ok) {
+          msgBox.style.color = "#10B981";
+          msgBox.textContent = `¡El torneo '${nombre}' ya está abierto!`;
+          document.getElementById('tour-name').value = '';
+        } else {
+          msgBox.style.color = "#EF4444";
+          msgBox.textContent = data.error || "Error al abrir torneo.";
+        }
+      } catch (e) {
+        msgBox.style.color = "#EF4444";
+        msgBox.textContent = "Error de conexión con el servidor.";
+      }
+    }
+  </script>
+</body>
+</html>

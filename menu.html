@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JUVENCHESS | Menú</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-dark: #06152D; --panel-bg: #0F294D; --gold: #FACC15; --green: #10B981; --text: #F8FAFC; --text-muted: #94A3B8; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg-dark); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+    .menu-container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 20px; }
+    .header-title { font-family: 'Cinzel', serif; color: var(--gold); font-size: 2rem; }
+    .section { background: var(--panel-bg); border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
+    .section-title { font-size: 1.1rem; color: var(--gold); margin-bottom: 15px; text-transform: uppercase; }
+    .btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+    .btn-option { background: rgba(255,255,255,0.05); border: 2px solid transparent; color: var(--text); padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-option.active { background: rgba(16, 185, 129, 0.2); border-color: var(--green); color: var(--green); }
+    .bots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+    .bot-card { background: rgba(0,0,0,0.2); border: 2px solid transparent; border-radius: 10px; padding: 15px 10px; text-align: center; cursor: pointer; }
+    .bot-card.active { border-color: var(--gold); background: rgba(250, 204, 21, 0.1); }
+    .btn-play { background-color: var(--green); color: #000; border: none; padding: 18px; font-size: 1.2rem; font-weight: 900; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 10px; }
+    .btn-challenge { background: rgba(250, 204, 21, 0.2); color: var(--gold); border: 1px solid var(--gold); padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: background 0.2s; display: flex; justify-content: space-between; align-items: center; }
+    .btn-challenge:hover { background: rgba(250, 204, 21, 0.4); }
+  </style>
+</head>
+<body>
+  <div class="menu-container">
+    <h1 class="header-title" id="player-greeting">Configuración</h1>
+    
+    <div class="section">
+      <h2 class="section-title">1. Modo de Juego</h2>
+      <div class="btn-grid" id="mode-selector">
+        <button class="btn-option active" data-mode="ia">🤖 Vs Bots (IA)</button>
+        <button class="btn-option" data-mode="pvp">👥 2 Jugadores</button>
+        <button class="btn-option" data-mode="online">🌐 En Línea</button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN BOTS LOCALES -->
+    <div class="section" id="bot-section">
+      <h2 class="section-title">2. Elige tu Oponente</h2>
+      <div class="bots-grid">
+        <div class="bot-card active" data-bot="profe" data-elo="200" data-name="Profe Adrian">Profe (Elo 200)</div>
+        <div class="bot-card" data-bot="santa" data-elo="500" data-name="Santa">Santa (Elo 500)</div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN RADAR ONLINE -->
+    <div class="section" id="lobby-section" style="display: none;">
+      <h2 class="section-title">2. Jugadores Conectados</h2>
+      <p style="font-size: 0.85rem; color: #94A3B8; margin-bottom: 15px;">Buscando rivales con el radar activo...</p>
+      <div id="salas-list" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Aquí aparecerán los jugadores -->
+      </div>
+    </div>
+
+    <!-- BOTONES DE INICIO -->
+    <button class="btn-play" id="btn-start">Jugar Ahora</button>
+  </div>
+
+  <script>
+    const sesion = JSON.parse(sessionStorage.getItem('juvenchess_session'));
+    const miNombre = sesion ? sesion.username : 'Invitado_' + Math.floor(Math.random()*100);
+    const miElo = sesion ? sesion.puntuacion : 0;
+    
+    document.getElementById('player-greeting').textContent = `Hola, ${miNombre}`;
+    let config = { mode: 'ia', botId: 'profe', botElo: 200, botName: 'Profe Adrian', timeMinutes: 10, timeIncrement: 0, playerAvatar: 'goyopeon.png', boardTheme: 'gold-blue', pieceStyle: 'png', room: null };
+
+    let radarActivo = null;
+    let primerPing = true;
+
+    // EVENTO: SELECCIÓN DE MODO
+    document.querySelectorAll('#mode-selector .btn-option').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('#mode-selector .btn-option').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        config.mode = e.target.dataset.mode;
+        
+        document.getElementById('bot-section').style.display = config.mode === 'ia' ? 'block' : 'none';
+        document.getElementById('lobby-section').style.display = config.mode === 'online' ? 'block' : 'none';
+        
+        // Si elige En Línea, arranca el radar. Si no, lo apaga.
+        if (config.mode === 'online') {
+          document.getElementById('btn-start').style.display = 'none'; // Se oculta porque entrarán dándole a "Retar"
+          encenderRadar();
+        } else {
+          document.getElementById('btn-start').style.display = 'block';
+          if (radarActivo) clearInterval(radarActivo);
+        }
+      });
+    });
+
+    document.querySelectorAll('.bot-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        document.querySelectorAll('.bot-card').forEach(c => c.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        config.botId = e.currentTarget.dataset.bot;
+        config.botElo = e.currentTarget.dataset.elo;
+        config.botName = e.currentTarget.dataset.name;
+      });
+    });
+
+    // EL RADAR QUE BUSCA JUGADORES CADA 2 SEGUNDOS
+    function encenderRadar() {
+      const contenedor = document.getElementById('salas-list');
+      primerPing = true;
+
+      radarActivo = setInterval(async () => {
+        try {
+          const res = await fetch('https://juvenchess-api.adrian-camelot32.workers.dev/api/lobby', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ username: miNombre, elo: miElo, primerPing: primerPing })
+          });
+          primerPing = false;
+          const data = await res.json();
+
+          // MAGIA: ¡Alguien me retó!
+          if (data.retadoEnSala) {
+            clearInterval(radarActivo);
+            config.room = data.retadoEnSala;
+            localStorage.setItem('juvenchess_config', JSON.stringify(config));
+            window.location.href = 'tablero.html'; // Teletransporte
+          }
+
+          // Pintar a los conectados en pantalla
+          if (data.jugadores.length === 0) {
+            contenedor.innerHTML = '<div style="color: #94A3B8; text-align: center; padding: 20px 0;">Esperando a que alguien más entre...</div>';
+          } else {
+            contenedor.innerHTML = '';
+            data.jugadores.forEach(j => {
+              const btn = document.createElement('button'); 
+              btn.className = 'btn-challenge';
+              btn.innerHTML = `<span>👤 ${j.username} (Elo: ${j.elo})</span> <span>⚔️ RETAR</span>`;
+              
+              // EVENTO: LANZAR EL RETO A ALGUIEN
+              btn.onclick = async () => {
+                clearInterval(radarActivo);
+                btn.innerHTML = "Lanzando reto...";
+                const idSalaUnica = 'sala_' + Date.now();
+                
+                await fetch('https://juvenchess-api.adrian-camelot32.workers.dev/api/retar', {
+                  method: 'POST', headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify({ target: j.username, room: idSalaUnica })
+                });
+
+                config.room = idSalaUnica;
+                localStorage.setItem('juvenchess_config', JSON.stringify(config));
+                window.location.href = 'tablero.html'; // Teletransporte
+              };
+              contenedor.appendChild(btn);
+            });
+          }
+        } catch (e) {}
+      }, 2000);
+    }
+
+    document.getElementById('btn-start').addEventListener('click', () => {
+      localStorage.setItem('juvenchess_config', JSON.stringify(config));
+      window.location.href = 'tablero.html';
+    });
+  </script>
+</body>
+</html>
