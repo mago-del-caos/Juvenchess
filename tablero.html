@@ -3,48 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JUVENCHESS | Tablero Pro</title>
+    <title>JUVENCHESS | Tablero Ultra Pro</title>
+    <!-- CSS Librerías -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
         h1 { color: #ffd700; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.8rem; }
         
-        /* Panel de Jugadores y Relojes */
         .info-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 450px; box-sizing: border-box; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #06d6a0; object-fit: cover; margin-right: 10px; vertical-align: middle; }
         .player-info { display: flex; align-items: center; font-weight: bold; }
         
-        /* Estilo de los Relojes */
         .clocks { display: flex; flex-direction: column; align-items: flex-end; font-family: monospace; font-size: 1.2rem; }
-        .clock { padding: 2px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 2px; }
-        .clock-active { background-color: #06d6a0; color: #0b132b; box-shadow: 0 0 8px #06d6a0; }
+        .clock { padding: 2px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 2px; transition: 0.3s; }
+        .clock-active { background-color: #06d6a0; color: #0b132b; box-shadow: 0 0 10px #06d6a0; font-size: 1.4rem; }
         .clock-inactive { background-color: #3a506b; color: #9aa5ce; }
 
-        /* Contenedor del tablero y engranaje */
         .board-wrapper { position: relative; width: 100%; max-width: 450px; margin-bottom: 10px; }
         #board { width: 100%; border: 4px solid #ffd700; border-radius: 4px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); background-color: #ffffff; }
         
-        .btn-config { position: absolute; top: -15px; right: -15px; background: #06d6a0; color: #0b132b; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
-        .btn-config:hover { background: #05b383; }
+        /* Botones y Menús */
+        .btn-config { position: absolute; top: -15px; right: -15px; background: #06d6a0; color: #0b132b; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 20px; cursor: pointer; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition: 0.3s; }
+        .btn-config:hover { background: #05b383; transform: scale(1.1); }
 
-        /* Modal de configuración */
-        #configModal { display: none; position: absolute; top: 30px; right: 0; background: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 15px; z-index: 101; box-shadow: 0 8px 16px rgba(0,0,0,0.8); min-width: 220px; }
+        #configModal { display: none; position: absolute; top: 35px; right: 0; background: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 15px; z-index: 101; box-shadow: 0 8px 16px rgba(0,0,0,0.8); min-width: 250px; }
         .config-item { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
-        .config-item select { padding: 5px; border-radius: 4px; background: #0b132b; color: white; border: 1px solid #3a506b; width: 60%; }
+        .config-item select { padding: 5px; border-radius: 4px; background: #0b132b; color: white; border: 1px solid #3a506b; width: 55%; font-size: 0.9rem; }
 
-        /* Historial de Movimientos */
+        .btn-accion { background: #06d6a0; border: none; padding: 8px; border-radius: 4px; font-weight: bold; width: 100%; margin-top: 5px; cursor: pointer; color:#0b132b;}
+        .btn-accion:hover { background: #05b383; }
+        .btn-danger { background: #d62828; color: white; }
+        .btn-danger:hover { background: #a81d1d; }
+
+        /* Historial y Tablero */
         .history-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; width: 100%; max-width: 450px; height: 100px; overflow-y: auto; margin-bottom: 15px; padding: 10px; box-sizing: border-box; }
         .history-panel h3 { margin: 0 0 5px 0; color: #06d6a0; font-size: 1rem; border-bottom: 1px solid #3a506b; padding-bottom: 3px; }
         .history-list { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 5px; font-size: 0.9rem; color: #e0e0e0; font-family: monospace; }
         
-        /* Resaltado de movimientos y Temas */
         .highlight1-32417, .highlight2-9c5d2 { box-shadow: inset 0 0 3px 3px yellow; }
         .board-classic .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
         .board-classic .black-3c85d { background-color: #b58863; color: #f0d9b5; }
         .board-juven .white-1e1d7 { background-color: #e0e0e0; color: #0b132b; }
         .board-juven .black-3c85d { background-color: #1c2541; color: #e0e0e0; }
 
-        .btn-volver { background-color: #d62828; color: white; font-weight: bold; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; max-width: 450px; }
+        .btn-volver { background-color: #d62828; color: white; font-weight: bold; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; max-width: 450px; font-size: 1.1rem;}
     </style>
 </head>
 <body>
@@ -55,72 +59,93 @@
         <div class="player-info">
             <img src="profe.png" alt="Avatar" class="avatar" id="avatarImg" onerror="this.src='zapata.png'">
             <div style="line-height: 1.2;">
-                <span style="color:#06d6a0;">Jugador:</span><br>
+                <span style="color:#06d6a0;"><i class="fas fa-user"></i> Jugador:</span><br>
                 <span id="nombreJugador" style="color:white;">Invitado</span>
             </div>
         </div>
         <div class="clocks">
-            <div id="relojNegras" class="clock clock-inactive">05:00</div>
-            <div id="relojBlancas" class="clock clock-inactive">05:00</div>
+            <div id="relojNegras" class="clock clock-inactive"><i class="fas fa-robot"></i> 05:00</div>
+            <div id="relojBlancas" class="clock clock-inactive"><i class="fas fa-stopwatch"></i> 05:00</div>
         </div>
     </div>
     
     <div style="text-align: center; margin-bottom: 5px;">
-        <span id="estadoJuego" style="color:#ffd700; font-weight:bold;">¡Haz tu primer movimiento para iniciar el reloj!</span>
+        <span id="estadoJuego" style="color:#ffd700; font-weight:bold;">¡Haz tu primer movimiento para iniciar!</span>
     </div>
 
     <div class="board-wrapper">
-        <button class="btn-config" onclick="toggleConfig()">⚙️</button>
+        <button class="btn-config" onclick="toggleConfig()"><i class="fas fa-cog"></i></button>
         
         <div id="configModal">
-            <h3 style="margin-top:0; color:#ffd700; border-bottom:1px solid #3a506b; padding-bottom:5px;">Ajustes</h3>
+            <h3 style="margin-top:0; color:#ffd700; border-bottom:1px solid #3a506b; padding-bottom:5px;"><i class="fas fa-sliders-h"></i> Ajustes</h3>
+            
+            <!-- NUEVO: Selector de Modos de Juego -->
             <div class="config-item">
-                <label>Piezas:</label>
-                <select id="selPiezas" onchange="actualizarAjustes()">
-                    <option value="custom">Chema/Goyo</option>
-                    <option value="classic">Clásicas</option>
+                <label><i class="fas fa-clock"></i> Modo:</label>
+                <select id="selTiempo" onchange="cambiarTiempo()">
+                    <option value="60">Bala (1 min)</option>
+                    <option value="180">Blitz (3 min)</option>
+                    <option value="300" selected>Blitz (5 min)</option>
+                    <option value="600">Rápido (10 min)</option>
+                    <option value="1800">Clásico (30 min)</option>
+                    <option value="custom">Personalizado...</option>
                 </select>
             </div>
+            
             <div class="config-item">
-                <label>Tablero:</label>
+                <label><i class="fas fa-chess-knight"></i> Piezas:</label>
+                <select id="selPiezas" onchange="actualizarAjustes()">
+                    <option value="custom">Chema/Goyo</option>
+                    <option value="classic">Clásicas (Wikipedia)</option>
+                </select>
+            </div>
+            
+            <div class="config-item">
+                <label><i class="fas fa-chess-board"></i> Tablero:</label>
                 <select id="selTablero" onchange="actualizarAjustes()">
                     <option value="board-classic">Madera</option>
                     <option value="board-juven">Oscuro</option>
                 </select>
             </div>
+            
             <div class="config-item">
-                <label>Ayuda:</label>
+                <label><i class="fas fa-lightbulb"></i> Ayuda visual:</label>
                 <input type="checkbox" id="chkAyuda" checked onchange="actualizarAjustes()">
             </div>
-            <button onclick="toggleConfig()" style="width:100%; background:#06d6a0; border:none; padding:5px; border-radius:4px; margin-top:10px; font-weight:bold;">Cerrar</button>
+            
+            <button class="btn-accion" onclick="toggleConfig()"><i class="fas fa-check"></i> Cerrar Opciones</button>
+            <button class="btn-accion btn-danger" onclick="reiniciarPartida()"><i class="fas fa-redo"></i> Reiniciar Partida</button>
         </div>
 
         <div id="board" class="board-classic"></div>
     </div>
 
     <div class="history-panel">
-        <h3>Historial de Partida</h3>
+        <h3><i class="fas fa-list-ol"></i> Historial de Movimientos</h3>
         <div class="history-list" id="moveHistory"></div>
     </div>
 
-    <button class="btn-volver" onclick="window.location.href='menu.html';">Volver al Menú</button>
+    <button class="btn-volver" onclick="window.location.href='menu.html';"><i class="fas fa-arrow-left"></i> Volver al Menú</button>
 
+    <!-- JS Librerías Potenciadas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 
     <script>
+        // Avatares
         const username = localStorage.getItem('username') || 'INVITADO';
         document.getElementById('nombreJugador').innerText = username;
-
-        // Asignación de avatares según el usuario
         if(username.toLowerCase() === 'cifra' || username.toLowerCase() === 'admin') {
             document.getElementById('avatarImg').src = 'profe.png';
         } else if (username.toLowerCase() === 'santa') {
             document.getElementById('avatarImg').src = 'santa.png';
+        } else if (username.toLowerCase() === 'chemita') {
+            document.getElementById('avatarImg').src = 'chemapeon.png'; 
         } else {
             document.getElementById('avatarImg').src = 'zapata.png';
         }
@@ -129,18 +154,52 @@
         var game = new Chess();
         var $board = $('#board');
         
-        // Variables de Reloj
-        let tiempoBlancas = 300; // 5 minutos en segundos
+        // Variables de Reloj y Modos de Juego
+        let tiempoInicial = 300; 
+        let tiempoBlancas = 300; 
         let tiempoNegras = 300;
         let timerInterval = null;
         let juegoIniciado = false;
-
         var configPiezas = 'custom';
         var mostrarAyuda = true;
 
         function toggleConfig() {
             const modal = document.getElementById('configModal');
             modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // LÓGICA DE TIEMPO Y MODOS (SweetAlert2)
+        async function cambiarTiempo() {
+            if(juegoIniciado) {
+                Swal.fire({ title: '¡Partida en curso!', text: 'Debes reiniciar la partida para cambiar el reloj.', icon: 'warning', background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' });
+                document.getElementById('selTiempo').value = tiempoInicial;
+                return;
+            }
+
+            let seleccion = document.getElementById('selTiempo').value;
+            
+            if(seleccion === 'custom') {
+                const { value: minutos } = await Swal.fire({
+                    title: 'Tiempo Personalizado',
+                    input: 'number',
+                    inputLabel: 'Minutos por jugador',
+                    inputPlaceholder: 'Ej: 15',
+                    background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0', showCancelButton: true,
+                    inputValidator: (value) => { if (!value || value <= 0) return '¡Ingresa un número mayor a 0!' }
+                });
+                if(minutos) {
+                    tiempoInicial = minutos * 60;
+                } else {
+                    document.getElementById('selTiempo').value = "300"; // Regresar a 5 min si cancela
+                    tiempoInicial = 300;
+                }
+            } else {
+                tiempoInicial = parseInt(seleccion);
+            }
+            
+            tiempoBlancas = tiempoInicial;
+            tiempoNegras = tiempoInicial;
+            actualizarRelojesUI();
         }
 
         function actualizarAjustes() {
@@ -151,10 +210,10 @@
             board.position(game.fen());
         }
 
+        // PIEZAS: Enlace oficial inquebrantable de chessboardjs.com
         function pieceTheme(piece) {
             if (configPiezas === 'classic') {
-                // Nuevo servidor 100% estable para las piezas clásicas
-                return 'https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/img/chesspieces/wikipedia/' + piece + '.png';
+                return 'https://chessboardjs.com/img/chesspieces/wikipedia/' + piece + '.png';
             }
             const customPieces = {
                 'wP': 'chemapeon.png', 'wN': 'chemacaballo.png', 'wB': 'chemaalfil.png', 'wR': 'chematorre.png', 'wQ': 'chemareyna.png', 'wK': 'chemarey.png',
@@ -163,31 +222,45 @@
             return customPieces[piece];
         }
 
-        function removeHighlights() {
-            $board.find('.square-55d63').removeClass('highlight1-32417 highlight2-9c5d2');
+        // RESETEAR PARTIDA
+        function reiniciarPartida() {
+            Swal.fire({
+                title: '¿Reiniciar partida?', text: "Se borrará el progreso actual.", icon: 'question',
+                showCancelButton: true, confirmButtonColor: '#d62828', cancelButtonColor: '#3a506b', confirmButtonText: 'Sí, reiniciar', background: '#1c2541', color: '#fff'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    game.reset();
+                    board.start();
+                    clearInterval(timerInterval);
+                    juegoIniciado = false;
+                    tiempoBlancas = tiempoInicial;
+                    tiempoNegras = tiempoInicial;
+                    actualizarRelojesUI();
+                    document.getElementById('moveHistory').innerHTML = '';
+                    document.getElementById('estadoJuego').innerText = '¡Haz tu primer movimiento para iniciar!';
+                    document.getElementById('relojBlancas').className = 'clock clock-inactive';
+                    document.getElementById('relojNegras').className = 'clock clock-inactive';
+                    toggleConfig();
+                }
+            });
         }
 
-        function greySquare(square) {
-            $board.find('.square-' + square).addClass('highlight1-32417');
-        }
+        // HIGHLIGHTS Y RELOJES
+        function removeHighlights() { $board.find('.square-55d63').removeClass('highlight1-32417 highlight2-9c5d2'); }
+        function greySquare(square) { $board.find('.square-' + square).addClass('highlight1-32417'); }
 
-        // CONTROL DE RELOJES
         function formatoTiempo(segundos) {
-            let min = Math.floor(segundos / 60);
-            let seg = segundos % 60;
+            let min = Math.floor(segundos / 60); let seg = segundos % 60;
             return (min < 10 ? "0" + min : min) + ":" + (seg < 10 ? "0" + seg : seg);
         }
 
         function actualizarRelojesUI() {
-            document.getElementById('relojBlancas').innerText = formatoTiempo(tiempoBlancas);
-            document.getElementById('relojNegras').innerText = formatoTiempo(tiempoNegras);
+            document.getElementById('relojBlancas').innerHTML = `<i class="fas fa-stopwatch"></i> ${formatoTiempo(tiempoBlancas)}`;
+            document.getElementById('relojNegras').innerHTML = `<i class="fas fa-robot"></i> ${formatoTiempo(tiempoNegras)}`;
             
-            if (game.turn() === 'w') {
-                document.getElementById('relojBlancas').className = 'clock clock-active';
-                document.getElementById('relojNegras').className = 'clock clock-inactive';
-            } else {
-                document.getElementById('relojBlancas').className = 'clock clock-inactive';
-                document.getElementById('relojNegras').className = 'clock clock-active';
+            if (juegoIniciado) {
+                document.getElementById('relojBlancas').className = game.turn() === 'w' ? 'clock clock-active' : 'clock clock-inactive';
+                document.getElementById('relojNegras').className = game.turn() === 'b' ? 'clock clock-active' : 'clock clock-inactive';
             }
         }
 
@@ -199,10 +272,10 @@
                     
                     if(game.turn() === 'w') {
                         tiempoBlancas--;
-                        if(tiempoBlancas <= 0) finPorTiempo("Negras");
+                        if(tiempoBlancas <= 0) finDelJuego("Tiempo Agotado", "Ganan las Negras", 'error');
                     } else {
                         tiempoNegras--;
-                        if(tiempoNegras <= 0) finPorTiempo("Blancas");
+                        if(tiempoNegras <= 0) finDelJuego("Tiempo Agotado", "¡Ganaste!", 'success');
                     }
                     actualizarRelojesUI();
                 }, 1000);
@@ -210,34 +283,27 @@
             actualizarRelojesUI();
         }
 
-        function finPorTiempo(ganador) {
+        function finDelJuego(titulo, mensaje, icono) {
             clearInterval(timerInterval);
-            document.getElementById('estadoJuego').innerText = `¡Se acabó el tiempo! ${ganador} ganan.`;
-            if(ganador === "Blancas") lanzarConfeti();
-            // Evitar más movimientos
-            board.draggable = false; 
+            document.getElementById('estadoJuego').innerText = titulo + " - " + mensaje;
+            if(icono === 'success') lanzarConfeti();
+            Swal.fire({ title: titulo, text: mensaje, icon: icono, background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' });
         }
 
-        // HISTORIAL DE MOVIMIENTOS
         function actualizarHistorial() {
             const historial = game.history();
             const panel = document.getElementById('moveHistory');
             let html = '';
-            
             for(let i = 0; i < historial.length; i += 2) {
-                let turno = (i / 2) + 1;
-                let blanca = historial[i];
-                let negra = historial[i+1] ? historial[i+1] : '';
-                html += `<div><b>${turno}.</b></div> <div>${blanca}</div> <div>${negra}</div>`;
+                html += `<div><b>${(i / 2) + 1}.</b></div> <div>${historial[i]}</div> <div>${historial[i+1] || ''}</div>`;
             }
             panel.innerHTML = html;
-            // Auto scroll hacia el final
             panel.parentElement.scrollTop = panel.parentElement.scrollHeight;
         }
 
-        function onDragStart(source, piece, position, orientation) {
+        function onDragStart(source, piece) {
             if (game.game_over() || tiempoBlancas <= 0 || tiempoNegras <= 0) return false;
-            if (piece.search(/^b/) !== -1) return false; // IA juega negras
+            if (piece.search(/^b/) !== -1) return false;
         }
 
         function onDrop(source, target) {
@@ -247,28 +313,20 @@
             removeHighlights();
             iniciarReloj();
             actualizarHistorial();
-            actualizarEstado();
+            verificarEstado();
             window.setTimeout(hacerMovimientoIA, 250);
         }
 
-        function onMouseoverSquare(square, piece) {
+        function onMouseoverSquare(square) {
             if (!mostrarAyuda || game.game_over()) return;
             var moves = game.moves({ square: square, verbose: true });
             if (moves.length === 0) return;
-
             greySquare(square);
-            for (var i = 0; i < moves.length; i++) {
-                greySquare(moves[i].to);
-            }
+            for (var i = 0; i < moves.length; i++) greySquare(moves[i].to);
         }
 
-        function onMouseoutSquare(square, piece) {
-            removeHighlights();
-        }
-
-        function onSnapEnd() {
-            board.position(game.fen());
-        }
+        function onMouseoutSquare() { removeHighlights(); }
+        function onSnapEnd() { board.position(game.fen()); }
 
         function hacerMovimientoIA() {
             var posiblesMovimientos = game.moves();
@@ -285,32 +343,25 @@
             
             actualizarRelojesUI();
             actualizarHistorial();
-            actualizarEstado();
+            verificarEstado();
         }
 
-        function actualizarEstado() {
-            if (tiempoBlancas <= 0 || tiempoNegras <= 0) return; // Si ganó por tiempo, no sobreescribir
-
-            var status = '';
-            var moverColor = game.turn() === 'b' ? 'Turno de Negras (IA)' : 'Turno de Blancas (Tú)';
-
+        function verificarEstado() {
+            if (tiempoBlancas <= 0 || tiempoNegras <= 0) return;
             if (game.in_checkmate()) {
-                status = 'Jaque mate. Ganan las ' + (game.turn() === 'b' ? 'Blancas' : 'Negras');
-                clearInterval(timerInterval);
-                if(game.turn() === 'b') lanzarConfeti();
+                let ganador = game.turn() === 'b' ? '¡Ganaste!' : 'Ganan las Negras';
+                finDelJuego("¡Jaque Mate!", ganador, game.turn() === 'b' ? 'success' : 'error');
             } else if (game.in_draw()) {
-                status = 'Juego terminado en empate.';
-                clearInterval(timerInterval);
+                finDelJuego("Empate", "El juego ha terminado en tablas.", 'info');
             } else {
-                status = moverColor;
+                let status = game.turn() === 'b' ? 'Turno de Negras (IA)' : 'Turno de Blancas (Tú)';
                 if (game.in_check()) status += ' (¡Jaque!)';
+                document.getElementById('estadoJuego').innerText = status;
             }
-            document.getElementById('estadoJuego').innerText = status;
         }
 
         function lanzarConfeti() {
-            var duration = 3 * 1000;
-            var end = Date.now() + duration;
+            var duration = 3 * 1000; var end = Date.now() + duration;
             (function frame() {
                 confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ffd700', '#06d6a0'] });
                 confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ffd700', '#06d6a0'] });
@@ -319,19 +370,13 @@
         }
 
         var config = {
-            draggable: true,
-            position: 'start',
-            showNotation: true,
-            pieceTheme: pieceTheme,
-            onDragStart: onDragStart,
-            onDrop: onDrop,
-            onMouseoutSquare: onMouseoutSquare,
-            onMouseoverSquare: onMouseoverSquare,
-            onSnapEnd: onSnapEnd
+            draggable: true, position: 'start', showNotation: true,
+            pieceTheme: pieceTheme, onDragStart: onDragStart, onDrop: onDrop,
+            onMouseoutSquare: onMouseoutSquare, onMouseoverSquare: onMouseoverSquare, onSnapEnd: onSnapEnd
         };
         
         board = Chessboard('board', config);
-        actualizarRelojesUI(); // Configura los relojes visualmente al cargar
+        actualizarRelojesUI();
     </script>
 </body>
 </html>
