@@ -3,66 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JUVENCHESS | Tablero</title>
-    <!-- CSS estable para que se dibujen los cuadros del tablero -->
+    <title>JUVENCHESS | Tablero Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
     <style>
-        body {
-            background-color: #0b132b; 
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            color: #ffd700;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-            text-transform: uppercase;
-        }
-        .info-panel {
-            background-color: #1c2541;
-            border: 2px solid #3a506b;
-            border-radius: 8px;
-            padding: 10px 20px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-        }
-        .info-text {
-            color: #06d6a0;
-            font-weight: bold;
-        }
-        #board {
-            width: 100%;
-            max-width: 400px;
-            margin-bottom: 20px;
-            border: 4px solid #ffd700;
-            border-radius: 4px;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-            /* Asegura que el fondo oscuro no oculte los cuadros negros */
-            background-color: #ffffff; 
-        }
-        .btn-volver {
-            background-color: #d62828;
-            color: white;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .btn-volver:hover {
-            background-color: #a81d1d;
-        }
+        body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+        h1 { color: #ffd700; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.8rem; }
+        
+        /* Panel superior con avatares */
+        .info-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 450px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #06d6a0; object-fit: cover; margin-right: 10px; vertical-align: middle; }
+        .player-info { display: flex; align-items: center; font-weight: bold; }
+        
+        /* Tabenedor del tablero y engranaje */
+        .board-wrapper { position: relative; width: 100%; max-width: 450px; margin-bottom: 20px; }
+        #board { width: 100%; border: 4px solid #ffd700; border-radius: 4px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); background-color: #ffffff; }
+        
+        /* Botón de configuración (Engranaje) */
+        .btn-config { position: absolute; top: -15px; right: -15px; background: #06d6a0; color: #0b132b; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+        .btn-config:hover { background: #05b383; }
+
+        /* Modal de configuración */
+        #configModal { display: none; position: absolute; top: 30px; right: 0; background: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 15px; z-index: 101; box-shadow: 0 8px 16px rgba(0,0,0,0.8); min-width: 200px; }
+        .config-item { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .config-item select { padding: 5px; border-radius: 4px; background: #0b132b; color: white; border: 1px solid #3a506b; }
+
+        /* Resaltado de movimientos */
+        .highlight1-32417, .highlight2-9c5d2 { box-shadow: inset 0 0 3px 3px yellow; }
+
+        /* Temas de color del tablero */
+        .board-classic .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
+        .board-classic .black-3c85d { background-color: #b58863; color: #f0d9b5; }
+        .board-juven .white-1e1d7 { background-color: #e0e0e0; color: #0b132b; }
+        .board-juven .black-3c85d { background-color: #1c2541; color: #e0e0e0; }
+
+        .btn-volver { background-color: #d62828; color: white; font-weight: bold; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; max-width: 450px; }
     </style>
 </head>
 <body>
@@ -70,103 +44,200 @@
     <h1>JUVENCHESS</h1>
     
     <div class="info-panel">
-        <span class="info-text">Jugador: <span id="nombreJugador" style="color:white;">Invitado</span></span>
-        <span class="info-text">Estado: <span id="estadoJuego" style="color:white;">Jugando</span></span>
+        <div class="player-info">
+            <img src="profe.png" alt="Avatar" class="avatar" id="avatarImg" onerror="this.src='zapata.png'">
+            <span style="color:#06d6a0;">Jugador:<br><span id="nombreJugador" style="color:white;">Invitado</span></span>
+        </div>
+        <div style="text-align:right;">
+            <span style="color:#06d6a0; font-weight:bold;">Estado:</span><br>
+            <span id="estadoJuego" style="color:white; font-size:0.9em;">Turno de Blancas</span>
+        </div>
     </div>
 
-    <!-- Contenedor del tablero -->
-    <div id="board"></div>
+    <div class="board-wrapper">
+        <button class="btn-config" onclick="toggleConfig()">⚙️</button>
+        
+        <!-- Modal de Opciones -->
+        <div id="configModal">
+            <h3 style="margin-top:0; color:#ffd700; border-bottom:1px solid #3a506b; padding-bottom:5px;">Ajustes</h3>
+            <div class="config-item">
+                <label>Piezas:</label>
+                <select id="selPiezas" onchange="actualizarAjustes()">
+                    <option value="custom">Juvenchess (Chema/Goyo)</option>
+                    <option value="classic">Clásicas (Wikipedia)</option>
+                </select>
+            </div>
+            <div class="config-item">
+                <label>Color del Tablero:</label>
+                <select id="selTablero" onchange="actualizarAjustes()">
+                    <option value="board-classic">Madera Clásica</option>
+                    <option value="board-juven">Oscuro Juvenchess</option>
+                </select>
+            </div>
+            <div class="config-item">
+                <label>Mostrar Ayuda:</label>
+                <input type="checkbox" id="chkAyuda" checked onchange="actualizarAjustes()">
+            </div>
+            <button onclick="toggleConfig()" style="width:100%; background:#06d6a0; border:none; padding:5px; border-radius:4px; margin-top:10px; font-weight:bold;">Cerrar</button>
+        </div>
+
+        <div id="board" class="board-classic"></div>
+    </div>
 
     <button class="btn-volver" onclick="window.location.href='menu.html';">Volver al Menú</button>
 
-    <!-- Librerías desde CDNs más confiables -->
+    <!-- Librerías: jQuery, UI (para Touch en celular), Chessboard, Chess.js, Confetti -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <script>
         const username = localStorage.getItem('username') || 'INVITADO';
         document.getElementById('nombreJugador').innerText = username;
 
+        // Asignar avatar según el usuario (puedes agregar lógica para santa o chemita aquí)
+        if(username.toLowerCase() === 'cifra' || username.toLowerCase() === 'admin') {
+            document.getElementById('avatarImg').src = 'profe.png';
+        } else {
+            document.getElementById('avatarImg').src = 'zapata.png';
+        }
+
         var board = null;
         var game = new Chess();
-        var $estado = $('#estadoJuego');
+        var $board = $('#board');
+        var squareClass = 'square-55d63';
+        var squareToHighlight = null;
+        var colorToHighlight = null;
 
-        // Mapeo exacto de tus piezas personalizadas
-        function usarPiezasPersonalizadas(piece) {
-            // "w" son las blancas (Chema), "b" son las negras (Goyo).
-            // Si necesitas invertirlos, solo cambia los nombres de los archivos aquí.
-            const piezas = {
-                'wP': 'chemapeon.png',
-                'wN': 'chemacaballo.png',
-                'wB': 'chemaalfil.png',
-                'wR': 'chematorre.png',
-                'wQ': 'chemareyna.png',
-                'wK': 'chemarey.png',
-                
-                'bP': 'goyopeon.png',
-                'bN': 'goyocaballo.png',
-                'bB': 'goyoalfil.png',
-                'bR': 'goyotorre.png',
-                'bQ': 'goyoreina.png',
-                'bK': 'goyorey.png'
+        // Opciones Globales
+        var configPiezas = 'custom';
+        var mostrarAyuda = true;
+
+        function toggleConfig() {
+            const modal = document.getElementById('configModal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function actualizarAjustes() {
+            configPiezas = document.getElementById('selPiezas').value;
+            mostrarAyuda = document.getElementById('chkAyuda').checked;
+            
+            // Cambiar color del tablero
+            $board.removeClass('board-classic board-juven');
+            $board.addClass(document.getElementById('selTablero').value);
+
+            // Recargar piezas
+            board.position(game.fen());
+        }
+
+        function pieceTheme(piece) {
+            if (configPiezas === 'classic') {
+                return 'https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/img/chesspieces/wikipedia/' + piece + '.png';
+            }
+            const customPieces = {
+                'wP': 'chemapeon.png', 'wN': 'chemacaballo.png', 'wB': 'chemaalfil.png', 'wR': 'chematorre.png', 'wQ': 'chemareyna.png', 'wK': 'chemarey.png',
+                'bP': 'goyopeon.png', 'bN': 'goyocaballo.png', 'bB': 'goyoalfil.png', 'bR': 'goyotorre.png', 'bQ': 'goyoreina.png', 'bK': 'goyorey.png'
             };
-            return piezas[piece];
+            return customPieces[piece];
         }
 
-        function onDragStart (source, piece, position, orientation) {
+        function removeHighlights(color) {
+            $board.find('.' + squareClass).removeClass('highlight' + (color ? color : '1-32417')).removeClass('highlight2-9c5d2');
+        }
+
+        function onDragStart(source, piece, position, orientation) {
             if (game.game_over()) return false;
-            if (piece.search(/^b/) !== -1) return false; // Solo permite mover blancas
+            if (piece.search(/^b/) !== -1) return false; // Solo permite jugar con blancas vs IA local
         }
 
-        function onDrop (source, target) {
-            var move = game.move({
-                from: source,
-                to: target,
-                promotion: 'q'
-            });
-
+        function onDrop(source, target) {
+            var move = game.move({ from: source, to: target, promotion: 'q' });
             if (move === null) return 'snapback';
+            
+            removeHighlights();
             actualizarEstado();
             window.setTimeout(hacerMovimientoIA, 250);
         }
 
-        function onSnapEnd () {
+        function onMouseoverSquare(square, piece) {
+            if (!mostrarAyuda || game.game_over()) return;
+            var moves = game.moves({ square: square, verbose: true });
+            if (moves.length === 0) return;
+
+            // Resaltar la casilla actual y los destinos
+            greySquare(square);
+            for (var i = 0; i < moves.length; i++) {
+                greySquare(moves[i].to);
+            }
+        }
+
+        function onMouseoutSquare(square, piece) {
+            removeHighlights();
+        }
+
+        function greySquare(square) {
+            var $square = $board.find('.square-' + square);
+            $square.addClass('highlight1-32417');
+        }
+
+        function onSnapEnd() {
             board.position(game.fen());
         }
 
-        function hacerMovimientoIA () {
+        function hacerMovimientoIA() {
             var posiblesMovimientos = game.moves();
             if (posiblesMovimientos.length === 0) return;
 
-            var indiceAleatorio = Math.floor(Math.random() * posiblesMovimientos.length);
-            game.move(posiblesMovimientos[indiceAleatorio]);
+            var move = game.move(posiblesMovimientos[Math.floor(Math.random() * posiblesMovimientos.length)]);
             board.position(game.fen());
+            
+            // Resaltar movimiento de la IA
+            if(mostrarAyuda) {
+                removeHighlights();
+                $board.find('.square-' + move.from).addClass('highlight2-9c5d2');
+                $board.find('.square-' + move.to).addClass('highlight2-9c5d2');
+            }
             actualizarEstado();
         }
 
-        function actualizarEstado () {
+        function actualizarEstado() {
             var status = '';
-            var moverColor = game.turn() === 'b' ? 'Negras (Goyo)' : 'Blancas (Chema)';
+            var moverColor = game.turn() === 'b' ? 'Negras (IA)' : 'Blancas (Tú)';
 
             if (game.in_checkmate()) {
-                status = 'Jaque mate. ' + moverColor + ' pierden.';
+                status = 'Jaque mate. Ganan las ' + (game.turn() === 'b' ? 'Blancas' : 'Negras');
+                if(game.turn() === 'b') lanzarConfeti(); // Ganaste tú
             } else if (game.in_draw()) {
                 status = 'Juego terminado en empate.';
             } else {
                 status = 'Turno de ' + moverColor;
                 if (game.in_check()) status += ' (¡Jaque!)';
             }
-            $estado.html(status);
+            document.getElementById('estadoJuego').innerText = status;
         }
 
-        // Configuración con tu tema de piezas integrado
+        function lanzarConfeti() {
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ffd700', '#06d6a0'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ffd700', '#06d6a0'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
         var config = {
             draggable: true,
             position: 'start',
-            pieceTheme: usarPiezasPersonalizadas, // Llama a la función de tus imágenes
+            showNotation: true, // Muestra las coordenadas A-H y 1-8
+            pieceTheme: pieceTheme,
             onDragStart: onDragStart,
             onDrop: onDrop,
+            onMouseoutSquare: onMouseoutSquare,
+            onMouseoverSquare: onMouseoverSquare,
             onSnapEnd: onSnapEnd
         };
         
