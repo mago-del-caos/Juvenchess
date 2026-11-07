@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JUVENCHESS | Tablero Ultra Pro</title>
-    <!-- CSS Librerías -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
@@ -24,7 +23,6 @@
         .board-wrapper { position: relative; width: 100%; max-width: 450px; margin-bottom: 10px; }
         #board { width: 100%; border: 4px solid #ffd700; border-radius: 4px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); background-color: #ffffff; }
         
-        /* Botones y Menús */
         .btn-config { position: absolute; top: -15px; right: -15px; background: #06d6a0; color: #0b132b; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 20px; cursor: pointer; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition: 0.3s; }
         .btn-config:hover { background: #05b383; transform: scale(1.1); }
 
@@ -37,7 +35,6 @@
         .btn-danger { background: #d62828; color: white; }
         .btn-danger:hover { background: #a81d1d; }
 
-        /* Historial y Tablero */
         .history-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; width: 100%; max-width: 450px; height: 100px; overflow-y: auto; margin-bottom: 15px; padding: 10px; box-sizing: border-box; }
         .history-panel h3 { margin: 0 0 5px 0; color: #06d6a0; font-size: 1rem; border-bottom: 1px solid #3a506b; padding-bottom: 3px; }
         .history-list { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 5px; font-size: 0.9rem; color: #e0e0e0; font-family: monospace; }
@@ -49,6 +46,9 @@
         .board-juven .black-3c85d { background-color: #1c2541; color: #e0e0e0; }
 
         .btn-volver { background-color: #d62828; color: white; font-weight: bold; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; max-width: 450px; font-size: 1.1rem;}
+        
+        /* Ajuste estético para el menú de SweetAlert */
+        .swal2-select { font-size: 1.2rem !important; padding: 10px !important; text-align: center; }
     </style>
 </head>
 <body>
@@ -79,7 +79,6 @@
         <div id="configModal">
             <h3 style="margin-top:0; color:#ffd700; border-bottom:1px solid #3a506b; padding-bottom:5px;"><i class="fas fa-sliders-h"></i> Ajustes</h3>
             
-            <!-- NUEVO: Selector de Modos de Juego -->
             <div class="config-item">
                 <label><i class="fas fa-clock"></i> Modo:</label>
                 <select id="selTiempo" onchange="cambiarTiempo()">
@@ -127,7 +126,6 @@
 
     <button class="btn-volver" onclick="window.location.href='menu.html';"><i class="fas fa-arrow-left"></i> Volver al Menú</button>
 
-    <!-- JS Librerías Potenciadas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
@@ -137,7 +135,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 
     <script>
-        // Avatares
         const username = localStorage.getItem('username') || 'INVITADO';
         document.getElementById('nombreJugador').innerText = username;
         if(username.toLowerCase() === 'cifra' || username.toLowerCase() === 'admin') {
@@ -154,7 +151,6 @@
         var game = new Chess();
         var $board = $('#board');
         
-        // Variables de Reloj y Modos de Juego
         let tiempoInicial = 300; 
         let tiempoBlancas = 300; 
         let tiempoNegras = 300;
@@ -168,7 +164,6 @@
             modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
         }
 
-        // LÓGICA DE TIEMPO Y MODOS (SweetAlert2)
         async function cambiarTiempo() {
             if(juegoIniciado) {
                 Swal.fire({ title: '¡Partida en curso!', text: 'Debes reiniciar la partida para cambiar el reloj.', icon: 'warning', background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' });
@@ -180,26 +175,16 @@
             
             if(seleccion === 'custom') {
                 const { value: minutos } = await Swal.fire({
-                    title: 'Tiempo Personalizado',
-                    input: 'number',
-                    inputLabel: 'Minutos por jugador',
-                    inputPlaceholder: 'Ej: 15',
+                    title: 'Tiempo Personalizado', input: 'number', inputLabel: 'Minutos por jugador', inputPlaceholder: 'Ej: 15',
                     background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0', showCancelButton: true,
                     inputValidator: (value) => { if (!value || value <= 0) return '¡Ingresa un número mayor a 0!' }
                 });
-                if(minutos) {
-                    tiempoInicial = minutos * 60;
-                } else {
-                    document.getElementById('selTiempo').value = "300"; // Regresar a 5 min si cancela
-                    tiempoInicial = 300;
-                }
+                if(minutos) { tiempoInicial = minutos * 60; } 
+                else { document.getElementById('selTiempo').value = "300"; tiempoInicial = 300; }
             } else {
                 tiempoInicial = parseInt(seleccion);
             }
-            
-            tiempoBlancas = tiempoInicial;
-            tiempoNegras = tiempoInicial;
-            actualizarRelojesUI();
+            tiempoBlancas = tiempoInicial; tiempoNegras = tiempoInicial; actualizarRelojesUI();
         }
 
         function actualizarAjustes() {
@@ -210,11 +195,8 @@
             board.position(game.fen());
         }
 
-        // PIEZAS: Enlace oficial inquebrantable de chessboardjs.com
         function pieceTheme(piece) {
-            if (configPiezas === 'classic') {
-                return 'https://chessboardjs.com/img/chesspieces/wikipedia/' + piece + '.png';
-            }
+            if (configPiezas === 'classic') return 'https://chessboardjs.com/img/chesspieces/wikipedia/' + piece + '.png';
             const customPieces = {
                 'wP': 'chemapeon.png', 'wN': 'chemacaballo.png', 'wB': 'chemaalfil.png', 'wR': 'chematorre.png', 'wQ': 'chemareyna.png', 'wK': 'chemarey.png',
                 'bP': 'goyopeon.png', 'bN': 'goyocaballo.png', 'bB': 'goyoalfil.png', 'bR': 'goyotorre.png', 'bQ': 'goyoreina.png', 'bK': 'goyorey.png'
@@ -222,30 +204,22 @@
             return customPieces[piece];
         }
 
-        // RESETEAR PARTIDA
         function reiniciarPartida() {
             Swal.fire({
                 title: '¿Reiniciar partida?', text: "Se borrará el progreso actual.", icon: 'question',
                 showCancelButton: true, confirmButtonColor: '#d62828', cancelButtonColor: '#3a506b', confirmButtonText: 'Sí, reiniciar', background: '#1c2541', color: '#fff'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    game.reset();
-                    board.start();
-                    clearInterval(timerInterval);
-                    juegoIniciado = false;
-                    tiempoBlancas = tiempoInicial;
-                    tiempoNegras = tiempoInicial;
-                    actualizarRelojesUI();
+                    game.reset(); board.start(); clearInterval(timerInterval); juegoIniciado = false;
+                    tiempoBlancas = tiempoInicial; tiempoNegras = tiempoInicial; actualizarRelojesUI();
                     document.getElementById('moveHistory').innerHTML = '';
                     document.getElementById('estadoJuego').innerText = '¡Haz tu primer movimiento para iniciar!';
-                    document.getElementById('relojBlancas').className = 'clock clock-inactive';
-                    document.getElementById('relojNegras').className = 'clock clock-inactive';
+                    document.getElementById('relojBlancas').className = 'clock clock-inactive'; document.getElementById('relojNegras').className = 'clock clock-inactive';
                     toggleConfig();
                 }
             });
         }
 
-        // HIGHLIGHTS Y RELOJES
         function removeHighlights() { $board.find('.square-55d63').removeClass('highlight1-32417 highlight2-9c5d2'); }
         function greySquare(square) { $board.find('.square-' + square).addClass('highlight1-32417'); }
 
@@ -257,7 +231,6 @@
         function actualizarRelojesUI() {
             document.getElementById('relojBlancas').innerHTML = `<i class="fas fa-stopwatch"></i> ${formatoTiempo(tiempoBlancas)}`;
             document.getElementById('relojNegras').innerHTML = `<i class="fas fa-robot"></i> ${formatoTiempo(tiempoNegras)}`;
-            
             if (juegoIniciado) {
                 document.getElementById('relojBlancas').className = game.turn() === 'w' ? 'clock clock-active' : 'clock clock-inactive';
                 document.getElementById('relojNegras').className = game.turn() === 'b' ? 'clock clock-active' : 'clock clock-inactive';
@@ -269,13 +242,10 @@
                 juegoIniciado = true;
                 timerInterval = setInterval(() => {
                     if(game.game_over()) { clearInterval(timerInterval); return; }
-                    
                     if(game.turn() === 'w') {
-                        tiempoBlancas--;
-                        if(tiempoBlancas <= 0) finDelJuego("Tiempo Agotado", "Ganan las Negras", 'error');
+                        tiempoBlancas--; if(tiempoBlancas <= 0) finDelJuego("Tiempo Agotado", "Ganan las Negras", 'error');
                     } else {
-                        tiempoNegras--;
-                        if(tiempoNegras <= 0) finDelJuego("Tiempo Agotado", "¡Ganaste!", 'success');
+                        tiempoNegras--; if(tiempoNegras <= 0) finDelJuego("Tiempo Agotado", "¡Ganaste!", 'success');
                     }
                     actualizarRelojesUI();
                 }, 1000);
@@ -291,14 +261,9 @@
         }
 
         function actualizarHistorial() {
-            const historial = game.history();
-            const panel = document.getElementById('moveHistory');
-            let html = '';
-            for(let i = 0; i < historial.length; i += 2) {
-                html += `<div><b>${(i / 2) + 1}.</b></div> <div>${historial[i]}</div> <div>${historial[i+1] || ''}</div>`;
-            }
-            panel.innerHTML = html;
-            panel.parentElement.scrollTop = panel.parentElement.scrollHeight;
+            const historial = game.history(); const panel = document.getElementById('moveHistory'); let html = '';
+            for(let i = 0; i < historial.length; i += 2) { html += `<div><b>${(i / 2) + 1}.</b></div> <div>${historial[i]}</div> <div>${historial[i+1] || ''}</div>`; }
+            panel.innerHTML = html; panel.parentElement.scrollTop = panel.parentElement.scrollHeight;
         }
 
         function onDragStart(source, piece) {
@@ -306,15 +271,74 @@
             if (piece.search(/^b/) !== -1) return false;
         }
 
+        // LÓGICA DE MOVIMIENTO CON DETECCIÓN DE CORONACIÓN
         function onDrop(source, target) {
-            var move = game.move({ from: source, to: target, promotion: 'q' });
-            if (move === null) return 'snapback';
+            var moves = game.moves({ verbose: true });
+            var isLegal = false;
+            var isPromotion = false;
+
+            // Verificar si el movimiento que el usuario intenta hacer es legal y si es una coronación
+            for (var i = 0; i < moves.length; i++) {
+                if (moves[i].from === source && moves[i].to === target) {
+                    isLegal = true;
+                    // En chess.js, si el objeto tiene la propiedad "promotion", es un movimiento de coronación
+                    if (moves[i].promotion) isPromotion = true; 
+                    break;
+                }
+            }
+
+            if (!isLegal) return 'snapback';
+
+            if (isPromotion) {
+                // Lanzamos el menú de coronación y pausamos el tablero
+                setTimeout(async () => {
+                    const { value: promoPiece } = await Swal.fire({
+                        title: '¡Coronación!',
+                        text: 'Elige tu nueva pieza:',
+                        input: 'select',
+                        inputOptions: {
+                            'q': 'Reina 👑',
+                            'r': 'Torre 🏰',
+                            'b': 'Alfil 🧙‍♂️',
+                            'n': 'Caballo 🐎'
+                        },
+                        inputValue: 'q',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0'
+                    });
+                    
+                    // Una vez que eliges, ejecutamos el movimiento con la pieza seleccionada
+                    ejecutarMovimiento(source, target, promoPiece);
+                }, 10);
+                return; // Evitamos que siga hasta que elijas
+            }
+
+            // Si no es coronación, se ejecuta normal
+            ejecutarMovimiento(source, target, 'q');
+        }
+
+        // FUNCIÓN SEPARADA PARA EJECUTAR EL MOVIMIENTO
+        function ejecutarMovimiento(source, target, promoPiece) {
+            var move = game.move({ from: source, to: target, promotion: promoPiece });
+            
+            if (move === null) {
+                board.position(game.fen());
+                return;
+            }
             
             removeHighlights();
             iniciarReloj();
             actualizarHistorial();
             verificarEstado();
-            window.setTimeout(hacerMovimientoIA, 250);
+            
+            // Actualizar visualmente el tablero para mostrar la nueva pieza coronada
+            board.position(game.fen());
+
+            // Solo juega la IA si el juego sigue activo
+            if (!game.game_over() && tiempoBlancas > 0 && tiempoNegras > 0) {
+                window.setTimeout(hacerMovimientoIA, 250);
+            }
         }
 
         function onMouseoverSquare(square) {
