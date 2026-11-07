@@ -3,62 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JUVENCHESS | Menú de Juego</title>
+    <title>JUVENCHESS | Menú Principal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-        h1 { color: #ffd700; margin-top: 20px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); text-transform: uppercase; }
-        .panel { background-color: rgba(28, 37, 65, 0.9); border: 2px solid #3a506b; border-radius: 12px; padding: 20px; width: 90%; max-width: 600px; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
-        .panel-title { color: #ffd700; font-weight: bold; margin-bottom: 15px; }
-        .btn-group { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        .btn-opcion { background-color: #1c2541; color: #ffffff; border: 2px solid #3a506b; padding: 10px 20px; border-radius: 8px; cursor: pointer; flex: 1; min-width: 120px; transition: 0.3s; }
-        .btn-opcion.active, .btn-opcion:hover { background-color: #0d2818; border-color: #06d6a0; }
-        .btn-jugar { background-color: #06d6a0; color: #0b132b; font-size: 1.2rem; font-weight: bold; padding: 15px 40px; border: none; border-radius: 8px; cursor: pointer; width: 90%; max-width: 600px; transition: background 0.3s; }
-        .btn-jugar:hover { background-color: #05b383; }
-        .btn-logout { background-color: #d62828; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px; font-weight: bold; transition: background 0.3s; }
+        body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .dashboard { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; max-width: 1000px; width: 100%; }
+        
+        /* Paneles */
+        .panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
+        h2 { color: #ffd700; margin-top: 0; border-bottom: 2px solid #3a506b; padding-bottom: 10px; font-size: 1.5rem; text-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+        
+        /* Perfil de Usuario */
+        .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; background: #0b132b; padding: 15px; border-radius: 8px; border: 1px solid #06d6a0; }
+        .avatar { width: 60px; height: 60px; border-radius: 50%; border: 3px solid #06d6a0; object-fit: cover; }
+        .profile-info h3 { margin: 0; color: #ffffff; font-size: 1.4rem; text-transform: uppercase; }
+        .elo-badge { display: inline-block; background: #ffd700; color: #0b132b; padding: 3px 10px; border-radius: 20px; font-weight: bold; margin-top: 5px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+
+        /* Botones de Modos de Juego */
+        .game-modes { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .btn-mode { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 15px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; color: #0b132b; }
+        .btn-bots { background: #06d6a0; }
+        .btn-bots:hover { background: #05b383; transform: scale(1.02); }
+        .btn-puzzles { background: #ffd700; }
+        .btn-puzzles:hover { background: #e6c200; transform: scale(1.02); }
+        .btn-online { background: #ff9f1c; }
+        .btn-online:hover { background: #e88e15; transform: scale(1.02); }
+
+        /* Listas Laterales (Top 10 y Torneos) */
+        .list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #3a506b; }
+        .list-item:last-child { border-bottom: none; }
+        .rank { font-weight: bold; color: #06d6a0; width: 25px; }
+        .score { color: #ffd700; font-family: monospace; font-size: 1.1rem; }
+        
+        .tournament-badge { background: #d62828; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+
+        .btn-logout { background-color: #d62828; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; transition: 0.3s; }
         .btn-logout:hover { background-color: #a81d1d; }
+
+        /* Responsivo para celulares */
+        @media (max-width: 768px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <h1 id="saludoUsuario">HOLA, INVITADO_79</h1>
 
-    <div class="panel">
-        <div class="panel-title">1. MODO DE JUEGO</div>
-        <div class="btn-group">
-            <button class="btn-opcion active">🤖 Vs Bots (IA)</button>
-            <button class="btn-opcion">👥 2 Jugadores</button>
-            <button class="btn-opcion">🌐 En Línea</button>
+    <div class="dashboard">
+        <!-- SECCIÓN IZQUIERDA: Perfil y Modos de Juego -->
+        <div class="panel">
+            <div class="profile-header">
+                <img src="zapata.png" alt="Avatar" class="avatar" id="menuAvatar">
+                <div class="profile-info">
+                    <h3 id="menuUsername">Cargando...</h3>
+                    <div class="elo-badge"><i class="fas fa-star"></i> ELO: <span id="menuElo">---</span></div>
+                </div>
+            </div>
+
+            <h2><i class="fas fa-chess"></i> Modos de Juego</h2>
+            <div class="game-modes">
+                <button class="btn-mode btn-bots" onclick="seleccionarBot()">
+                    <i class="fas fa-robot"></i> Jugar contra Bots (Revolución)
+                </button>
+                <button class="btn-mode btn-puzzles" onclick="irAPuzzles()">
+                    <i class="fas fa-puzzle-piece"></i> Entrenar con Puzzles
+                </button>
+                <button class="btn-mode btn-online" onclick="modoOnline()">
+                    <i class="fas fa-globe"></i> Partida Online (Próximamente)
+                </button>
+            </div>
+
+            <button class="btn-logout" onclick="cerrarSesion()">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </button>
+        </div>
+
+        <!-- SECCIÓN DERECHA: Top 10 y Torneos -->
+        <div class="sidebar">
+            <div class="panel" style="margin-bottom: 20px;">
+                <h2><i class="fas fa-trophy"></i> Top 10 Jugadores</h2>
+                <div id="top10List">
+                    <div style="text-align: center; color: #9aa5ce;">Cargando clasificaciones...</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2><i class="fas fa-flag-checkered"></i> Torneos Activos</h2>
+                <div id="torneosList">
+                    <div style="text-align: center; color: #9aa5ce;">Buscando torneos...</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="panel">
-        <div class="panel-title">2. ELIGE TU OPONENTE</div>
-        <div class="btn-group">
-            <button class="btn-opcion active">Profe (Elo 200)</button>
-            <button class="btn-opcion">Santa (Elo 500)</button>
-        </div>
-    </div>
-
-    <button class="btn-jugar" onclick="window.location.href='tablero.html';">Jugar Ahora</button>
-    <button id="btnCerrarSesion" class="btn-logout">Cerrar Sesión</button>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
     <script>
-        // Cerrar sesión te regresa a index.html (el login)
-        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.href = 'index.html'; 
-        });
+        const API_URL = 'https://juvenchess-api.adrian-camelot32.workers.dev';
+        const username = localStorage.getItem('username');
 
-        const username = localStorage.getItem('username') || 'INVITADO_79';
-        document.getElementById('saludoUsuario').innerText = `HOLA, ${username}`;
-        
-        document.querySelectorAll('.btn-opcion').forEach(btn => {
-            btn.addEventListener('click', function() {
-                let hermanos = this.parentElement.children;
-                for(let h of hermanos) h.classList.remove('active');
-                this.classList.add('active');
+        // Redirigir si no ha iniciado sesión
+        if(!username) window.location.href = 'index.html';
+
+        // Configurar Perfil
+        document.getElementById('menuUsername').innerText = username;
+        if(username.toLowerCase() === 'cifra' || username.toLowerCase() === 'admin') {
+            document.getElementById('menuAvatar').src = 'profe.png';
+        } else if (username.toLowerCase() === 'santa') {
+            document.getElementById('menuAvatar').src = 'santa.png';
+        } else if (username.toLowerCase() === 'chemita') {
+            document.getElementById('menuAvatar').src = 'chemapeon.png';
+        }
+
+        // CARGAR DATOS DEL SERVIDOR (Elo, Top 10, Torneos)
+        async function cargarDatos() {
+            try {
+                // 1. Cargar Usuarios
+                const resUsr = await fetch(`${API_URL}/admin/usuarios`);
+                const usuarios = await resUsr.json();
+                
+                // Encontrar el Elo del jugador actual
+                const miUsuario = usuarios.find(u => u.username.toLowerCase() === username.toLowerCase());
+                if(miUsuario) document.getElementById('menuElo').innerText = miUsuario.puntuacion;
+
+                // Generar Top 10
+                const top10 = usuarios.slice(0, 10);
+                let htmlTop = '';
+                top10.forEach((u, index) => {
+                    let corona = index === 0 ? '<i class="fas fa-crown" style="color:gold;"></i> ' : '';
+                    htmlTop += `
+                        <div class="list-item">
+                            <div><span class="rank">${index + 1}.</span> ${corona}${u.username}</div>
+                            <div class="score">${u.puntuacion}</div>
+                        </div>`;
+                });
+                document.getElementById('top10List').innerHTML = htmlTop;
+
+                // 2. Cargar Torneos
+                const resTor = await fetch(`${API_URL}/admin/torneos`);
+                const torneos = await resTor.json();
+                let htmlTorneos = '';
+                if(torneos.length === 0) {
+                    htmlTorneos = '<div style="color: #9aa5ce;">No hay torneos activos.</div>';
+                } else {
+                    torneos.forEach(t => {
+                        htmlTorneos += `
+                            <div class="list-item" style="flex-direction: column; gap: 5px;">
+                                <div><i class="fas fa-chess-tournament"></i> <b>${t.nombre}</b></div>
+                                <div><span class="tournament-badge">${t.fecha}</span> <span style="color:#06d6a0; font-size:0.9rem;">${t.estado}</span></div>
+                            </div>`;
+                    });
+                }
+                document.getElementById('torneosList').innerHTML = htmlTorneos;
+
+            } catch (error) {
+                console.error("Error cargando datos del servidor", error);
+            }
+        }
+
+        // SELECCIÓN DE BOTS (Revolución Mexicana)
+        async function seleccionarBot() {
+            const bots = {
+                '1': 'Francisco I. Madero (Nivel 1 - Principiante)',
+                '2': 'Adelita (Nivel 2 - Principiante)',
+                '3': 'Hermanos Flores Magón (Nivel 3 - Básico)',
+                '4': 'Carmen Serdán (Nivel 4 - Básico)',
+                '5': 'Pascual Orozco (Nivel 5 - Intermedio)',
+                '6': 'Plutarco Elías Calles (Nivel 6 - Intermedio)',
+                '7': 'Venustiano Carranza (Nivel 7 - Avanzado)',
+                '8': 'Álvaro Obregón (Nivel 8 - Avanzado)',
+                '9': 'Felipe Ángeles (Nivel 9 - Experto Artillero)',
+                '10': 'Emiliano Zapata (Nivel 10 - Estratega del Sur)',
+                '11': 'Pancho Villa (Nivel 11 - Centauro del Norte)'
+            };
+
+            const { value: botSeleccionado } = await Swal.fire({
+                title: 'Elige tu Oponente Histórico',
+                input: 'select',
+                inputOptions: bots,
+                inputPlaceholder: 'Selecciona un héroe...',
+                showCancelButton: true,
+                confirmButtonColor: '#06d6a0',
+                cancelButtonColor: '#d62828',
+                confirmButtonText: '¡A la Batalla!',
+                cancelButtonText: 'Cancelar',
+                background: '#1c2541', color: '#fff'
             });
-        });
+
+            if (botSeleccionado) {
+                // Guardamos el bot para que el tablero sepa contra quién juegas
+                localStorage.setItem('botName', bots[botSeleccionado]);
+                window.location.href = 'tablero.html';
+            }
+        }
+
+        // REDIRECCIONES
+        function irAPuzzles() {
+            window.location.href = 'puzzles.html';
+        }
+
+        function modoOnline() {
+            Swal.fire({
+                title: 'Juego en Línea',
+                text: 'El lobby multijugador está en construcción. ¡Estará listo para el próximo torneo!',
+                icon: 'info',
+                background: '#1c2541', color: '#fff', confirmButtonColor: '#ff9f1c'
+            });
+        }
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        // Iniciar
+        cargarDatos();
     </script>
 </body>
 </html>
