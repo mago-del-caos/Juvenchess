@@ -22,7 +22,6 @@
 
     <h1>PANEL DE CONTROL - DIRECTOR</h1>
 
-    <!-- SECCIÓN: Crear Usuarios -->
     <div class="panel">
         <h2>Crear Nuevo Alumno/Usuario</h2>
         <input type="text" id="newUsername" placeholder="Nombre de usuario">
@@ -34,7 +33,6 @@
         <button onclick="crearUsuario()">Registrar Usuario</button>
     </div>
 
-    <!-- SECCIÓN: Crear Torneos -->
     <div class="panel">
         <h2>Crear Torneo</h2>
         <input type="text" id="torneoNombre" placeholder="Nombre del Torneo (Ej: Torneo Interno FES)">
@@ -42,7 +40,6 @@
         <button onclick="crearTorneo()">Abrir Torneo</button>
     </div>
 
-    <!-- SECCIÓN: Ranking y Elo -->
     <div class="panel">
         <h2>Ranking y Puntuaciones (Elo)</h2>
         <button onclick="cargarUsuarios()">Actualizar Tabla</button>
@@ -68,40 +65,68 @@
             const pass = document.getElementById('newPassword').value;
             const rol = document.getElementById('newRol').value;
             
-            await fetch(`${API_URL}/admin/usuarios`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: user, password: pass, rol: rol })
-            });
-            alert('Usuario creado exitosamente con 1000 de Elo inicial.');
-            cargarUsuarios();
+            if(!user || !pass) {
+                alert("Por favor, llena tanto el nombre de usuario como la contraseña.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/admin/usuarios`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass, rol: rol })
+                });
+                const data = await res.json();
+
+                if(res.ok) {
+                    alert('¡Usuario creado exitosamente con 1000 de Elo inicial!');
+                    // Limpiamos las casillas automáticamente
+                    document.getElementById('newUsername').value = '';
+                    document.getElementById('newPassword').value = '';
+                    cargarUsuarios(); // Actualizamos la tabla
+                } else {
+                    alert('⚠️ Error al crear: ' + data.error);
+                }
+            } catch(e) {
+                alert('⚠️ Error de red al intentar conectar con la base de datos.');
+            }
         }
 
         async function crearTorneo() {
             const nombre = document.getElementById('torneoNombre').value;
             const fecha = document.getElementById('torneoFecha').value;
-            
-            await fetch(`${API_URL}/admin/torneos`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre: nombre, fecha: fecha })
-            });
-            alert('Torneo creado y activo.');
+            if(!nombre || !fecha) return alert("Llena los datos del torneo");
+
+            try {
+                await fetch(`${API_URL}/admin/torneos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre: nombre, fecha: fecha })
+                });
+                alert('¡Torneo creado exitosamente!');
+                document.getElementById('torneoNombre').value = '';
+            } catch(e) {
+                alert('Error al crear torneo.');
+            }
         }
 
         async function cargarUsuarios() {
-            const res = await fetch(`${API_URL}/admin/usuarios`);
-            const usuarios = await res.json();
-            const tbody = document.getElementById('tablaUsuarios');
-            tbody.innerHTML = '';
-            
-            usuarios.forEach(u => {
-                tbody.innerHTML += `<tr>
-                    <td>${u.username}</td>
-                    <td>${u.rol}</td>
-                    <td style="color:#06d6a0; font-weight:bold;">${u.puntuacion}</td>
-                </tr>`;
-            });
+            try {
+                const res = await fetch(`${API_URL}/admin/usuarios`);
+                const usuarios = await res.json();
+                const tbody = document.getElementById('tablaUsuarios');
+                tbody.innerHTML = '';
+                
+                usuarios.forEach(u => {
+                    tbody.innerHTML += `<tr>
+                        <td>${u.username}</td>
+                        <td>${u.rol}</td>
+                        <td style="color:#06d6a0; font-weight:bold;">${u.puntuacion}</td>
+                    </tr>`;
+                });
+            } catch(e) {
+                console.log("No se pudo cargar la tabla de usuarios.");
+            }
         }
 
         function cerrarSesion() {
@@ -109,7 +134,7 @@
             window.location.href = 'index.html';
         }
 
-        // Cargar tabla al entrar
+        // Cargar tabla automáticamente al entrar
         cargarUsuarios();
     </script>
 </body>
