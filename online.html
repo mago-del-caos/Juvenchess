@@ -9,66 +9,228 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        h1 { color: #ffd700; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.8rem; }
+        h1 { color: #ffd700; margin-bottom: 15px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.8rem; text-align: center; }
         
-        .info-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 450px; box-sizing: border-box; }
-        
-        .board-wrapper { position: relative; width: 100%; max-width: 450px; margin-bottom: 10px; }
+        /* PANTALLA DE LOBBY */
+        #lobbyContainer { width: 100%; max-width: 600px; display: block; }
+        .lobby-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
+        .lobby-title { color: #06d6a0; border-bottom: 1px solid #3a506b; padding-bottom: 10px; margin-top: 0; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #3a506b; background: #0b132b; border-radius: 6px; margin-bottom: 8px; }
+        .btn-crear { background-color: #ff9f1c; color: #0b132b; font-weight: bold; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1.1rem; margin-bottom: 15px; transition: 0.3s;}
+        .btn-crear:hover { background-color: #e88e15; }
+        .btn-jugar { background-color: #06d6a0; color: #0b132b; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .btn-reanudar { background-color: #ffd700; color: #0b132b; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+
+        /* PANTALLA DE TABLERO */
+        #boardContainer { width: 100%; max-width: 450px; display: none; }
+        .info-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; }
+        .board-wrapper { position: relative; width: 100%; margin-bottom: 10px; }
         #board { width: 100%; border: 4px solid #ffd700; border-radius: 4px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); background-color: #ffffff; }
         
+        /* Ajustes y Engranaje */
+        .btn-config { position: absolute; top: -15px; right: -15px; background: #06d6a0; color: #0b132b; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 20px; cursor: pointer; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition: 0.3s; }
+        #configModal { display: none; position: absolute; top: 35px; right: 0; background: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 15px; z-index: 101; box-shadow: 0 8px 16px rgba(0,0,0,0.8); min-width: 250px; }
+        .config-item { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
+        .config-item select { padding: 5px; border-radius: 4px; background: #0b132b; color: white; border: 1px solid #3a506b; width: 55%; font-size: 0.9rem; }
+        .btn-accion { background: #06d6a0; border: none; padding: 8px; border-radius: 4px; font-weight: bold; width: 100%; margin-top: 5px; cursor: pointer; color:#0b132b;}
+        
+        .btn-volver { background-color: #d62828; color: white; font-weight: bold; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1.1rem; margin-top: 10px;}
+        
+        .board-classic .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
+        .board-classic .black-3c85d { background-color: #b58863; color: #f0d9b5; }
         .board-juven .white-1e1d7 { background-color: #e0e0e0; color: #0b132b; }
         .board-juven .black-3c85d { background-color: #1c2541; color: #e0e0e0; }
 
-        .btn-volver { background-color: #d62828; color: white; font-weight: bold; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; max-width: 450px; font-size: 1.1rem; margin-top: 10px;}
-        
-        /* Pantalla de Carga */
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 19, 43, 0.95); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner { border: 8px solid #1c2541; border-top: 8px solid #06d6a0; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-bottom: 20px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .swal2-select { font-size: 1.1rem !important; padding: 10px !important; text-align: center; }
     </style>
 </head>
 <body>
 
-    <!-- Pantalla de Búsqueda de Partida -->
-    <div id="loader">
-        <div class="spinner"></div>
-        <h2 style="color: #ffd700;">Conectando al Servidor...</h2>
-        <p id="loaderText" style="color: #06d6a0;">Buscando rival disponible</p>
-        <button class="btn-volver" style="width: auto; margin-top: 30px;" onclick="window.location.href='menu.html'">Cancelar</button>
-    </div>
-
     <h1><i class="fas fa-globe"></i> ARENA ONLINE</h1>
     
-    <div class="info-panel">
-        <div style="color:#06d6a0; font-weight:bold;">Tú:<br><span id="jugadorLocal" style="color:white;">-</span></div>
-        <div style="text-align:center; color:#ffd700; font-weight:bold;" id="estadoJuego">Conectando...</div>
-        <div style="color:#d62828; font-weight:bold; text-align:right;">Rival:<br><span id="jugadorRival" style="color:white;">-</span></div>
-    </div>
-    
-    <div class="board-wrapper">
-        <div id="board" class="board-juven"></div>
+    <!-- PANTALLA 1: ZONA DE ESPERA (LOBBY) -->
+    <div id="lobbyContainer">
+        <button class="btn-crear" onclick="crearReto()"><i class="fas fa-plus-circle"></i> Crear Nuevo Reto</button>
+        
+        <div class="lobby-panel">
+            <h3 class="lobby-title"><i class="fas fa-pause-circle"></i> Mis Partidas Guardadas</h3>
+            <div id="listaActivas">
+                <div style="color: #9aa5ce; text-align: center;">Cargando partidas...</div>
+            </div>
+        </div>
+
+        <div class="lobby-panel">
+            <h3 class="lobby-title"><i class="fas fa-users"></i> Retos Disponibles</h3>
+            <div id="listaEspera">
+                <div style="color: #9aa5ce; text-align: center;">Buscando rivales...</div>
+            </div>
+        </div>
+
+        <button class="btn-volver" onclick="window.location.href='menu.html';"><i class="fas fa-arrow-left"></i> Volver al Menú Principal</button>
     </div>
 
-    <button class="btn-volver" onclick="window.location.href='menu.html';"><i class="fas fa-arrow-left"></i> Salir de la Partida</button>
+    <!-- PANTALLA 2: TABLERO DE JUEGO -->
+    <div id="boardContainer">
+        <div class="info-panel">
+            <div style="color:#06d6a0; font-weight:bold;">Tú:<br><span id="jugadorLocal" style="color:white;">-</span></div>
+            <div style="text-align:center; color:#ffd700; font-weight:bold;" id="estadoJuego">Conectando...</div>
+            <div style="color:#d62828; font-weight:bold; text-align:right;">Rival:<br><span id="jugadorRival" style="color:white;">-</span></div>
+        </div>
+        
+        <div class="board-wrapper">
+            <button class="btn-config" onclick="toggleConfig()"><i class="fas fa-cog"></i></button>
+            
+            <div id="configModal">
+                <h3 style="margin-top:0; color:#ffd700; border-bottom:1px solid #3a506b; padding-bottom:5px;"><i class="fas fa-sliders-h"></i> Ajustes</h3>
+                <div class="config-item">
+                    <label>Piezas:</label>
+                    <select id="selPiezas" onchange="actualizarAjustes()">
+                        <option value="custom">Chema/Goyo</option>
+                        <option value="classic">Clásicas</option>
+                    </select>
+                </div>
+                <div class="config-item">
+                    <label>Tablero:</label>
+                    <select id="selTablero" onchange="actualizarAjustes()">
+                        <option value="board-classic">Madera</option>
+                        <option value="board-juven">Oscuro</option>
+                    </select>
+                </div>
+                <button class="btn-accion" onclick="toggleConfig()"><i class="fas fa-check"></i> Cerrar</button>
+            </div>
+
+            <div id="board" class="board-classic"></div>
+        </div>
+
+        <button class="btn-volver" onclick="salirAlLobby()"><i class="fas fa-door-open"></i> Salir y Guardar Partida</button>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 
     <script>
         const API_URL = 'https://juvenchess-api.adrian-camelot32.workers.dev';
-        const username = localStorage.getItem('username') || 'INVITADO';
-        
+        const username = localStorage.getItem('username');
+        if(!username) window.location.href = 'index.html';
+
         let partidaId = null;
-        let miColor = 'w'; // w o b
+        let miColor = 'w';
         let pollingInterval = null;
+        var configPiezas = 'custom';
 
         var board = null;
         var game = new Chess();
 
+        // ------------------ SISTEMA DE LOBBY ------------------
+        async function cargarLobby() {
+            try {
+                const res = await fetch(`${API_URL}/online/lobby?user=${username}`);
+                const data = await res.json();
+                
+                // Renderizar Retos Disponibles
+                let htmlEspera = '';
+                if(data.esperando.length === 0) htmlEspera = '<div style="color: #9aa5ce; text-align: center;">Nadie está buscando partida. ¡Crea un reto!</div>';
+                data.esperando.forEach(p => {
+                    let tiempo = p.tiempo / 60;
+                    let juegaCon = p.color_creador === 'w' ? 'Negras' : 'Blancas'; // Tú juegas con lo opuesto
+                    htmlEspera += `
+                        <div class="list-item">
+                            <div><i class="fas fa-user"></i> <b>${p.creador}</b> <br> <small style="color:#06d6a0;">⏱️ ${tiempo} min | Tú serás: ${juegaCon}</small></div>
+                            <button class="btn-jugar" onclick="unirseReto('${p.id}', '${p.color_creador}')">Jugar</button>
+                        </div>`;
+                });
+                document.getElementById('listaEspera').innerHTML = htmlEspera;
+
+                // Renderizar Partidas Activas (Guardadas)
+                let htmlActivas = '';
+                if(data.activas.length === 0) htmlActivas = '<div style="color: #9aa5ce; text-align: center;">No tienes partidas en curso.</div>';
+                data.activas.forEach(p => {
+                    let rival = p.creador === username ? p.oponente : p.creador;
+                    let micolor = p.creador === username ? p.color_creador : (p.color_creador === 'w' ? 'b' : 'w');
+                    htmlActivas += `
+                        <div class="list-item">
+                            <div><i class="fas fa-chess-knight"></i> vs <b>${rival}</b> <br> <small style="color:#ffd700;">Partida en progreso</small></div>
+                            <button class="btn-reanudar" onclick="reanudarPartida('${p.id}', '${micolor}', '${p.creador}', '${p.oponente}')">Reanudar</button>
+                        </div>`;
+                });
+                document.getElementById('listaActivas').innerHTML = htmlActivas;
+
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function crearReto() {
+            const { value: formValues } = await Swal.fire({
+                title: 'Configurar Reto',
+                html: `
+                    <select id="swal-tiempo" class="swal2-select" style="width: 80%;">
+                        <option value="180">Blitz (3 min)</option>
+                        <option value="300" selected>Blitz (5 min)</option>
+                        <option value="600">Rápido (10 min)</option>
+                    </select>
+                    <select id="swal-color" class="swal2-select" style="width: 80%;">
+                        <option value="w">Yo juego con Blancas</option>
+                        <option value="b">Yo juego con Negras</option>
+                    </select>
+                `,
+                focusConfirm: false,
+                background: '#1c2541', color: '#fff', confirmButtonColor: '#ff9f1c', confirmButtonText: 'Crear Reto', showCancelButton: true,
+                preConfirm: () => {
+                    return { tiempo: document.getElementById('swal-tiempo').value, color: document.getElementById('swal-color').value }
+                }
+            });
+
+            if (formValues) {
+                const res = await fetch(`${API_URL}/online/crear`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, tiempo: formValues.tiempo, color: formValues.color })
+                });
+                const data = await res.json();
+                
+                partidaId = data.id;
+                miColor = formValues.color;
+                prepararTablero("Esperando rival...", "Esperando...");
+            }
+        }
+
+        async function unirseReto(id, colorCreador) {
+            partidaId = id;
+            miColor = colorCreador === 'w' ? 'b' : 'w';
+            
+            await fetch(`${API_URL}/online/unirse`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: partidaId, username: username })
+            });
+            prepararTablero("Rival", "Conectando...");
+        }
+
+        function reanudarPartida(id, color, creador, oponente) {
+            partidaId = id;
+            miColor = color;
+            let rival = creador === username ? oponente : creador;
+            prepararTablero(rival, "Reanudando...");
+        }
+
+        // ------------------ SISTEMA DE TABLERO Y AJUSTES ------------------
+        function toggleConfig() {
+            const modal = document.getElementById('configModal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function actualizarAjustes() {
+            configPiezas = document.getElementById('selPiezas').value;
+            $('#board').removeClass('board-classic board-juven');
+            $('#board').addClass(document.getElementById('selTablero').value);
+            board.position(game.fen());
+        }
+
         function pieceTheme(piece) {
+            if (configPiezas === 'classic') return 'https://chessboardjs.com/img/chesspieces/wikipedia/' + piece + '.png';
             const customPieces = {
                 'wP': 'chemapeon.png', 'wN': 'chemacaballo.png', 'wB': 'chemaalfil.png', 'wR': 'chematorre.png', 'wQ': 'chemareyna.png', 'wK': 'chemarey.png',
                 'bP': 'goyopeon.png', 'bN': 'goyocaballo.png', 'bB': 'goyoalfil.png', 'bR': 'goyotorre.png', 'bQ': 'goyoreina.png', 'bK': 'goyorey.png'
@@ -76,105 +238,81 @@
             return customPieces[piece];
         }
 
-        // 1. BUSCAR O CREAR PARTIDA
-        async function buscarPartida() {
-            try {
-                const res = await fetch(`${API_URL}/online/buscar`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: username })
-                });
-                const data = await res.json();
-                
-                partidaId = data.id;
-                miColor = data.color;
-                
-                // Rotar el tablero si somos negras
-                board.orientation(miColor === 'w' ? 'white' : 'black');
-                
-                // Iniciar el monitoreo
-                pollingInterval = setInterval(monitorearPartida, 1500);
+        function prepararTablero(nombreRival, estadoText) {
+            document.getElementById('lobbyContainer').style.display = 'none';
+            document.getElementById('boardContainer').style.display = 'block';
+            
+            document.getElementById('jugadorLocal').innerText = username;
+            document.getElementById('jugadorRival').innerText = nombreRival;
+            document.getElementById('estadoJuego').innerText = estadoText;
 
-            } catch(e) {
-                document.getElementById('loaderText').innerText = "Error de conexión. Intenta de nuevo.";
-            }
+            board.orientation(miColor === 'w' ? 'white' : 'black');
+            pollingInterval = setInterval(monitorearPartida, 1500);
         }
 
-        // 2. MONITOREAR ESTADO (POLLING)
+        function salirAlLobby() {
+            clearInterval(pollingInterval);
+            document.getElementById('boardContainer').style.display = 'none';
+            document.getElementById('lobbyContainer').style.display = 'block';
+            cargarLobby(); // Refrescar lista al volver
+        }
+
+        // ------------------ SINCRONIZACIÓN EN TIEMPO REAL ------------------
         async function monitorearPartida() {
             try {
                 const res = await fetch(`${API_URL}/online/estado?id=${partidaId}`);
                 const data = await res.json();
                 
                 if (data.estado === 'esperando') {
-                    document.getElementById('loaderText').innerText = "Sala creada. Esperando a que un rival se conecte...";
+                    document.getElementById('estadoJuego').innerText = "Esperando que alguien acepte...";
                 } else if (data.estado === 'jugando') {
-                    // Ocultar pantalla de carga
-                    document.getElementById('loader').style.display = 'none';
+                    // Actualizar nombre del rival si apenas se unió
+                    document.getElementById('jugadorRival').innerText = miColor === 'w' ? data.oponente : data.creador;
                     
-                    // Mostrar nombres
-                    document.getElementById('jugadorLocal').innerText = miColor === 'w' ? data.jugador_blancas : data.jugador_negras;
-                    document.getElementById('jugadorRival').innerText = miColor === 'w' ? data.jugador_negras : data.jugador_blancas;
-                    
-                    // Sincronizar FEN si el rival movió
+                    // Sincronizar piezas
                     if (data.fen !== game.fen()) {
                         game.load(data.fen);
                         board.position(game.fen());
                     }
-
-                    actualizarEstadoUI();
+                    
+                    if (game.in_checkmate()) {
+                        document.getElementById('estadoJuego').innerText = '¡Jaque Mate!';
+                    } else {
+                        document.getElementById('estadoJuego').innerText = game.turn() === miColor ? "¡Tu Turno!" : "Turno del Rival";
+                    }
                 }
-            } catch(e) {
-                console.log("Esperando respuesta del servidor...");
-            }
+            } catch(e) {}
         }
 
-        // 3. MOVER PIEZA Y ENVIAR AL SERVIDOR
         async function onDrop(source, target) {
-            // Validar que sea mi turno y mi color
             if (game.turn() !== miColor) return 'snapback';
 
             var move = game.move({ from: source, to: target, promotion: 'q' });
             if (move === null) return 'snapback';
-            
-            actualizarEstadoUI();
 
-            // Enviar movimiento al servidor
+            // Enviar a la base de datos
             await fetch(`${API_URL}/online/mover`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: partidaId, fen: game.fen() })
             });
+            document.getElementById('estadoJuego').innerText = "Turno del Rival";
         }
 
         function onDragStart(source, piece) {
-            // Solo permitir mover si el juego empezó y es mi turno
             if (game.game_over() || game.turn() !== miColor) return false;
-            // Solo puedo mover mis propias piezas
             if ((miColor === 'w' && piece.search(/^b/) !== -1) || (miColor === 'b' && piece.search(/^w/) !== -1)) return false;
         }
 
-        function onSnapEnd() {
-            board.position(game.fen());
-        }
-
-        function actualizarEstadoUI() {
-            if (game.in_checkmate()) {
-                document.getElementById('estadoJuego').innerText = '¡Jaque Mate!';
-            } else {
-                document.getElementById('estadoJuego').innerText = game.turn() === miColor ? "¡Tu Turno!" : "Turno del Rival";
-            }
-        }
+        function onSnapEnd() { board.position(game.fen()); }
 
         var config = {
             draggable: true, position: 'start', pieceTheme: pieceTheme,
             onDragStart: onDragStart, onDrop: onDrop, onSnapEnd: onSnapEnd
         };
-        
         board = Chessboard('board', config);
         
-        // Iniciar búsqueda al abrir la página
-        buscarPartida();
+        // Iniciar el lobby al cargar la página
+        cargarLobby();
     </script>
 </body>
 </html>
