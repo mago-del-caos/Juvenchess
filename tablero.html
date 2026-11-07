@@ -7,30 +7,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
     <style>
         body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        h1 { color: #ffd700; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.8rem; }
+        h1 { color: #ffd700; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.8rem; }
         
-        /* Panel superior con avatares */
-        .info-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 450px; }
+        /* Panel de Jugadores y Relojes */
+        .info-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 450px; box-sizing: border-box; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #06d6a0; object-fit: cover; margin-right: 10px; vertical-align: middle; }
         .player-info { display: flex; align-items: center; font-weight: bold; }
         
-        /* Tabenedor del tablero y engranaje */
-        .board-wrapper { position: relative; width: 100%; max-width: 450px; margin-bottom: 20px; }
+        /* Estilo de los Relojes */
+        .clocks { display: flex; flex-direction: column; align-items: flex-end; font-family: monospace; font-size: 1.2rem; }
+        .clock { padding: 2px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 2px; }
+        .clock-active { background-color: #06d6a0; color: #0b132b; box-shadow: 0 0 8px #06d6a0; }
+        .clock-inactive { background-color: #3a506b; color: #9aa5ce; }
+
+        /* Contenedor del tablero y engranaje */
+        .board-wrapper { position: relative; width: 100%; max-width: 450px; margin-bottom: 10px; }
         #board { width: 100%; border: 4px solid #ffd700; border-radius: 4px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); background-color: #ffffff; }
         
-        /* Botón de configuración (Engranaje) */
         .btn-config { position: absolute; top: -15px; right: -15px; background: #06d6a0; color: #0b132b; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
         .btn-config:hover { background: #05b383; }
 
         /* Modal de configuración */
-        #configModal { display: none; position: absolute; top: 30px; right: 0; background: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 15px; z-index: 101; box-shadow: 0 8px 16px rgba(0,0,0,0.8); min-width: 200px; }
-        .config-item { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .config-item select { padding: 5px; border-radius: 4px; background: #0b132b; color: white; border: 1px solid #3a506b; }
+        #configModal { display: none; position: absolute; top: 30px; right: 0; background: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 15px; z-index: 101; box-shadow: 0 8px 16px rgba(0,0,0,0.8); min-width: 220px; }
+        .config-item { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
+        .config-item select { padding: 5px; border-radius: 4px; background: #0b132b; color: white; border: 1px solid #3a506b; width: 60%; }
 
-        /* Resaltado de movimientos */
+        /* Historial de Movimientos */
+        .history-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; width: 100%; max-width: 450px; height: 100px; overflow-y: auto; margin-bottom: 15px; padding: 10px; box-sizing: border-box; }
+        .history-panel h3 { margin: 0 0 5px 0; color: #06d6a0; font-size: 1rem; border-bottom: 1px solid #3a506b; padding-bottom: 3px; }
+        .history-list { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 5px; font-size: 0.9rem; color: #e0e0e0; font-family: monospace; }
+        
+        /* Resaltado de movimientos y Temas */
         .highlight1-32417, .highlight2-9c5d2 { box-shadow: inset 0 0 3px 3px yellow; }
-
-        /* Temas de color del tablero */
         .board-classic .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
         .board-classic .black-3c85d { background-color: #b58863; color: #f0d9b5; }
         .board-juven .white-1e1d7 { background-color: #e0e0e0; color: #0b132b; }
@@ -46,36 +54,42 @@
     <div class="info-panel">
         <div class="player-info">
             <img src="profe.png" alt="Avatar" class="avatar" id="avatarImg" onerror="this.src='zapata.png'">
-            <span style="color:#06d6a0;">Jugador:<br><span id="nombreJugador" style="color:white;">Invitado</span></span>
+            <div style="line-height: 1.2;">
+                <span style="color:#06d6a0;">Jugador:</span><br>
+                <span id="nombreJugador" style="color:white;">Invitado</span>
+            </div>
         </div>
-        <div style="text-align:right;">
-            <span style="color:#06d6a0; font-weight:bold;">Estado:</span><br>
-            <span id="estadoJuego" style="color:white; font-size:0.9em;">Turno de Blancas</span>
+        <div class="clocks">
+            <div id="relojNegras" class="clock clock-inactive">05:00</div>
+            <div id="relojBlancas" class="clock clock-inactive">05:00</div>
         </div>
+    </div>
+    
+    <div style="text-align: center; margin-bottom: 5px;">
+        <span id="estadoJuego" style="color:#ffd700; font-weight:bold;">¡Haz tu primer movimiento para iniciar el reloj!</span>
     </div>
 
     <div class="board-wrapper">
         <button class="btn-config" onclick="toggleConfig()">⚙️</button>
         
-        <!-- Modal de Opciones -->
         <div id="configModal">
             <h3 style="margin-top:0; color:#ffd700; border-bottom:1px solid #3a506b; padding-bottom:5px;">Ajustes</h3>
             <div class="config-item">
                 <label>Piezas:</label>
                 <select id="selPiezas" onchange="actualizarAjustes()">
-                    <option value="custom">Juvenchess (Chema/Goyo)</option>
-                    <option value="classic">Clásicas (Wikipedia)</option>
+                    <option value="custom">Chema/Goyo</option>
+                    <option value="classic">Clásicas</option>
                 </select>
             </div>
             <div class="config-item">
-                <label>Color del Tablero:</label>
+                <label>Tablero:</label>
                 <select id="selTablero" onchange="actualizarAjustes()">
-                    <option value="board-classic">Madera Clásica</option>
-                    <option value="board-juven">Oscuro Juvenchess</option>
+                    <option value="board-classic">Madera</option>
+                    <option value="board-juven">Oscuro</option>
                 </select>
             </div>
             <div class="config-item">
-                <label>Mostrar Ayuda:</label>
+                <label>Ayuda:</label>
                 <input type="checkbox" id="chkAyuda" checked onchange="actualizarAjustes()">
             </div>
             <button onclick="toggleConfig()" style="width:100%; background:#06d6a0; border:none; padding:5px; border-radius:4px; margin-top:10px; font-weight:bold;">Cerrar</button>
@@ -84,9 +98,13 @@
         <div id="board" class="board-classic"></div>
     </div>
 
+    <div class="history-panel">
+        <h3>Historial de Partida</h3>
+        <div class="history-list" id="moveHistory"></div>
+    </div>
+
     <button class="btn-volver" onclick="window.location.href='menu.html';">Volver al Menú</button>
 
-    <!-- Librerías: jQuery, UI (para Touch en celular), Chessboard, Chess.js, Confetti -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
@@ -98,9 +116,11 @@
         const username = localStorage.getItem('username') || 'INVITADO';
         document.getElementById('nombreJugador').innerText = username;
 
-        // Asignar avatar según el usuario (puedes agregar lógica para santa o chemita aquí)
+        // Asignación de avatares según el usuario
         if(username.toLowerCase() === 'cifra' || username.toLowerCase() === 'admin') {
             document.getElementById('avatarImg').src = 'profe.png';
+        } else if (username.toLowerCase() === 'santa') {
+            document.getElementById('avatarImg').src = 'santa.png';
         } else {
             document.getElementById('avatarImg').src = 'zapata.png';
         }
@@ -108,11 +128,13 @@
         var board = null;
         var game = new Chess();
         var $board = $('#board');
-        var squareClass = 'square-55d63';
-        var squareToHighlight = null;
-        var colorToHighlight = null;
+        
+        // Variables de Reloj
+        let tiempoBlancas = 300; // 5 minutos en segundos
+        let tiempoNegras = 300;
+        let timerInterval = null;
+        let juegoIniciado = false;
 
-        // Opciones Globales
         var configPiezas = 'custom';
         var mostrarAyuda = true;
 
@@ -124,18 +146,15 @@
         function actualizarAjustes() {
             configPiezas = document.getElementById('selPiezas').value;
             mostrarAyuda = document.getElementById('chkAyuda').checked;
-            
-            // Cambiar color del tablero
             $board.removeClass('board-classic board-juven');
             $board.addClass(document.getElementById('selTablero').value);
-
-            // Recargar piezas
             board.position(game.fen());
         }
 
         function pieceTheme(piece) {
             if (configPiezas === 'classic') {
-                return 'https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/img/chesspieces/wikipedia/' + piece + '.png';
+                // Nuevo servidor 100% estable para las piezas clásicas
+                return 'https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/img/chesspieces/wikipedia/' + piece + '.png';
             }
             const customPieces = {
                 'wP': 'chemapeon.png', 'wN': 'chemacaballo.png', 'wB': 'chemaalfil.png', 'wR': 'chematorre.png', 'wQ': 'chemareyna.png', 'wK': 'chemarey.png',
@@ -144,13 +163,81 @@
             return customPieces[piece];
         }
 
-        function removeHighlights(color) {
-            $board.find('.' + squareClass).removeClass('highlight' + (color ? color : '1-32417')).removeClass('highlight2-9c5d2');
+        function removeHighlights() {
+            $board.find('.square-55d63').removeClass('highlight1-32417 highlight2-9c5d2');
+        }
+
+        function greySquare(square) {
+            $board.find('.square-' + square).addClass('highlight1-32417');
+        }
+
+        // CONTROL DE RELOJES
+        function formatoTiempo(segundos) {
+            let min = Math.floor(segundos / 60);
+            let seg = segundos % 60;
+            return (min < 10 ? "0" + min : min) + ":" + (seg < 10 ? "0" + seg : seg);
+        }
+
+        function actualizarRelojesUI() {
+            document.getElementById('relojBlancas').innerText = formatoTiempo(tiempoBlancas);
+            document.getElementById('relojNegras').innerText = formatoTiempo(tiempoNegras);
+            
+            if (game.turn() === 'w') {
+                document.getElementById('relojBlancas').className = 'clock clock-active';
+                document.getElementById('relojNegras').className = 'clock clock-inactive';
+            } else {
+                document.getElementById('relojBlancas').className = 'clock clock-inactive';
+                document.getElementById('relojNegras').className = 'clock clock-active';
+            }
+        }
+
+        function iniciarReloj() {
+            if(!juegoIniciado) {
+                juegoIniciado = true;
+                timerInterval = setInterval(() => {
+                    if(game.game_over()) { clearInterval(timerInterval); return; }
+                    
+                    if(game.turn() === 'w') {
+                        tiempoBlancas--;
+                        if(tiempoBlancas <= 0) finPorTiempo("Negras");
+                    } else {
+                        tiempoNegras--;
+                        if(tiempoNegras <= 0) finPorTiempo("Blancas");
+                    }
+                    actualizarRelojesUI();
+                }, 1000);
+            }
+            actualizarRelojesUI();
+        }
+
+        function finPorTiempo(ganador) {
+            clearInterval(timerInterval);
+            document.getElementById('estadoJuego').innerText = `¡Se acabó el tiempo! ${ganador} ganan.`;
+            if(ganador === "Blancas") lanzarConfeti();
+            // Evitar más movimientos
+            board.draggable = false; 
+        }
+
+        // HISTORIAL DE MOVIMIENTOS
+        function actualizarHistorial() {
+            const historial = game.history();
+            const panel = document.getElementById('moveHistory');
+            let html = '';
+            
+            for(let i = 0; i < historial.length; i += 2) {
+                let turno = (i / 2) + 1;
+                let blanca = historial[i];
+                let negra = historial[i+1] ? historial[i+1] : '';
+                html += `<div><b>${turno}.</b></div> <div>${blanca}</div> <div>${negra}</div>`;
+            }
+            panel.innerHTML = html;
+            // Auto scroll hacia el final
+            panel.parentElement.scrollTop = panel.parentElement.scrollHeight;
         }
 
         function onDragStart(source, piece, position, orientation) {
-            if (game.game_over()) return false;
-            if (piece.search(/^b/) !== -1) return false; // Solo permite jugar con blancas vs IA local
+            if (game.game_over() || tiempoBlancas <= 0 || tiempoNegras <= 0) return false;
+            if (piece.search(/^b/) !== -1) return false; // IA juega negras
         }
 
         function onDrop(source, target) {
@@ -158,6 +245,8 @@
             if (move === null) return 'snapback';
             
             removeHighlights();
+            iniciarReloj();
+            actualizarHistorial();
             actualizarEstado();
             window.setTimeout(hacerMovimientoIA, 250);
         }
@@ -167,7 +256,6 @@
             var moves = game.moves({ square: square, verbose: true });
             if (moves.length === 0) return;
 
-            // Resaltar la casilla actual y los destinos
             greySquare(square);
             for (var i = 0; i < moves.length; i++) {
                 greySquare(moves[i].to);
@@ -176,11 +264,6 @@
 
         function onMouseoutSquare(square, piece) {
             removeHighlights();
-        }
-
-        function greySquare(square) {
-            var $square = $board.find('.square-' + square);
-            $square.addClass('highlight1-32417');
         }
 
         function onSnapEnd() {
@@ -194,26 +277,32 @@
             var move = game.move(posiblesMovimientos[Math.floor(Math.random() * posiblesMovimientos.length)]);
             board.position(game.fen());
             
-            // Resaltar movimiento de la IA
             if(mostrarAyuda) {
                 removeHighlights();
                 $board.find('.square-' + move.from).addClass('highlight2-9c5d2');
                 $board.find('.square-' + move.to).addClass('highlight2-9c5d2');
             }
+            
+            actualizarRelojesUI();
+            actualizarHistorial();
             actualizarEstado();
         }
 
         function actualizarEstado() {
+            if (tiempoBlancas <= 0 || tiempoNegras <= 0) return; // Si ganó por tiempo, no sobreescribir
+
             var status = '';
-            var moverColor = game.turn() === 'b' ? 'Negras (IA)' : 'Blancas (Tú)';
+            var moverColor = game.turn() === 'b' ? 'Turno de Negras (IA)' : 'Turno de Blancas (Tú)';
 
             if (game.in_checkmate()) {
                 status = 'Jaque mate. Ganan las ' + (game.turn() === 'b' ? 'Blancas' : 'Negras');
-                if(game.turn() === 'b') lanzarConfeti(); // Ganaste tú
+                clearInterval(timerInterval);
+                if(game.turn() === 'b') lanzarConfeti();
             } else if (game.in_draw()) {
                 status = 'Juego terminado en empate.';
+                clearInterval(timerInterval);
             } else {
-                status = 'Turno de ' + moverColor;
+                status = moverColor;
                 if (game.in_check()) status += ' (¡Jaque!)';
             }
             document.getElementById('estadoJuego').innerText = status;
@@ -232,7 +321,7 @@
         var config = {
             draggable: true,
             position: 'start',
-            showNotation: true, // Muestra las coordenadas A-H y 1-8
+            showNotation: true,
             pieceTheme: pieceTheme,
             onDragStart: onDragStart,
             onDrop: onDrop,
@@ -242,7 +331,7 @@
         };
         
         board = Chessboard('board', config);
-        actualizarEstado();
+        actualizarRelojesUI(); // Configura los relojes visualmente al cargar
     </script>
 </body>
 </html>
