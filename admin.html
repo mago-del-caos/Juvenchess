@@ -27,7 +27,9 @@
         <input type="text" id="newUsername" placeholder="Nombre de usuario">
         <input type="text" id="newPassword" placeholder="Contraseña">
         <select id="newRol">
-            <option value="jugador">Jugador</option>
+            <!-- AQUÍ ESTÁ LA CORRECCIÓN: Los values ahora coinciden con tu base de datos -->
+            <option value="casual">Jugador Casual</option>
+            <option value="oficial">Jugador Oficial</option>
             <option value="admin">Administrador</option>
         </select>
         <button onclick="crearUsuario()">Registrar Usuario</button>
@@ -80,10 +82,9 @@
 
                 if(res.ok) {
                     alert('¡Usuario creado exitosamente con 1000 de Elo inicial!');
-                    // Limpiamos las casillas automáticamente
                     document.getElementById('newUsername').value = '';
                     document.getElementById('newPassword').value = '';
-                    cargarUsuarios(); // Actualizamos la tabla
+                    cargarUsuarios();
                 } else {
                     alert('⚠️ Error al crear: ' + data.error);
                 }
@@ -134,7 +135,6 @@
             window.location.href = 'index.html';
         }
 
-        // Cargar tabla automáticamente al entrar
         cargarUsuarios();
     </script>
 </body>
