@@ -3,138 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JUVENCHESS | Menú de Juego</title>
+    <title>JUVENCHESS | Iniciar Sesión</title>
     <style>
         body {
-            background-color: #0b132b; 
-            /* Si tenías una imagen de fondo, descomenta la línea de abajo y ajusta la ruta */
-            /* background-image: url('assets/img/fondo-menu.jpg'); */
-            background-size: cover;
-            background-position: center;
+            background-color: #0b132b;
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 20px;
         }
-        h1 {
-            color: #ffd700;
-            margin-top: 20px;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-            text-transform: uppercase;
-        }
-        .panel {
-            background-color: rgba(28, 37, 65, 0.9);
+        .login-container {
+            background-color: #1c2541;
             border: 2px solid #3a506b;
             border-radius: 12px;
-            padding: 20px;
-            width: 90%;
-            max-width: 600px;
-            margin-bottom: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            text-align: center;
         }
-        .panel-title {
-            color: #ffd700;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .btn-opcion {
-            background-color: #1c2541;
-            color: #ffffff;
-            border: 2px solid #3a506b;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            flex: 1;
-            min-width: 120px;
-            transition: 0.3s;
-        }
-        .btn-opcion.active, .btn-opcion:hover {
-            background-color: #0d2818;
-            border-color: #06d6a0;
-        }
-        .btn-jugar {
-            background-color: #06d6a0;
-            color: #0b132b;
-            font-size: 1.2rem;
-            font-weight: bold;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 90%;
-            max-width: 600px;
-            transition: background 0.3s;
-        }
-        .btn-jugar:hover {
-            background-color: #05b383;
-        }
-        .btn-logout {
-            background-color: #d62828;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 20px;
-            font-weight: bold;
-        }
+        .logo { width: 120px; margin-bottom: 20px; }
+        h2 { color: #ffd700; margin-bottom: 25px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 8px; color: #06d6a0; font-weight: bold; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #3a506b; border-radius: 8px; background-color: #0b132b; color: #ffffff; box-sizing: border-box; font-size: 1rem; }
+        .input-group input:focus { outline: none; border-color: #ffd700; }
+        .btn-login { background-color: #06d6a0; color: #0b132b; font-size: 1.2rem; font-weight: bold; padding: 15px; border: none; border-radius: 8px; cursor: pointer; width: 100%; transition: background 0.3s; }
+        .btn-login:hover { background-color: #05b383; }
+        .error-msg { color: #d62828; margin-top: 15px; font-weight: bold; display: none; }
     </style>
 </head>
 <body>
-    <h1 id="saludoUsuario">HOLA, INVITADO_79</h1>
-
-    <div class="panel">
-        <div class="panel-title">1. MODO DE JUEGO</div>
-        <div class="btn-group">
-            <button class="btn-opcion active">🤖 Vs Bots (IA)</button>
-            <button class="btn-opcion">👥 2 Jugadores</button>
-            <button class="btn-opcion">🌐 En Línea</button>
-        </div>
+    <div class="login-container">
+        <img src="assets/img/logo-juvenchess.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <h2>INICIAR SESIÓN</h2>
+        <form id="formLogin">
+            <div class="input-group">
+                <label for="username">Usuario</label>
+                <input type="text" id="username" placeholder="Ingresa tu usuario" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" placeholder="Ingresa tu contraseña" required>
+            </div>
+            <button type="submit" class="btn-login">Entrar</button>
+            <div id="mensajeError" class="error-msg">Usuario o contraseña incorrectos</div>
+        </form>
     </div>
-
-    <div class="panel">
-        <div class="panel-title">2. ELIGE TU OPONENTE</div>
-        <div class="btn-group">
-            <button class="btn-opcion active">Profe (Elo 200)</button>
-            <button class="btn-opcion">Santa (Elo 500)</button>
-        </div>
-    </div>
-
-    <!-- Botón para ir al tablero -->
-    <button class="btn-jugar" onclick="window.location.href='tablero.html';">Jugar Ahora</button>
-    
-    <!-- Botón de Cerrar Sesión -->
-    <button id="btnCerrarSesion" class="btn-logout">Cerrar Sesión</button>
 
     <script>
-        // Funcionalidad para cerrar sesión
-        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.href = 'index.html'; // Cambia esto si tu inicio de sesión se llama diferente
-        });
+        document.getElementById('formLogin').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const errorDiv = document.getElementById('mensajeError');
 
-        // Recuperar nombre de usuario guardado
-        const username = localStorage.getItem('username') || 'INVITADO_79';
-        document.getElementById('saludoUsuario').innerText = `HOLA, ${username}`;
-        
-        // Efecto visual para seleccionar opciones
-        document.querySelectorAll('.btn-opcion').forEach(btn => {
-            btn.addEventListener('click', function() {
-                let hermanos = this.parentElement.children;
-                for(let h of hermanos) h.classList.remove('active');
-                this.classList.add('active');
-            });
+            try {
+                const respuesta = await fetch('https://TU-WORKER.mago-del-caos.workers.dev/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
+                });
+                const data = await respuesta.json();
+                
+                if (respuesta.ok) {
+                    localStorage.setItem('username', user.toUpperCase());
+                    window.location.href = 'menu.html'; // <--- ¡AQUÍ REDIRIGE AL MENÚ!
+                } else {
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerText = data.error || 'Usuario o contraseña incorrectos';
+                }
+            } catch (error) {
+                // Fallback de administrador local
+                if(user === 'admin' && pass === 'cifra1234') {
+                    localStorage.setItem('username', 'ADMIN');
+                    window.location.href = 'menu.html';
+                } else {
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerText = 'Error de conexión con el servidor.';
+                }
+            }
         });
     </script>
 </body>
