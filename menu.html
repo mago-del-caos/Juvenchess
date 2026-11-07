@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUVENCHESS | Menú de Juego</title>
+    <style>
+        body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        h1 { color: #ffd700; margin-top: 20px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); text-transform: uppercase; }
+        .panel { background-color: rgba(28, 37, 65, 0.9); border: 2px solid #3a506b; border-radius: 12px; padding: 20px; width: 90%; max-width: 600px; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
+        .panel-title { color: #ffd700; font-weight: bold; margin-bottom: 15px; }
+        .btn-group { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .btn-opcion { background-color: #1c2541; color: #ffffff; border: 2px solid #3a506b; padding: 10px 20px; border-radius: 8px; cursor: pointer; flex: 1; min-width: 120px; transition: 0.3s; }
+        .btn-opcion.active, .btn-opcion:hover { background-color: #0d2818; border-color: #06d6a0; }
+        .btn-jugar { background-color: #06d6a0; color: #0b132b; font-size: 1.2rem; font-weight: bold; padding: 15px 40px; border: none; border-radius: 8px; cursor: pointer; width: 90%; max-width: 600px; transition: background 0.3s; }
+        .btn-jugar:hover { background-color: #05b383; }
+        .btn-logout { background-color: #d62828; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px; font-weight: bold; transition: background 0.3s; }
+        .btn-logout:hover { background-color: #a81d1d; }
+    </style>
+</head>
+<body>
+    <h1 id="saludoUsuario">HOLA, INVITADO_79</h1>
+
+    <div class="panel">
+        <div class="panel-title">1. MODO DE JUEGO</div>
+        <div class="btn-group">
+            <button class="btn-opcion active">🤖 Vs Bots (IA)</button>
+            <button class="btn-opcion">👥 2 Jugadores</button>
+            <button class="btn-opcion">🌐 En Línea</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title">2. ELIGE TU OPONENTE</div>
+        <div class="btn-group">
+            <button class="btn-opcion active">Profe (Elo 200)</button>
+            <button class="btn-opcion">Santa (Elo 500)</button>
+        </div>
+    </div>
+
+    <button class="btn-jugar" onclick="window.location.href='tablero.html';">Jugar Ahora</button>
+    <button id="btnCerrarSesion" class="btn-logout">Cerrar Sesión</button>
+
+    <script>
+        // Cerrar sesión te regresa a index.html (el login)
+        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = 'index.html'; 
+        });
+
+        const username = localStorage.getItem('username') || 'INVITADO_79';
+        document.getElementById('saludoUsuario').innerText = `HOLA, ${username}`;
+        
+        document.querySelectorAll('.btn-opcion').forEach(btn => {
+            btn.addEventListener('click', function() {
+                let hermanos = this.parentElement.children;
+                for(let h of hermanos) h.classList.remove('active');
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
