@@ -1,214 +1,147 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#06152D">
-  <title>JUVENCHESS | Acceso al Sistema</title>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-  
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body {
-      background-color: #06152D;
-      color: #F8FAFC;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .login-container {
-      background: #0F294D;
-      border-radius: 16px;
-      padding: 40px 30px;
-      width: 100%;
-      max-width: 420px;
-      border: 1px solid rgba(255,255,255,0.05);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-      text-align: center;
-    }
-
-    .brand-title {
-      font-family: 'Cinzel', serif;
-      font-size: 2.5rem;
-      color: #FACC15;
-      margin-bottom: 5px;
-      text-shadow: 0 0 10px rgba(250, 204, 21, 0.4);
-    }
-    
-    .brand-subtitle {
-      font-size: 0.9rem;
-      color: #94A3B8;
-      margin-bottom: 30px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .tabs {
-      display: flex;
-      background: rgba(0,0,0,0.3);
-      border-radius: 8px;
-      margin-bottom: 25px;
-      padding: 4px;
-    }
-
-    .tab-btn {
-      flex: 1;
-      background: none;
-      border: none;
-      color: #94A3B8;
-      padding: 10px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .tab-btn.active { background: #10B981; color: #000; }
-
-    .form-section { display: none; }
-    .form-section.active { display: block; }
-
-    .input-group { margin-bottom: 15px; text-align: left; }
-    .input-group label { display: block; font-size: 0.8rem; color: #94A3B8; margin-bottom: 6px; font-weight: 700; }
-    .input-group input {
-      width: 100%;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: #FFF;
-      padding: 12px 15px;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-family: inherit;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .input-group input:focus { border-color: #FACC15; }
-
-    .btn-submit {
-      width: 100%; background: #FACC15; color: #000; border: none; padding: 14px;
-      border-radius: 8px; font-size: 1.1rem; font-weight: 900; cursor: pointer; margin-top: 10px;
-    }
-    
-    .btn-casual {
-      width: 100%; background: rgba(255,255,255,0.1); color: #FFF; border: 1px solid rgba(255,255,255,0.2);
-      padding: 14px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 10px;
-    }
-    
-    .status-msg { margin-top: 15px; font-size: 0.85rem; color: #EF4444; min-height: 20px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUVENCHESS | Iniciar Sesión</title>
+    <style>
+        body {
+            background-color: #0b132b;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .login-container {
+            background-color: #1c2541;
+            border: 2px solid #3a506b;
+            border-radius: 12px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .logo {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #ffd700;
+            margin-bottom: 25px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #06d6a0;
+            font-weight: bold;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #3a506b;
+            border-radius: 8px;
+            background-color: #0b132b;
+            color: #ffffff;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+        .btn-login {
+            background-color: #06d6a0;
+            color: #0b132b;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        .btn-login:hover {
+            background-color: #05b383;
+        }
+        .error-msg {
+            color: #d62828;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="login-container">
-    <h1 class="brand-title">JUVENCHESS</h1>
-    <p class="brand-subtitle">Centro de Autenticación</p>
-
-    <div class="tabs">
-      <button class="tab-btn active" id="tab-oficial">Jugador Oficial</button>
-      <button class="tab-btn" id="tab-casual">Invitado Casual</button>
+    <div class="login-container">
+        <!-- Puedes poner la ruta de tu logo aquí -->
+        <img src="assets/img/logo-juvenchess.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        
+        <h2>INICIAR SESIÓN</h2>
+        
+        <form id="formLogin">
+            <div class="input-group">
+                <label for="username">Usuario</label>
+                <input type="text" id="username" placeholder="Ingresa tu usuario" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" placeholder="Ingresa tu contraseña" required>
+            </div>
+            
+            <button type="submit" class="btn-login">Entrar</button>
+            <div id="mensajeError" class="error-msg">Usuario o contraseña incorrectos</div>
+        </form>
     </div>
 
-    <!-- Panel de Login -->
-    <div id="form-oficial" class="form-section active">
-      <div class="input-group">
-        <label>Nombre de Usuario</label>
-        <input type="text" id="username" placeholder="Ingresa tu usuario asignado" autocomplete="off">
-      </div>
-      <div class="input-group">
-        <label>Contraseña</label>
-        <input type="password" id="password" placeholder="••••••••">
-      </div>
-      <button class="btn-submit" id="btn-login-oficial">Iniciar Sesión</button>
-      <div class="status-msg" id="login-status"></div>
-    </div>
+    <script>
+        document.getElementById('formLogin').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const errorDiv = document.getElementById('mensajeError');
 
-    <!-- Panel Casual -->
-    <div id="form-casual" class="form-section">
-      <p style="font-size: 0.9rem; color: #94A3B8; margin-bottom: 20px; line-height: 1.5;">
-        Accede rápidamente sin contraseña.<br> Tu progreso y puntos (Elo) no se guardarán en el Salón de la Fama.
-      </p>
-      <div class="input-group">
-        <label>Elige un Apodo</label>
-        <input type="text" id="guest-name" placeholder="Ej. RetadorAnonimo" maxlength="15">
-      </div>
-      <button class="btn-casual" id="btn-login-casual">Entrar a la Arena</button>
-    </div>
-  </div>
+            try {
+                // REEMPLAZA ESTA URL CON LA DE TU WORKER DE CLOUDFLARE
+                const respuesta = await fetch('https://TU-WORKER.mago-del-caos.workers.dev/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
+                });
 
-  <script>
-    const API_URL = "https://juvenchess-api.adrian-camelot32.workers.dev";
+                const data = await respuesta.json();
 
-    const btnOficial = document.getElementById('tab-oficial');
-    const btnCasual = document.getElementById('tab-casual');
-    const formOficial = document.getElementById('form-oficial');
-    const formCasual = document.getElementById('form-casual');
-    const statusMsg = document.getElementById('login-status');
-
-    btnOficial.addEventListener('click', () => {
-      btnOficial.classList.add('active'); btnCasual.classList.remove('active');
-      formOficial.classList.add('active'); formCasual.classList.remove('active');
-      statusMsg.textContent = "";
-    });
-
-    btnCasual.addEventListener('click', () => {
-      btnCasual.classList.add('active'); btnOficial.classList.remove('active');
-      formCasual.classList.add('active'); formOficial.classList.remove('active');
-      statusMsg.textContent = "";
-    });
-
-    document.getElementById('btn-login-oficial').addEventListener('click', async () => {
-      const user = document.getElementById('username').value.trim();
-      const pass = document.getElementById('password').value.trim();
-
-      if(!user || !pass) return statusMsg.textContent = "Por favor ingresa usuario y contraseña.";
-
-      statusMsg.style.color = "#FACC15";
-      statusMsg.textContent = "Verificando credenciales...";
-
-      try {
-        const response = await fetch(`${API_URL}/login`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: user, password: pass })
+                if (respuesta.ok) {
+                    // Si el login es correcto, guardamos el usuario y vamos al menú principal
+                    localStorage.setItem('username', user.toUpperCase());
+                    window.location.href = 'index.html'; // o menu.html según donde pusiste el menú
+                } else {
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerText = data.error || 'Usuario o contraseña incorrectos';
+                }
+            } catch (error) {
+                // Fallback temporal si la API no está conectada (para que pruebes tu clave de admin)
+                if(user === 'admin' && pass === 'cifra1234') {
+                    localStorage.setItem('username', 'ADMIN');
+                    window.location.href = 'index.html';
+                } else {
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerText = 'Error de conexión con el servidor.';
+                }
+            }
         });
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-          sessionStorage.setItem('juvenchess_session', JSON.stringify({
-            id: data.user.id_usuario, username: data.user.username,
-            rol: data.user.rol, puntuacion: data.user.puntuacion
-          }));
-          statusMsg.style.color = "#10B981";
-          statusMsg.textContent = "¡Conexión establecida! Redirigiendo...";
-          
-          setTimeout(() => {
-            window.location.href = data.user.rol === 'admin' ? 'admin.html' : 'menu.html';
-          }, 800);
-        } else {
-          statusMsg.style.color = "#EF4444";
-          statusMsg.textContent = data.error || "Credenciales incorrectas.";
-        }
-      } catch (error) {
-        statusMsg.style.color = "#EF4444";
-        statusMsg.textContent = "Error al conectar con el servidor.";
-      }
-    });
-
-    document.getElementById('btn-login-casual').addEventListener('click', () => {
-      sessionStorage.setItem('juvenchess_session', JSON.stringify({
-        id: 'tmp_' + Date.now(), username: document.getElementById('guest-name').value.trim() || 'Invitado',
-        rol: 'casual', puntuacion: 0
-      }));
-      window.location.href = 'menu.html';
-    });
-  </script>
+    </script>
 </body>
 </html>
-
