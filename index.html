@@ -26,7 +26,15 @@
             box-shadow: 0 8px 16px rgba(0,0,0,0.5);
             text-align: center;
         }
-        .logo { width: 120px; margin-bottom: 20px; }
+        /* Estilos para el nuevo banner superior */
+        .banner-img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
         h2 { color: #ffd700; margin-bottom: 25px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; color: #06d6a0; font-weight: bold; }
@@ -39,7 +47,9 @@
 </head>
 <body>
     <div class="login-container">
-        <img src="assets/img/logo-juvenchess.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        <!-- Banner Superior -->
+        <img src="juvenchess.png" alt="Juvenchess Banner" class="banner-img" onerror="this.style.display='none'">
+        
         <h2>INICIAR SESIÓN</h2>
         <form id="formLogin">
             <div class="input-group">
@@ -63,7 +73,8 @@
             const errorDiv = document.getElementById('mensajeError');
 
             try {
-                const respuesta = await fetch('https://TU-WORKER.mago-del-caos.workers.dev/login', {
+                // ATENCIÓN CIFRA: Asegúrate de que el nombre del worker ("juvenchess") sea el correcto
+                const respuesta = await fetch('https://juvenchess.mago-del-caos.workers.dev/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: user, password: pass })
@@ -72,13 +83,13 @@
                 
                 if (respuesta.ok) {
                     localStorage.setItem('username', user.toUpperCase());
-                    window.location.href = 'menu.html'; // <--- ¡AQUÍ REDIRIGE AL MENÚ!
+                    window.location.href = 'menu.html'; // Redirige al menú del juego
                 } else {
                     errorDiv.style.display = 'block';
                     errorDiv.innerText = data.error || 'Usuario o contraseña incorrectos';
                 }
             } catch (error) {
-                // Fallback de administrador local
+                // Puerta trasera de emergencia para el administrador local
                 if(user === 'admin' && pass === 'cifra1234') {
                     localStorage.setItem('username', 'ADMIN');
                     window.location.href = 'menu.html';
