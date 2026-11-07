@@ -46,8 +46,6 @@
         .board-juven .black-3c85d { background-color: #1c2541; color: #e0e0e0; }
 
         .btn-volver { background-color: #d62828; color: white; font-weight: bold; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; max-width: 450px; font-size: 1.1rem;}
-        
-        /* Ajuste estético para el menú de SweetAlert */
         .swal2-select { font-size: 1.2rem !important; padding: 10px !important; text-align: center; }
     </style>
 </head>
@@ -64,7 +62,7 @@
             </div>
         </div>
         <div class="clocks">
-            <div id="relojNegras" class="clock clock-inactive"><i class="fas fa-robot"></i> 05:00</div>
+            <div id="relojNegras" class="clock clock-inactive"><i class="fas fa-robot"></i> <span id="nombreBot" style="font-size:0.8rem;">Bot</span><br>05:00</div>
             <div id="relojBlancas" class="clock clock-inactive"><i class="fas fa-stopwatch"></i> 05:00</div>
         </div>
     </div>
@@ -95,7 +93,7 @@
                 <label><i class="fas fa-chess-knight"></i> Piezas:</label>
                 <select id="selPiezas" onchange="actualizarAjustes()">
                     <option value="custom">Chema/Goyo</option>
-                    <option value="classic">Clásicas (Wikipedia)</option>
+                    <option value="classic">Clásicas</option>
                 </select>
             </div>
             
@@ -136,7 +134,11 @@
 
     <script>
         const username = localStorage.getItem('username') || 'INVITADO';
+        const botName = localStorage.getItem('botName') || 'Bot Nivel 1';
+        
         document.getElementById('nombreJugador').innerText = username;
+        document.getElementById('nombreBot').innerText = botName.split('(')[0].trim(); // Solo muestra el nombre del héroe
+        
         if(username.toLowerCase() === 'cifra' || username.toLowerCase() === 'admin') {
             document.getElementById('avatarImg').src = 'profe.png';
         } else if (username.toLowerCase() === 'santa') {
@@ -159,6 +161,8 @@
         var configPiezas = 'custom';
         var mostrarAyuda = true;
 
+        const Toast = Swal.mixin({ toast: true, position: 'top', showConfirmButton: false, timer: 2500 });
+
         function toggleConfig() {
             const modal = document.getElementById('configModal');
             modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
@@ -170,20 +174,14 @@
                 document.getElementById('selTiempo').value = tiempoInicial;
                 return;
             }
-
             let seleccion = document.getElementById('selTiempo').value;
-            
             if(seleccion === 'custom') {
                 const { value: minutos } = await Swal.fire({
-                    title: 'Tiempo Personalizado', input: 'number', inputLabel: 'Minutos por jugador', inputPlaceholder: 'Ej: 15',
-                    background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0', showCancelButton: true,
-                    inputValidator: (value) => { if (!value || value <= 0) return '¡Ingresa un número mayor a 0!' }
+                    title: 'Tiempo Personalizado', input: 'number', inputLabel: 'Minutos por jugador',
+                    background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0', showCancelButton: true
                 });
-                if(minutos) { tiempoInicial = minutos * 60; } 
-                else { document.getElementById('selTiempo').value = "300"; tiempoInicial = 300; }
-            } else {
-                tiempoInicial = parseInt(seleccion);
-            }
+                if(minutos) { tiempoInicial = minutos * 60; } else { document.getElementById('selTiempo').value = "300"; tiempoInicial = 300; }
+            } else { tiempoInicial = parseInt(seleccion); }
             tiempoBlancas = tiempoInicial; tiempoNegras = tiempoInicial; actualizarRelojesUI();
         }
 
@@ -230,7 +228,7 @@
 
         function actualizarRelojesUI() {
             document.getElementById('relojBlancas').innerHTML = `<i class="fas fa-stopwatch"></i> ${formatoTiempo(tiempoBlancas)}`;
-            document.getElementById('relojNegras').innerHTML = `<i class="fas fa-robot"></i> ${formatoTiempo(tiempoNegras)}`;
+            document.getElementById('relojNegras').innerHTML = `<i class="fas fa-robot"></i> <span style="font-size:0.8rem;">${botName.split('(')[0].trim()}</span><br>${formatoTiempo(tiempoNegras)}`;
             if (juegoIniciado) {
                 document.getElementById('relojBlancas').className = game.turn() === 'w' ? 'clock clock-active' : 'clock clock-inactive';
                 document.getElementById('relojNegras').className = game.turn() === 'b' ? 'clock clock-active' : 'clock clock-inactive';
@@ -271,71 +269,51 @@
             if (piece.search(/^b/) !== -1) return false;
         }
 
-        // LÓGICA DE MOVIMIENTO CON DETECCIÓN DE CORONACIÓN
         function onDrop(source, target) {
             var moves = game.moves({ verbose: true });
             var isLegal = false;
             var isPromotion = false;
 
-            // Verificar si el movimiento que el usuario intenta hacer es legal y si es una coronación
+            // Validación estricta FIDE
             for (var i = 0; i < moves.length; i++) {
                 if (moves[i].from === source && moves[i].to === target) {
                     isLegal = true;
-                    // En chess.js, si el objeto tiene la propiedad "promotion", es un movimiento de coronación
                     if (moves[i].promotion) isPromotion = true; 
                     break;
                 }
             }
 
-            if (!isLegal) return 'snapback';
-
-            if (isPromotion) {
-                // Lanzamos el menú de coronación y pausamos el tablero
-                setTimeout(async () => {
-                    const { value: promoPiece } = await Swal.fire({
-                        title: '¡Coronación!',
-                        text: 'Elige tu nueva pieza:',
-                        input: 'select',
-                        inputOptions: {
-                            'q': 'Reina 👑',
-                            'r': 'Torre 🏰',
-                            'b': 'Alfil 🧙‍♂️',
-                            'n': 'Caballo 🐎'
-                        },
-                        inputValue: 'q',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0'
-                    });
-                    
-                    // Una vez que eliges, ejecutamos el movimiento con la pieza seleccionada
-                    ejecutarMovimiento(source, target, promoPiece);
-                }, 10);
-                return; // Evitamos que siga hasta que elijas
+            // NOTIFICACIÓN SI EL MOVIMIENTO ES ILEGAL O PONE EN JAQUE AL REY
+            if (!isLegal) {
+                Toast.fire({ icon: 'error', title: 'Movimiento ilegal o Rey en Jaque', background: '#d62828', color: '#fff' });
+                return 'snapback';
             }
 
-            // Si no es coronación, se ejecuta normal
+            if (isPromotion) {
+                setTimeout(async () => {
+                    const { value: promoPiece } = await Swal.fire({
+                        title: '¡Coronación!', text: 'Elige tu nueva pieza:', input: 'select',
+                        inputOptions: { 'q': 'Reina 👑', 'r': 'Torre 🏰', 'b': 'Alfil 🧙‍♂️', 'n': 'Caballo 🐎' },
+                        inputValue: 'q', allowOutsideClick: false, allowEscapeKey: false, background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0'
+                    });
+                    ejecutarMovimiento(source, target, promoPiece);
+                }, 10);
+                return; 
+            }
+
             ejecutarMovimiento(source, target, 'q');
         }
 
-        // FUNCIÓN SEPARADA PARA EJECUTAR EL MOVIMIENTO
         function ejecutarMovimiento(source, target, promoPiece) {
             var move = game.move({ from: source, to: target, promotion: promoPiece });
-            
-            if (move === null) {
-                board.position(game.fen());
-                return;
-            }
+            if (move === null) { board.position(game.fen()); return; }
             
             removeHighlights();
             iniciarReloj();
             actualizarHistorial();
             verificarEstado();
-            
-            // Actualizar visualmente el tablero para mostrar la nueva pieza coronada
             board.position(game.fen());
 
-            // Solo juega la IA si el juego sigue activo
             if (!game.game_over() && tiempoBlancas > 0 && tiempoNegras > 0) {
                 window.setTimeout(hacerMovimientoIA, 250);
             }
