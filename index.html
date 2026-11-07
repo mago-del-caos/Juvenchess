@@ -26,7 +26,6 @@
             box-shadow: 0 8px 16px rgba(0,0,0,0.5);
             text-align: center;
         }
-        /* Estilos para el nuevo banner superior */
         .banner-img {
             width: 100%;
             height: auto;
@@ -35,14 +34,56 @@
             border: 2px solid #ffd700;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
-        h2 { color: #ffd700; margin-bottom: 25px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-        .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group label { display: block; margin-bottom: 8px; color: #06d6a0; font-weight: bold; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid #3a506b; border-radius: 8px; background-color: #0b132b; color: #ffffff; box-sizing: border-box; font-size: 1rem; }
-        .input-group input:focus { outline: none; border-color: #ffd700; }
-        .btn-login { background-color: #06d6a0; color: #0b132b; font-size: 1.2rem; font-weight: bold; padding: 15px; border: none; border-radius: 8px; cursor: pointer; width: 100%; transition: background 0.3s; }
-        .btn-login:hover { background-color: #05b383; }
-        .error-msg { color: #d62828; margin-top: 15px; font-weight: bold; display: none; }
+        h2 { 
+            color: #ffd700; 
+            margin-bottom: 25px; 
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); 
+        }
+        .input-group { 
+            margin-bottom: 20px; 
+            text-align: left; 
+        }
+        .input-group label { 
+            display: block; 
+            margin-bottom: 8px; 
+            color: #06d6a0; 
+            font-weight: bold; 
+        }
+        .input-group input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #3a506b; 
+            border-radius: 8px; 
+            background-color: #0b132b; 
+            color: #ffffff; 
+            box-sizing: border-box; 
+            font-size: 1rem; 
+        }
+        .input-group input:focus { 
+            outline: none; 
+            border-color: #ffd700; 
+        }
+        .btn-login { 
+            background-color: #06d6a0; 
+            color: #0b132b; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            width: 100%; 
+            transition: background 0.3s; 
+        }
+        .btn-login:hover { 
+            background-color: #05b383; 
+        }
+        .error-msg { 
+            color: #d62828; 
+            margin-top: 15px; 
+            font-weight: bold; 
+            display: none; 
+        }
     </style>
 </head>
 <body>
@@ -51,6 +92,7 @@
         <img src="juvenchess.png" alt="Juvenchess Banner" class="banner-img" onerror="this.style.display='none'">
         
         <h2>INICIAR SESIÓN</h2>
+        
         <form id="formLogin">
             <div class="input-group">
                 <label for="username">Usuario</label>
@@ -68,28 +110,30 @@
     <script>
         document.getElementById('formLogin').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
             const errorDiv = document.getElementById('mensajeError');
 
             try {
-                // ATENCIÓN CIFRA: Asegúrate de que el nombre del worker ("juvenchess") sea el correcto
-                const respuesta = await fetch('https://juvenchess.mago-del-caos.workers.dev/login', {
+                // Conexión exacta a tu Worker en Cloudflare
+                const respuesta = await fetch('https://juvenchess-api.adrian-camelot32.workers.dev/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: user, password: pass })
                 });
+                
                 const data = await respuesta.json();
                 
                 if (respuesta.ok) {
-                    localStorage.setItem('username', user.toUpperCase());
-                    window.location.href = 'menu.html'; // Redirige al menú del juego
+                    localStorage.setItem('username', data.username || user.toUpperCase());
+                    window.location.href = 'menu.html';
                 } else {
                     errorDiv.style.display = 'block';
                     errorDiv.innerText = data.error || 'Usuario o contraseña incorrectos';
                 }
             } catch (error) {
-                // Puerta trasera de emergencia para el administrador local
+                // Puerta trasera de emergencia
                 if(user === 'admin' && pass === 'cifra1234') {
                     localStorage.setItem('username', 'ADMIN');
                     window.location.href = 'menu.html';
