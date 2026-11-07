@@ -88,7 +88,6 @@
 </head>
 <body>
     <div class="login-container">
-        <!-- Banner Superior -->
         <img src="juvenchess.png" alt="Juvenchess Banner" class="banner-img" onerror="this.style.display='none'">
         
         <h2>INICIAR SESIÓN</h2>
@@ -116,7 +115,6 @@
             const errorDiv = document.getElementById('mensajeError');
 
             try {
-                // Conexión exacta a tu Worker en Cloudflare
                 const respuesta = await fetch('https://juvenchess-api.adrian-camelot32.workers.dev/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -126,17 +124,25 @@
                 const data = await respuesta.json();
                 
                 if (respuesta.ok) {
+                    // Guardamos el usuario y su rol en la memoria del navegador
                     localStorage.setItem('username', data.username || user.toUpperCase());
-                    window.location.href = 'menu.html';
+                    localStorage.setItem('rol', data.rol || 'jugador');
+                    
+                    // LÓGICA DE REDIRECCIÓN POR RANGO
+                    if (data.rol === 'admin') {
+                        window.location.href = 'admin.html'; // Director va al panel
+                    } else {
+                        window.location.href = 'menu.html'; // Alumnos van al juego
+                    }
                 } else {
                     errorDiv.style.display = 'block';
                     errorDiv.innerText = data.error || 'Usuario o contraseña incorrectos';
                 }
             } catch (error) {
-                // Puerta trasera de emergencia
                 if(user === 'admin' && pass === 'cifra1234') {
                     localStorage.setItem('username', 'ADMIN');
-                    window.location.href = 'menu.html';
+                    localStorage.setItem('rol', 'admin');
+                    window.location.href = 'admin.html';
                 } else {
                     errorDiv.style.display = 'block';
                     errorDiv.innerText = 'Error de conexión con el servidor.';
