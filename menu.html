@@ -53,7 +53,7 @@
         <!-- SECCIÓN IZQUIERDA: Perfil y Modos de Juego -->
         <div class="panel">
             <div class="profile-header">
-                <img src="zapata.png" alt="Avatar" class="avatar" id="menuAvatar">
+                <img src="zapata.png" alt="Avatar" class="avatar" id="menuAvatar" onerror="this.src='zapata.png'">
                 <div class="profile-info">
                     <h3 id="menuUsername">Cargando...</h3>
                     <div class="elo-badge"><i class="fas fa-star"></i> ELO: <span id="menuElo">---</span></div>
@@ -69,7 +69,7 @@
                     <i class="fas fa-puzzle-piece"></i> Entrenar con Puzzles
                 </button>
                 <button class="btn-mode btn-online" onclick="modoOnline()">
-                    <i class="fas fa-globe"></i> Partida Online (Próximamente)
+                    <i class="fas fa-globe"></i> Partida Online
                 </button>
             </div>
 
@@ -190,7 +190,6 @@
             });
 
             if (botSeleccionado) {
-                // Guardamos el bot para que el tablero sepa contra quién juegas
                 localStorage.setItem('botName', bots[botSeleccionado]);
                 window.location.href = 'tablero.html';
             }
@@ -202,12 +201,7 @@
         }
 
         function modoOnline() {
-            Swal.fire({
-                title: 'Juego en Línea',
-                text: 'El lobby multijugador está en construcción. ¡Estará listo para el próximo torneo!',
-                icon: 'info',
-                background: '#1c2541', color: '#fff', confirmButtonColor: '#ff9f1c'
-            });
+            window.location.href = 'online.html';
         }
 
         function cerrarSesion() {
