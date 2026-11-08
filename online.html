@@ -14,12 +14,14 @@
         /* PANTALLA DE LOBBY */
         #lobbyContainer { width: 100%; max-width: 600px; display: block; }
         .lobby-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
-        .lobby-title { color: #06d6a0; border-bottom: 1px solid #3a506b; padding-bottom: 10px; margin-top: 0; }
+        .lobby-title { color: #06d6a0; border-bottom: 1px solid #3a506b; padding-bottom: 10px; margin-top: 0; display: flex; justify-content: space-between; align-items: center; }
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #3a506b; background: #0b132b; border-radius: 6px; margin-bottom: 8px; }
         .btn-crear { background-color: #ff9f1c; color: #0b132b; font-weight: bold; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1.1rem; margin-bottom: 15px; transition: 0.3s;}
         .btn-crear:hover { background-color: #e88e15; }
-        .btn-jugar { background-color: #06d6a0; color: #0b132b; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .btn-reanudar { background-color: #ffd700; color: #0b132b; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .btn-jugar { background-color: #06d6a0; color: #0b132b; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-jugar:hover { background-color: #05b383; }
+        .btn-reanudar { background-color: #ffd700; color: #0b132b; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.3s;}
+        .btn-reanudar:hover { background-color: #e6c200; }
 
         /* PANTALLA DE TABLERO */
         #boardContainer { width: 100%; max-width: 450px; display: none; }
@@ -42,6 +44,8 @@
         .board-juven .black-3c85d { background-color: #1c2541; color: #e0e0e0; }
 
         .swal2-select { font-size: 1.1rem !important; padding: 10px !important; text-align: center; }
+        .radar-icon { animation: pulse 2s infinite; color: #06d6a0; font-size: 0.9rem; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -60,7 +64,10 @@
         </div>
 
         <div class="lobby-panel">
-            <h3 class="lobby-title"><i class="fas fa-users"></i> Retos Disponibles</h3>
+            <h3 class="lobby-title">
+                <span><i class="fas fa-users"></i> Retos Disponibles</span>
+                <span class="radar-icon" title="Buscando retos automáticamente"><i class="fas fa-satellite-dish"></i> Buscando...</span>
+            </h3>
             <div id="listaEspera">
                 <div style="color: #9aa5ce; text-align: center;">Buscando rivales...</div>
             </div>
@@ -119,13 +126,14 @@
 
         let partidaId = null;
         let miColor = 'w';
-        let pollingInterval = null;
+        let pollingInterval = null;      // Para actualizar el tablero durante el juego
+        let lobbyInterval = null;        // NUEVO: Radar automático para buscar retos
         var configPiezas = 'custom';
 
         var board = null;
         var game = new Chess();
 
-        // ------------------ SISTEMA DE LOBBY ------------------
+        // ------------------ SISTEMA DE LOBBY CON RADAR ------------------
         async function cargarLobby() {
             try {
                 const res = await fetch(`${API_URL}/online/lobby?user=${username}`);
@@ -133,14 +141,14 @@
                 
                 // Renderizar Retos Disponibles
                 let htmlEspera = '';
-                if(data.esperando.length === 0) htmlEspera = '<div style="color: #9aa5ce; text-align: center;">Nadie está buscando partida. ¡Crea un reto!</div>';
+                if(data.esperando.length === 0) htmlEspera = '<div style="color: #9aa5ce; text-align: center;">Nadie está buscando partida en este momento.</div>';
                 data.esperando.forEach(p => {
                     let tiempo = p.tiempo / 60;
-                    let juegaCon = p.color_creador === 'w' ? 'Negras' : 'Blancas'; // Tú juegas con lo opuesto
+                    let juegaCon = p.color_creador === 'w' ? 'Negras' : 'Blancas'; 
                     htmlEspera += `
                         <div class="list-item">
                             <div><i class="fas fa-user"></i> <b>${p.creador}</b> <br> <small style="color:#06d6a0;">⏱️ ${tiempo} min | Tú serás: ${juegaCon}</small></div>
-                            <button class="btn-jugar" onclick="unirseReto('${p.id}', '${p.color_creador}')">Jugar</button>
+                            <button class="btn-jugar" onclick="unirseReto('${p.id}', '${p.color_creador}')"><i class="fas fa-play"></i> Jugar</button>
                         </div>`;
                 });
                 document.getElementById('listaEspera').innerHTML = htmlEspera;
@@ -154,13 +162,28 @@
                     htmlActivas += `
                         <div class="list-item">
                             <div><i class="fas fa-chess-knight"></i> vs <b>${rival}</b> <br> <small style="color:#ffd700;">Partida en progreso</small></div>
-                            <button class="btn-reanudar" onclick="reanudarPartida('${p.id}', '${micolor}', '${p.creador}', '${p.oponente}')">Reanudar</button>
+                            <button class="btn-reanudar" onclick="reanudarPartida('${p.id}', '${micolor}', '${p.creador}', '${p.oponente}')"><i class="fas fa-play-circle"></i> Reanudar</button>
                         </div>`;
                 });
                 document.getElementById('listaActivas').innerHTML = htmlActivas;
 
             } catch(e) {
-                console.error(e);
+                console.error("Error conectando con el radar del lobby.");
+            }
+        }
+
+        // Enciende el radar que busca retos cada 3 segundos
+        function activarRadarLobby() {
+            if (!lobbyInterval) {
+                lobbyInterval = setInterval(cargarLobby, 3000);
+            }
+        }
+
+        // Apaga el radar para no consumir datos mientras juegas
+        function desactivarRadarLobby() {
+            if (lobbyInterval) {
+                clearInterval(lobbyInterval);
+                lobbyInterval = null;
             }
         }
 
@@ -194,7 +217,10 @@
                 
                 partidaId = data.id;
                 miColor = formValues.color;
-                prepararTablero("Esperando rival...", "Esperando...");
+                
+                // Forzamos que actualice su propio lobby antes de entrar para que vea su reto
+                await cargarLobby();
+                prepararTablero("Esperando rival...", "Nadie se ha unido. Dile a un amigo.");
             }
         }
 
@@ -239,6 +265,9 @@
         }
 
         function prepararTablero(nombreRival, estadoText) {
+            // Apagar el radar del lobby
+            desactivarRadarLobby();
+            
             document.getElementById('lobbyContainer').style.display = 'none';
             document.getElementById('boardContainer').style.display = 'block';
             
@@ -247,14 +276,21 @@
             document.getElementById('estadoJuego').innerText = estadoText;
 
             board.orientation(miColor === 'w' ? 'white' : 'black');
+            
+            // Iniciar sincronización del tablero
             pollingInterval = setInterval(monitorearPartida, 1500);
         }
 
         function salirAlLobby() {
+            // Detener el juego
             clearInterval(pollingInterval);
+            
+            // Volver a encender el lobby
             document.getElementById('boardContainer').style.display = 'none';
             document.getElementById('lobbyContainer').style.display = 'block';
-            cargarLobby(); // Refrescar lista al volver
+            
+            cargarLobby(); 
+            activarRadarLobby(); // Reactivar el radar automático
         }
 
         // ------------------ SINCRONIZACIÓN EN TIEMPO REAL ------------------
@@ -264,7 +300,7 @@
                 const data = await res.json();
                 
                 if (data.estado === 'esperando') {
-                    document.getElementById('estadoJuego').innerText = "Esperando que alguien acepte...";
+                    document.getElementById('estadoJuego').innerText = "Esperando que alguien se una...";
                 } else if (data.estado === 'jugando') {
                     // Actualizar nombre del rival si apenas se unió
                     document.getElementById('jugadorRival').innerText = miColor === 'w' ? data.oponente : data.creador;
@@ -295,7 +331,7 @@
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: partidaId, fen: game.fen() })
             });
-            document.getElementById('estadoJuego').innerText = "Turno del Rival";
+            document.getElementById('estadoJuego').innerText = "Enviando movimiento...";
         }
 
         function onDragStart(source, piece) {
@@ -311,8 +347,9 @@
         };
         board = Chessboard('board', config);
         
-        // Iniciar el lobby al cargar la página
+        // Al cargar la página: cargar lista una vez e iniciar el radar
         cargarLobby();
+        activarRadarLobby();
     </script>
 </body>
 </html>
