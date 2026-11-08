@@ -7,19 +7,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-box { background-color: #1c2541; padding: 30px; border-radius: 12px; border: 2px solid #3a506b; box-shadow: 0 8px 16px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 350px; }
-        h1 { color: #ffd700; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        .subtitle { color: #06d6a0; margin-bottom: 25px; font-weight: bold; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #3a506b; background-color: #0b132b; color: white; box-sizing: border-box; font-size: 1rem;}
+        body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; box-sizing: border-box; }
+        .login-box { background-color: #1c2541; padding: 25px; border-radius: 12px; border: 2px solid #3a506b; box-shadow: 0 8px 16px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 380px; }
+        
+        /* IMAGEN DE PORTADA */
+        .portada-container { width: 100%; height: 140px; border-radius: 8px; overflow: hidden; margin-bottom: 15px; border: 2px solid #06d6a0; background-color: #0b132b; }
+        .portada-img { width: 100%; height: 100%; object-fit: cover; }
+
+        h1 { color: #ffd700; margin: 5px 0; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.6rem; }
+        .subtitle { color: #06d6a0; margin-bottom: 20px; font-weight: bold; font-size: 0.95rem; }
+        
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #3a506b; background-color: #0b132b; color: white; box-sizing: border-box; font-size: 1rem;}
         button { background-color: #06d6a0; color: #0b132b; font-weight: bold; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1.1rem; margin-top: 15px; transition: 0.3s; }
         button:hover { background-color: #05b383; }
-        .loader { display: none; margin-top: 15px; color: #ffd700; font-weight: bold; }
+        .loader { display: none; margin-top: 15px; color: #ffd700; font-weight: bold; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
     <div class="login-box">
+        <!-- Imagen de portada restaurada (asegúrate de tener una imagen llamada portada.png o cámbiala por el nombre de tu archivo) -->
+        <div class="portada-container">
+            <img src="portada.png" alt="Portada JuvenChess" class="portada-img" onerror="this.src='zapata.png'">
+        </div>
+
         <h1><i class="fas fa-chess-knight"></i> JUVENCHESS</h1>
         <div class="subtitle">Instituto Juventud</div>
         
@@ -33,19 +44,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
     <script>
-        // 1. ESCUDO CONTRA EL BUCLE (PING-PONG)
+        // Escudo anti-bucle de redirección
         const currentUser = localStorage.getItem('username');
         const rol = localStorage.getItem('rol');
         
-        // Solo te manda al menú si el nombre existe, NO está en blanco, NO es null, y NO es la palabra undefined.
         if (currentUser && currentUser.trim() !== '' && currentUser !== 'undefined' && currentUser !== 'null') {
-            if (rol === 'admin') {
+            if (rol === 'admin' || rol === 'Admin') {
                 window.location.href = 'admin.html';
             } else {
                 window.location.href = 'menu.html';
             }
         } else {
-            // Si encuentra basura, limpia la memoria inmediatamente para detener el bucle
             localStorage.clear();
         }
 
@@ -72,7 +81,6 @@
                 document.getElementById('loader').style.display = 'none';
 
                 if (response.ok && data.success) {
-                    // Limpieza total antes de guardar nuevos datos
                     localStorage.clear();
                     
                     localStorage.setItem('username', data.username);
@@ -81,7 +89,6 @@
                         localStorage.setItem('avatar', data.avatar);
                     }
                     
-                    // Redirección segura
                     if (data.rol === 'admin' || data.rol === 'Admin') {
                         window.location.href = 'admin.html';
                     } else {
@@ -92,11 +99,10 @@
                 }
             } catch (error) {
                 document.getElementById('loader').style.display = 'none';
-                Swal.fire('Error de conexión', 'No se pudo contactar con Cloudflare. Verifica tu internet.', 'error');
+                Swal.fire('Error de conexión', 'No se pudo contactar con Cloudflare.', 'error');
             }
         }
         
-        // Atajo para presionar "Enter" y hacer login rápido
         document.getElementById('password').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') login();
         });
