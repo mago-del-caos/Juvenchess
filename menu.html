@@ -10,41 +10,38 @@
         body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .dashboard { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; max-width: 1000px; width: 100%; }
         
-        /* Paneles */
-        .panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
+        .panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); margin-bottom: 20px;}
         h2 { color: #ffd700; margin-top: 0; border-bottom: 2px solid #3a506b; padding-bottom: 10px; font-size: 1.5rem; text-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
         
-        /* Perfil de Usuario */
-        .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; background: #0b132b; padding: 15px; border-radius: 8px; border: 1px solid #06d6a0; }
+        /* Perfil de Usuario y Vitrina */
+        .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; background: #0b132b; padding: 15px; border-radius: 8px; border: 1px solid #06d6a0; }
         .avatar { width: 60px; height: 60px; border-radius: 50%; border: 3px solid #06d6a0; object-fit: cover; }
         .profile-info h3 { margin: 0; color: #ffffff; font-size: 1.4rem; text-transform: uppercase; }
         .elo-badge { display: inline-block; background: #ffd700; color: #0b132b; padding: 3px 10px; border-radius: 20px; font-weight: bold; margin-top: 5px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+        
+        /* TROFEOS DEL USUARIO */
+        .vitrina { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .trofeo-card { background: linear-gradient(135deg, #ffd700 0%, #e6a800 100%); color: #0b132b; padding: 10px; border-radius: 8px; font-weight: bold; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3); flex: 1; min-width: 200px; animation: brillocopa 2s infinite alternate;}
+        .trofeo-card i { font-size: 2rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .trofeo-text { line-height: 1.2; }
+        @keyframes brillocopa { from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); } to { box-shadow: 0 0 20px rgba(255, 215, 0, 1); } }
 
-        /* Botones de Modos de Juego */
         .game-modes { display: grid; grid-template-columns: 1fr; gap: 15px; }
         .btn-mode { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 15px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; color: #0b132b; }
-        .btn-bots { background: #06d6a0; }
-        .btn-bots:hover { background: #05b383; transform: scale(1.02); }
-        .btn-puzzles { background: #ffd700; }
-        .btn-puzzles:hover { background: #e6c200; transform: scale(1.02); }
-        .btn-online { background: #ff9f1c; }
-        .btn-online:hover { background: #e88e15; transform: scale(1.02); }
+        .btn-bots { background: #06d6a0; } .btn-bots:hover { background: #05b383; transform: scale(1.02); }
+        .btn-puzzles { background: #ffd700; } .btn-puzzles:hover { background: #e6c200; transform: scale(1.02); }
+        .btn-online { background: #ff9f1c; } .btn-online:hover { background: #e88e15; transform: scale(1.02); }
 
-        /* Listas Laterales (Top 10 y Torneos) */
-        .list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #3a506b; }
-        .list-item:last-child { border-bottom: none; }
+        .list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #3a506b; font-size: 0.95rem; }
         .rank { font-weight: bold; color: #06d6a0; width: 25px; }
         .score { color: #ffd700; font-family: monospace; font-size: 1.1rem; }
-        
-        .tournament-badge { background: #d62828; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .tournament-badge { background: #06d6a0; color: #0b132b; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-top: 5px; display: inline-block;}
+        .tournament-details { color: #9aa5ce; font-size: 0.85rem; margin-top: 3px; }
 
         .btn-logout { background-color: #d62828; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; transition: 0.3s; }
         .btn-logout:hover { background-color: #a81d1d; }
-
-        /* Responsivo para celulares */
-        @media (max-width: 768px) {
-            .dashboard { grid-template-columns: 1fr; }
-        }
+        
+        @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -60,38 +57,29 @@
                 </div>
             </div>
 
+            <!-- CONTENEDOR DE TROFEOS -->
+            <div class="vitrina" id="misTrofeos"></div>
+
             <h2><i class="fas fa-chess"></i> Modos de Juego</h2>
             <div class="game-modes">
-                <button class="btn-mode btn-bots" onclick="seleccionarBot()">
-                    <i class="fas fa-robot"></i> Jugar contra Bots (Revolución)
-                </button>
-                <button class="btn-mode btn-puzzles" onclick="irAPuzzles()">
-                    <i class="fas fa-puzzle-piece"></i> Entrenar con Puzzles
-                </button>
-                <button class="btn-mode btn-online" onclick="modoOnline()">
-                    <i class="fas fa-globe"></i> Partida Online
-                </button>
+                <button class="btn-mode btn-bots" onclick="seleccionarBot()"><i class="fas fa-robot"></i> Jugar contra Bots Históricos</button>
+                <button class="btn-mode btn-puzzles" onclick="irAPuzzles()"><i class="fas fa-puzzle-piece"></i> Entrenar con Puzzles</button>
+                <button class="btn-mode btn-online" onclick="modoOnline()"><i class="fas fa-globe"></i> Arena Online</button>
             </div>
 
-            <button class="btn-logout" onclick="cerrarSesion()">
-                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-            </button>
+            <button class="btn-logout" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
         </div>
 
         <!-- SECCIÓN DERECHA: Top 10 y Torneos -->
         <div class="sidebar">
-            <div class="panel" style="margin-bottom: 20px;">
-                <h2><i class="fas fa-trophy"></i> Top 10 Jugadores</h2>
-                <div id="top10List">
-                    <div style="text-align: center; color: #9aa5ce;">Cargando clasificaciones...</div>
-                </div>
-            </div>
-
             <div class="panel">
-                <h2><i class="fas fa-flag-checkered"></i> Torneos Activos</h2>
-                <div id="torneosList">
-                    <div style="text-align: center; color: #9aa5ce;">Buscando torneos...</div>
-                </div>
+                <h2><i class="fas fa-flag-checkered"></i> Torneos Próximos</h2>
+                <div id="torneosList"><div style="color: #9aa5ce; text-align: center;">Buscando torneos...</div></div>
+            </div>
+            
+            <div class="panel">
+                <h2><i class="fas fa-trophy"></i> Top 10 Global</h2>
+                <div id="top10List"><div style="color: #9aa5ce; text-align: center;">Cargando clasificaciones...</div></div>
             </div>
         </div>
     </div>
@@ -100,116 +88,80 @@
     <script>
         const API_URL = 'https://juvenchess-api.adrian-camelot32.workers.dev';
         const username = localStorage.getItem('username');
-
-        // Redirigir si no ha iniciado sesión
         if(!username) window.location.href = 'index.html';
 
-        // Configurar Perfil
         document.getElementById('menuUsername').innerText = username;
-        if(username.toLowerCase() === 'cifra' || username.toLowerCase() === 'admin') {
-            document.getElementById('menuAvatar').src = 'profe.png';
-        } else if (username.toLowerCase() === 'santa') {
-            document.getElementById('menuAvatar').src = 'santa.png';
-        } else if (username.toLowerCase() === 'chemita') {
-            document.getElementById('menuAvatar').src = 'chemapeon.png';
-        }
+        if(username.toLowerCase() === 'cifra' || username.toLowerCase() === 'admin') document.getElementById('menuAvatar').src = 'profe.png';
+        else if (username.toLowerCase() === 'santa') document.getElementById('menuAvatar').src = 'santa.png';
+        else if (username.toLowerCase() === 'chemita') document.getElementById('menuAvatar').src = 'chemapeon.png';
 
-        // CARGAR DATOS DEL SERVIDOR (Elo, Top 10, Torneos)
         async function cargarDatos() {
             try {
-                // 1. Cargar Usuarios
+                // 1. TOP 10 y ELO
                 const resUsr = await fetch(`${API_URL}/admin/usuarios`);
                 const usuarios = await resUsr.json();
-                
-                // Encontrar el Elo del jugador actual
                 const miUsuario = usuarios.find(u => u.username.toLowerCase() === username.toLowerCase());
                 if(miUsuario) document.getElementById('menuElo').innerText = miUsuario.puntuacion;
 
-                // Generar Top 10
-                const top10 = usuarios.slice(0, 10);
                 let htmlTop = '';
-                top10.forEach((u, index) => {
+                usuarios.slice(0, 10).forEach((u, index) => {
                     let corona = index === 0 ? '<i class="fas fa-crown" style="color:gold;"></i> ' : '';
-                    htmlTop += `
-                        <div class="list-item">
-                            <div><span class="rank">${index + 1}.</span> ${corona}${u.username}</div>
-                            <div class="score">${u.puntuacion}</div>
-                        </div>`;
+                    htmlTop += `<div class="list-item"><div><span class="rank">${index + 1}.</span> ${corona}${u.username}</div><div class="score">${u.puntuacion}</div></div>`;
                 });
                 document.getElementById('top10List').innerHTML = htmlTop;
 
-                // 2. Cargar Torneos
+                // 2. TORNEOS Y TROFEOS
                 const resTor = await fetch(`${API_URL}/admin/torneos`);
                 const torneos = await resTor.json();
+                
                 let htmlTorneos = '';
-                if(torneos.length === 0) {
-                    htmlTorneos = '<div style="color: #9aa5ce;">No hay torneos activos.</div>';
-                } else {
-                    torneos.forEach(t => {
-                        htmlTorneos += `
-                            <div class="list-item" style="flex-direction: column; gap: 5px;">
-                                <div><i class="fas fa-chess-tournament"></i> <b>${t.nombre}</b></div>
-                                <div><span class="tournament-badge">${t.fecha}</span> <span style="color:#06d6a0; font-size:0.9rem;">${t.estado}</span></div>
+                let htmlTrofeos = '';
+                let tieneTrofeos = false;
+
+                torneos.forEach(t => {
+                    // Si el usuario es el ganador de este torneo, agregarle la Copa
+                    if (t.ganador && t.ganador.toLowerCase() === username.toLowerCase()) {
+                        tieneTrofeos = true;
+                        htmlTrofeos += `
+                            <div class="trofeo-card" title="Ganador del torneo">
+                                <i class="fas fa-trophy"></i>
+                                <div class="trofeo-text">
+                                    <div style="font-size: 0.8rem; text-transform: uppercase;">Campeón</div>
+                                    <div style="font-size: 1rem;">${t.nombre}</div>
+                                    <div style="font-size: 0.7rem;">${t.fecha}</div>
+                                </div>
                             </div>`;
-                    });
-                }
+                    }
+
+                    // Lista de torneos Abiertos en el panel derecho
+                    if (t.estado === 'Abierto') {
+                        htmlTorneos += `
+                            <div class="list-item" style="flex-direction: column; align-items: flex-start;">
+                                <div style="color: white; font-weight: bold;"><i class="fas fa-chess-tournament"></i> ${t.nombre}</div>
+                                <div class="tournament-badge"><i class="far fa-calendar-alt"></i> ${t.fecha} a las ${t.hora}</div>
+                                <div class="tournament-details"><i class="fas fa-chess-board"></i> ${t.modalidad} | <i class="fas fa-users"></i> ${t.participantes} plazas</div>
+                            </div>`;
+                    }
+                });
+
+                if(htmlTorneos === '') htmlTorneos = '<div style="color: #9aa5ce; text-align: center;">No hay torneos programados.</div>';
                 document.getElementById('torneosList').innerHTML = htmlTorneos;
+                
+                if (tieneTrofeos) document.getElementById('misTrofeos').innerHTML = htmlTrofeos;
 
-            } catch (error) {
-                console.error("Error cargando datos del servidor", error);
-            }
+            } catch (error) { console.error("Error", error); }
         }
 
-        // SELECCIÓN DE BOTS (Revolución Mexicana)
         async function seleccionarBot() {
-            const bots = {
-                '1': 'Francisco I. Madero (Nivel 1 - Principiante)',
-                '2': 'Adelita (Nivel 2 - Principiante)',
-                '3': 'Hermanos Flores Magón (Nivel 3 - Básico)',
-                '4': 'Carmen Serdán (Nivel 4 - Básico)',
-                '5': 'Pascual Orozco (Nivel 5 - Intermedio)',
-                '6': 'Plutarco Elías Calles (Nivel 6 - Intermedio)',
-                '7': 'Venustiano Carranza (Nivel 7 - Avanzado)',
-                '8': 'Álvaro Obregón (Nivel 8 - Avanzado)',
-                '9': 'Felipe Ángeles (Nivel 9 - Experto Artillero)',
-                '10': 'Emiliano Zapata (Nivel 10 - Estratega del Sur)',
-                '11': 'Pancho Villa (Nivel 11 - Centauro del Norte)'
-            };
-
-            const { value: botSeleccionado } = await Swal.fire({
-                title: 'Elige tu Oponente Histórico',
-                input: 'select',
-                inputOptions: bots,
-                inputPlaceholder: 'Selecciona un héroe...',
-                showCancelButton: true,
-                confirmButtonColor: '#06d6a0',
-                cancelButtonColor: '#d62828',
-                confirmButtonText: '¡A la Batalla!',
-                cancelButtonText: 'Cancelar',
-                background: '#1c2541', color: '#fff'
-            });
-
-            if (botSeleccionado) {
-                localStorage.setItem('botName', bots[botSeleccionado]);
-                window.location.href = 'tablero.html';
-            }
+            const bots = { '1': 'Francisco I. Madero (Principiante)', '2': 'Adelita (Principiante)', '3': 'Hermanos Flores Magón (Básico)', '4': 'Carmen Serdán (Básico)', '5': 'Pascual Orozco (Intermedio)', '6': 'Plutarco Elías Calles (Intermedio)', '7': 'Venustiano Carranza (Avanzado)', '8': 'Álvaro Obregón (Avanzado)', '9': 'Felipe Ángeles (Experto)', '10': 'Emiliano Zapata (Estratega)', '11': 'Pancho Villa (Centauro)' };
+            const { value: botSeleccionado } = await Swal.fire({ title: 'Elige tu Oponente Histórico', input: 'select', inputOptions: bots, showCancelButton: true, confirmButtonColor: '#06d6a0', cancelButtonColor: '#d62828', confirmButtonText: '¡A la Batalla!', background: '#1c2541', color: '#fff' });
+            if (botSeleccionado) { localStorage.setItem('botName', bots[botSeleccionado]); window.location.href = 'tablero.html'; }
         }
 
-        // REDIRECCIONES
-        function irAPuzzles() {
-            window.location.href = 'puzzles.html';
-        }
+        function irAPuzzles() { window.location.href = 'puzzles.html'; }
+        function modoOnline() { window.location.href = 'online.html'; }
+        function cerrarSesion() { localStorage.clear(); window.location.href = 'index.html'; }
 
-        function modoOnline() {
-            window.location.href = 'online.html';
-        }
-
-        function cerrarSesion() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
-
-        // Iniciar
         cargarDatos();
     </script>
 </body>
