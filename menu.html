@@ -13,13 +13,11 @@
         .panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); margin-bottom: 20px;}
         h2 { color: #ffd700; margin-top: 0; border-bottom: 2px solid #3a506b; padding-bottom: 10px; font-size: 1.5rem; text-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
         
-        /* Perfil de Usuario y Vitrina */
         .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; background: #0b132b; padding: 15px; border-radius: 8px; border: 1px solid #06d6a0; }
         .avatar { width: 60px; height: 60px; border-radius: 50%; border: 3px solid #06d6a0; object-fit: cover; }
         .profile-info h3 { margin: 0; color: #ffffff; font-size: 1.4rem; text-transform: uppercase; }
         .elo-badge { display: inline-block; background: #ffd700; color: #0b132b; padding: 3px 10px; border-radius: 20px; font-weight: bold; margin-top: 5px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
         
-        /* TROFEOS DEL USUARIO */
         .vitrina { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         .trofeo-card { background: linear-gradient(135deg, #ffd700 0%, #e6a800 100%); color: #0b132b; padding: 10px; border-radius: 8px; font-weight: bold; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3); flex: 1; min-width: 200px; animation: brillocopa 2s infinite alternate;}
         .trofeo-card i { font-size: 2rem; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
@@ -37,6 +35,10 @@
         .score { color: #ffd700; font-family: monospace; font-size: 1.1rem; }
         .tournament-badge { background: #06d6a0; color: #0b132b; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-top: 5px; display: inline-block;}
         .tournament-details { color: #9aa5ce; font-size: 0.85rem; margin-top: 3px; }
+        
+        .btn-inscribir { background-color: #ff9f1c; color: #0b132b; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 5px; }
+        .btn-inscribir:hover { background-color: #e88e15; }
+        .btn-inscrito { background-color: #3a506b; color: #06d6a0; border: 1px solid #06d6a0; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: default; margin-top: 5px; }
 
         .btn-logout { background-color: #d62828; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; transition: 0.3s; }
         .btn-logout:hover { background-color: #a81d1d; }
@@ -47,7 +49,6 @@
 <body>
 
     <div class="dashboard">
-        <!-- SECCIÓN IZQUIERDA: Perfil y Modos de Juego -->
         <div class="panel">
             <div class="profile-header">
                 <img src="zapata.png" alt="Avatar" class="avatar" id="menuAvatar" onerror="this.src='zapata.png'">
@@ -57,7 +58,6 @@
                 </div>
             </div>
 
-            <!-- CONTENEDOR DE TROFEOS -->
             <div class="vitrina" id="misTrofeos"></div>
 
             <h2><i class="fas fa-chess"></i> Modos de Juego</h2>
@@ -70,7 +70,6 @@
             <button class="btn-logout" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
         </div>
 
-        <!-- SECCIÓN DERECHA: Top 10 y Torneos -->
         <div class="sidebar">
             <div class="panel">
                 <h2><i class="fas fa-flag-checkered"></i> Torneos Próximos</h2>
@@ -110,7 +109,11 @@
                 });
                 document.getElementById('top10List').innerHTML = htmlTop;
 
-                // 2. TORNEOS Y TROFEOS
+                // 2. OBTENER MIS INSCRIPCIONES
+                const resMisIns = await fetch(`${API_URL}/online/torneos/mis-inscripciones?user=${username}`);
+                const misInscripciones = await resMisIns.json();
+
+                // 3. TORNEOS Y TROFEOS
                 const resTor = await fetch(`${API_URL}/admin/torneos`);
                 const torneos = await resTor.json();
                 
@@ -119,7 +122,6 @@
                 let tieneTrofeos = false;
 
                 torneos.forEach(t => {
-                    // Si el usuario es el ganador de este torneo, agregarle la Copa
                     if (t.ganador && t.ganador.toLowerCase() === username.toLowerCase()) {
                         tieneTrofeos = true;
                         htmlTrofeos += `
@@ -133,13 +135,20 @@
                             </div>`;
                     }
 
-                    // Lista de torneos Abiertos en el panel derecho
                     if (t.estado === 'Abierto') {
+                        // Verificar si el usuario ya está inscrito en este torneo
+                        let btnInscripcion = misInscripciones.includes(t.id) 
+                            ? `<button class="btn-inscrito"><i class="fas fa-check"></i> Inscrito</button>` 
+                            : `<button class="btn-inscribir" onclick="inscribirse(${t.id}, '${t.nombre}')"><i class="fas fa-bullseye"></i> Inscribirse</button>`;
+
                         htmlTorneos += `
                             <div class="list-item" style="flex-direction: column; align-items: flex-start;">
-                                <div style="color: white; font-weight: bold;"><i class="fas fa-chess-tournament"></i> ${t.nombre}</div>
+                                <div style="color: white; font-weight: bold; display: flex; justify-content: space-between; width: 100%;">
+                                    <span><i class="fas fa-chess-tournament"></i> ${t.nombre}</span>
+                                </div>
                                 <div class="tournament-badge"><i class="far fa-calendar-alt"></i> ${t.fecha} a las ${t.hora}</div>
                                 <div class="tournament-details"><i class="fas fa-chess-board"></i> ${t.modalidad} | <i class="fas fa-users"></i> ${t.participantes} plazas</div>
+                                ${btnInscripcion}
                             </div>`;
                     }
                 });
@@ -150,6 +159,24 @@
                 if (tieneTrofeos) document.getElementById('misTrofeos').innerHTML = htmlTrofeos;
 
             } catch (error) { console.error("Error", error); }
+        }
+
+        async function inscribirse(torneoId, nombreTorneo) {
+            try {
+                const res = await fetch(`${API_URL}/online/torneos/inscribir`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ torneo_id: torneoId, username: username })
+                });
+
+                if (res.ok) {
+                    Swal.fire({ title: '¡Inscrito!', text: `Te has registrado en el torneo "${nombreTorneo}".`, icon: 'success', background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' });
+                    cargarDatos(); // Recargar para mostrar el botón de "Inscrito"
+                } else {
+                    Swal.fire({ title: 'Error', text: 'Ya estás inscrito o hubo un problema.', icon: 'error', background: '#1c2541', color: '#fff' });
+                }
+            } catch(e) {
+                Swal.fire({ title: 'Error', text: 'Fallo de conexión.', icon: 'error', background: '#1c2541', color: '#fff' });
+            }
         }
 
         async function seleccionarBot() {
