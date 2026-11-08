@@ -13,8 +13,13 @@
         .panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); margin-bottom: 20px;}
         h2 { color: #ffd700; margin-top: 0; border-bottom: 2px solid #3a506b; padding-bottom: 10px; font-size: 1.5rem; text-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
         
+        /* PERFIL Y FOTO DE USUARIO */
         .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; background: #0b132b; padding: 15px; border-radius: 8px; border: 1px solid #06d6a0; }
-        .avatar { width: 60px; height: 60px; border-radius: 50%; border: 3px solid #06d6a0; object-fit: cover; }
+        .avatar-container { position: relative; width: 70px; height: 70px; cursor: pointer; }
+        .avatar { width: 100%; height: 100%; border-radius: 50%; border: 3px solid #06d6a0; object-fit: cover; }
+        .avatar-edit { position: absolute; bottom: 0; right: 0; background: #ff9f1c; color: #0b132b; border-radius: 50%; width: 25px; height: 25px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.5); transition: 0.3s; }
+        .avatar-container:hover .avatar-edit { transform: scale(1.1); background: #e88e15; }
+        
         .profile-info h3 { margin: 0; color: #ffffff; font-size: 1.4rem; text-transform: uppercase; }
         .elo-badge { display: inline-block; background: #ffd700; color: #0b132b; padding: 3px 10px; border-radius: 20px; font-weight: bold; margin-top: 5px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
         
@@ -30,8 +35,8 @@
         .btn-puzzles { background: #ffd700; } .btn-puzzles:hover { background: #e6c200; transform: scale(1.02); }
         .btn-online { background: #ff9f1c; } .btn-online:hover { background: #e88e15; transform: scale(1.02); }
 
-        .list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #3a506b; font-size: 0.95rem; }
-        .rank { font-weight: bold; color: #06d6a0; width: 25px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #3a506b; font-size: 0.95rem; }
+        .rank { font-weight: bold; color: #06d6a0; width: 25px; display:inline-block; }
         .score { color: #ffd700; font-family: monospace; font-size: 1.1rem; }
         .tournament-badge { background: #06d6a0; color: #0b132b; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-top: 5px; display: inline-block;}
         .tournament-details { color: #9aa5ce; font-size: 0.85rem; margin-top: 3px; }
@@ -51,7 +56,13 @@
     <div class="dashboard">
         <div class="panel">
             <div class="profile-header">
-                <img src="zapata.png" alt="Avatar" class="avatar" id="menuAvatar" onerror="this.src='zapata.png'">
+                <!-- SECCIÓN DE FOTO EDITABLE -->
+                <div class="avatar-container" title="Cambiar foto de perfil" onclick="document.getElementById('fileAvatar').click()">
+                    <img src="zapata.png" alt="Avatar" class="avatar" id="menuAvatar" onerror="this.src='zapata.png'">
+                    <div class="avatar-edit"><i class="fas fa-camera"></i></div>
+                </div>
+                <input type="file" id="fileAvatar" style="display:none" accept="image/png, image/jpeg, image/gif">
+                
                 <div class="profile-info">
                     <h3 id="menuUsername">Cargando...</h3>
                     <div class="elo-badge"><i class="fas fa-star"></i> ELO: <span id="menuElo">---</span></div>
@@ -90,65 +101,104 @@
         if(!username) window.location.href = 'index.html';
 
         document.getElementById('menuUsername').innerText = username;
-        if(username.toLowerCase() === 'cifra' || username.toLowerCase() === 'admin') document.getElementById('menuAvatar').src = 'profe.png';
-        else if (username.toLowerCase() === 'santa') document.getElementById('menuAvatar').src = 'santa.png';
-        else if (username.toLowerCase() === 'chemita') document.getElementById('menuAvatar').src = 'chemapeon.png';
+
+        // --- SISTEMA DE COMPRESIÓN Y SUBIDA DE FOTO ---
+        document.getElementById('fileAvatar').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // Creamos un canvas para comprimir la imagen a un cuadrado de 100x100
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 100; canvas.height = 100;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Recorte tipo "Cover"
+                    const size = Math.min(img.width, img.height);
+                    const x = (img.width - size) / 2;
+                    const y = (img.height - size) / 2;
+                    ctx.drawImage(img, x, y, size, size, 0, 0, 100, 100);
+                    
+                    // Convertir a texto Base64
+                    const base64Avatar = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    // Mostrar carga y enviar a Cloudflare
+                    Swal.fire({ title: 'Actualizando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    
+                    fetch(`${API_URL}/usuarios/avatar`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: username, avatar: base64Avatar })
+                    }).then(res => res.json()).then(data => {
+                        if(data.success) {
+                            localStorage.setItem('avatar', base64Avatar);
+                            document.getElementById('menuAvatar').src = base64Avatar;
+                            cargarDatos(); // Refrescar el top 10
+                            Swal.fire({ title: '¡Éxito!', text: 'Foto de perfil actualizada.', icon: 'success', background: '#1c2541', color: '#fff', timer: 1500 });
+                        }
+                    });
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
 
         async function cargarDatos() {
             try {
-                // 1. TOP 10 y ELO
+                // 1. TOP 10, ELO y RECUPERAR AVATAR
                 const resUsr = await fetch(`${API_URL}/admin/usuarios`);
                 const usuarios = await resUsr.json();
+                
                 const miUsuario = usuarios.find(u => u.username.toLowerCase() === username.toLowerCase());
-                if(miUsuario) document.getElementById('menuElo').innerText = miUsuario.puntuacion;
+                if(miUsuario) {
+                    document.getElementById('menuElo').innerText = miUsuario.puntuacion;
+                    // Sincronizar foto de perfil si venimos de otra computadora
+                    const foto = miUsuario.avatar || 'zapata.png';
+                    localStorage.setItem('avatar', foto);
+                    document.getElementById('menuAvatar').src = foto;
+                }
 
                 let htmlTop = '';
                 usuarios.slice(0, 10).forEach((u, index) => {
                     let corona = index === 0 ? '<i class="fas fa-crown" style="color:gold;"></i> ' : '';
-                    htmlTop += `<div class="list-item"><div><span class="rank">${index + 1}.</span> ${corona}${u.username}</div><div class="score">${u.puntuacion}</div></div>`;
+                    let img = u.avatar || 'zapata.png';
+                    htmlTop += `
+                        <div class="list-item">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span class="rank">${index + 1}.</span> 
+                                <img src="${img}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid #06d6a0;">
+                                <span>${corona}${u.username}</span>
+                            </div>
+                            <div class="score">${u.puntuacion}</div>
+                        </div>`;
                 });
                 document.getElementById('top10List').innerHTML = htmlTop;
 
-                // 2. OBTENER MIS INSCRIPCIONES (Blindado)
+                // 2. OBTENER MIS INSCRIPCIONES
                 let misInscripciones = [];
                 try {
                     const resMisIns = await fetch(`${API_URL}/online/torneos/mis-inscripciones?user=${username}`);
-                    if (resMisIns.ok) {
-                        const dataIns = await resMisIns.json();
-                        if (Array.isArray(dataIns)) misInscripciones = dataIns;
-                    }
-                } catch(e) {
-                    console.log("No se pudo cargar la tabla de inscripciones.");
-                }
+                    if (resMisIns.ok) { const dataIns = await resMisIns.json(); if (Array.isArray(dataIns)) misInscripciones = dataIns; }
+                } catch(e) {}
 
                 // 3. TORNEOS Y TROFEOS
                 const resTor = await fetch(`${API_URL}/admin/torneos`);
                 const torneos = await resTor.json();
                 
-                let htmlTorneos = '';
-                let htmlTrofeos = '';
-                let tieneTrofeos = false;
+                let htmlTorneos = ''; let htmlTrofeos = ''; let tieneTrofeos = false;
 
                 if (Array.isArray(torneos)) {
                     torneos.forEach(t => {
                         if (t.ganador && t.ganador.toLowerCase() === username.toLowerCase()) {
                             tieneTrofeos = true;
-                            htmlTrofeos += `
-                                <div class="trofeo-card" title="Ganador del torneo">
-                                    <i class="fas fa-trophy"></i>
-                                    <div class="trofeo-text">
-                                        <div style="font-size: 0.8rem; text-transform: uppercase;">Campeón</div>
-                                        <div style="font-size: 1rem;">${t.nombre}</div>
-                                        <div style="font-size: 0.7rem;">${t.fecha}</div>
-                                    </div>
-                                </div>`;
+                            htmlTrofeos += `<div class="trofeo-card" title="Ganador del torneo"><i class="fas fa-trophy"></i><div class="trofeo-text"><div style="font-size: 0.8rem; text-transform: uppercase;">Campeón</div><div style="font-size: 1rem;">${t.nombre}</div><div style="font-size: 0.7rem;">${t.fecha}</div></div></div>`;
                         }
-
                         if (t.estado === 'Abierto') {
                             let btnInscripcion = misInscripciones.includes(t.id) 
                                 ? `<button class="btn-inscrito"><i class="fas fa-check"></i> Inscrito</button>` 
                                 : `<button class="btn-inscribir" onclick="inscribirse(${t.id}, '${t.nombre}')"><i class="fas fa-bullseye"></i> Inscribirse</button>`;
-
                             htmlTorneos += `
                                 <div class="list-item" style="flex-direction: column; align-items: flex-start;">
                                     <div style="color: white; font-weight: bold; display: flex; justify-content: space-between; width: 100%;">
@@ -161,34 +211,19 @@
                         }
                     });
                 }
-
                 if(htmlTorneos === '') htmlTorneos = '<div style="color: #9aa5ce; text-align: center;">No hay torneos programados.</div>';
                 document.getElementById('torneosList').innerHTML = htmlTorneos;
-                
                 if (tieneTrofeos) document.getElementById('misTrofeos').innerHTML = htmlTrofeos;
 
-            } catch (error) { 
-                console.error("Error", error); 
-                document.getElementById('torneosList').innerHTML = '<div style="color: #ff4d4d; text-align: center;">Error al conectar con la base de datos.</div>';
-            }
+            } catch (error) { document.getElementById('torneosList').innerHTML = '<div style="color: #ff4d4d; text-align: center;">Error al conectar con la base de datos.</div>'; }
         }
 
         async function inscribirse(torneoId, nombreTorneo) {
             try {
-                const res = await fetch(`${API_URL}/online/torneos/inscribir`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ torneo_id: torneoId, username: username })
-                });
-
-                if (res.ok) {
-                    Swal.fire({ title: '¡Inscrito!', text: `Te has registrado en el torneo "${nombreTorneo}".`, icon: 'success', background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' });
-                    cargarDatos(); 
-                } else {
-                    Swal.fire({ title: 'Error', text: 'Ya estás inscrito o hubo un problema de conexión con el servidor.', icon: 'error', background: '#1c2541', color: '#fff' });
-                }
-            } catch(e) {
-                Swal.fire({ title: 'Error', text: 'Fallo de conexión.', icon: 'error', background: '#1c2541', color: '#fff' });
-            }
+                const res = await fetch(`${API_URL}/online/torneos/inscribir`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ torneo_id: torneoId, username: username }) });
+                if (res.ok) { Swal.fire({ title: '¡Inscrito!', text: `Te has registrado en el torneo "${nombreTorneo}".`, icon: 'success', background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' }); cargarDatos(); } 
+                else { Swal.fire({ title: 'Error', text: 'Ya estás inscrito o hubo un problema de conexión con el servidor.', icon: 'error', background: '#1c2541', color: '#fff' }); }
+            } catch(e) { Swal.fire({ title: 'Error', text: 'Fallo de conexión.', icon: 'error', background: '#1c2541', color: '#fff' }); }
         }
 
         async function seleccionarBot() {
