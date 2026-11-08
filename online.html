@@ -44,6 +44,8 @@
         .swal2-select { font-size: 1.1rem !important; padding: 10px !important; text-align: center; }
         .radar-icon { animation: pulse 2s infinite; color: #06d6a0; font-size: 0.9rem; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        
+        .error-msg { color: #ff4d4d; font-weight: bold; text-align: center; padding: 10px; border: 1px solid #ff4d4d; border-radius: 5px; background: rgba(255, 77, 77, 0.1); }
     </style>
 </head>
 <body>
@@ -116,36 +118,70 @@
 
         async function cargarLobby() {
             try {
-                // SOLUCIÓN: Le agregamos &t=${Date.now()} para evitar la caché del navegador.
                 const res = await fetch(`${API_URL}/online/lobby?user=${username}&t=${Date.now()}`);
+                
+                // Si la conexión falla (ej. error 500 del servidor), atrapamos el texto real
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    mostrarErrorEnPantalla(`Error del Servidor (${res.status}): ${errorText}`);
+                    return;
+                }
+
                 const data = await res.json();
                 
+                // Si el servidor envía un error JSON manejado por nosotros
+                if (data.error) {
+                    mostrarErrorEnPantalla(data.error);
+                    return;
+                }
+                
+                // Procesar lista de espera de forma segura
+                const esperando = data.esperando || [];
                 let htmlEspera = '';
-                if(data.esperando.length === 0) htmlEspera = '<div style="color: #9aa5ce; text-align: center;">Nadie está buscando partida en este momento.</div>';
-                data.esperando.forEach(p => {
-                    let tiempo = p.tiempo / 60;
-                    let juegaCon = p.color_creador === 'w' ? 'Negras' : 'Blancas'; 
-                    htmlEspera += `
-                        <div class="list-item">
-                            <div><i class="fas fa-user"></i> <b>${p.creador}</b> <br> <small style="color:#06d6a0;">⏱️ ${tiempo} min | Tú serás: ${juegaCon}</small></div>
-                            <button class="btn-jugar" onclick="unirseReto('${p.id}', '${p.color_creador}')"><i class="fas fa-play"></i> Jugar</button>
-                        </div>`;
-                });
+                if(esperando.length === 0) {
+                    htmlEspera = '<div style="color: #9aa5ce; text-align: center;">Nadie está buscando partida en este momento.</div>';
+                } else {
+                    esperando.forEach(p => {
+                        let tiempo = p.tiempo / 60;
+                        let juegaCon = p.color_creador === 'w' ? 'Negras' : 'Blancas'; 
+                        htmlEspera += `
+                            <div class="list-item">
+                                <div><i class="fas fa-user"></i> <b>${p.creador}</b> <br> <small style="color:#06d6a0;">⏱️ ${tiempo} min | Tú serás: ${juegaCon}</small></div>
+                                <button class="btn-jugar" onclick="unirseReto('${p.id}', '${p.color_creador}')"><i class="fas fa-play"></i> Jugar</button>
+                            </div>`;
+                    });
+                }
                 document.getElementById('listaEspera').innerHTML = htmlEspera;
 
+                // Procesar partidas activas de forma segura
+                const activas = data.activas || [];
                 let htmlActivas = '';
-                if(data.activas.length === 0) htmlActivas = '<div style="color: #9aa5ce; text-align: center;">No tienes partidas en curso.</div>';
-                data.activas.forEach(p => {
-                    let rival = p.creador === username ? p.oponente : p.creador;
-                    let micolor = p.creador === username ? p.color_creador : (p.color_creador === 'w' ? 'b' : 'w');
-                    htmlActivas += `
-                        <div class="list-item">
-                            <div><i class="fas fa-chess-knight"></i> vs <b>${rival}</b> <br> <small style="color:#ffd700;">Partida en progreso</small></div>
-                            <button class="btn-reanudar" onclick="reanudarPartida('${p.id}', '${micolor}', '${p.creador}', '${p.oponente}')"><i class="fas fa-play-circle"></i> Reanudar</button>
-                        </div>`;
-                });
+                if(activas.length === 0) {
+                    htmlActivas = '<div style="color: #9aa5ce; text-align: center;">No tienes partidas en curso.</div>';
+                } else {
+                    activas.forEach(p => {
+                        let rival = p.creador === username ? p.oponente : p.creador;
+                        let micolor = p.creador === username ? p.color_creador : (p.color_creador === 'w' ? 'b' : 'w');
+                        htmlActivas += `
+                            <div class="list-item">
+                                <div><i class="fas fa-chess-knight"></i> vs <b>${rival}</b> <br> <small style="color:#ffd700;">Partida en progreso</small></div>
+                                <button class="btn-reanudar" onclick="reanudarPartida('${p.id}', '${micolor}', '${p.creador}', '${p.oponente}')"><i class="fas fa-play-circle"></i> Reanudar</button>
+                            </div>`;
+                    });
+                }
                 document.getElementById('listaActivas').innerHTML = htmlActivas;
-            } catch(e) { console.error("Error conectando con el radar del lobby."); }
+
+            } catch(e) { 
+                mostrarErrorEnPantalla(`Fallo de conexión o de lectura de datos: ${e.message}`);
+            }
+        }
+
+        // Función auxiliar para imprimir el error en pantalla
+        function mostrarErrorEnPantalla(mensaje) {
+            desactivarRadarLobby(); // Apagamos el radar para que el error no parpadee
+            const errorHtml = `<div class="error-msg"><i class="fas fa-exclamation-triangle"></i> D1/API ERROR:<br>${mensaje}</div>`;
+            document.getElementById('listaEspera').innerHTML = errorHtml;
+            document.getElementById('listaActivas').innerHTML = errorHtml;
         }
 
         function activarRadarLobby() { if (!lobbyInterval) lobbyInterval = setInterval(cargarLobby, 3000); }
@@ -165,6 +201,13 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, tiempo: formValues.tiempo, color: formValues.color })
                 });
+                
+                if(!res.ok) {
+                    const err = await res.text();
+                    Swal.fire({ title: 'Error al crear reto', text: err, icon: 'error', background: '#1c2541', color: '#fff' });
+                    return;
+                }
+
                 const data = await res.json();
                 partidaId = data.id; miColor = formValues.color;
                 
@@ -211,7 +254,6 @@
             document.getElementById('estadoJuego').innerText = estadoText;
             board.orientation(miColor === 'w' ? 'white' : 'black');
             
-            // Sincronización anti-caché del tablero en juego
             pollingInterval = setInterval(monitorearPartida, 1500);
         }
 
@@ -224,7 +266,6 @@
 
         async function monitorearPartida() {
             try {
-                // Sincronización anti-caché durante la partida
                 const res = await fetch(`${API_URL}/online/estado?id=${partidaId}&t=${Date.now()}`);
                 const data = await res.json();
                 
