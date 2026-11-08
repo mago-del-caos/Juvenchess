@@ -4,61 +4,93 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JUVENCHESS | Panel de Control</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         h1 { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        .panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; width: 100%; max-width: 800px; margin-bottom: 20px; }
+        .panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; width: 100%; max-width: 800px; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
         h2 { color: #06d6a0; border-bottom: 1px solid #3a506b; padding-bottom: 10px; }
-        input, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #3a506b; background-color: #0b132b; color: white; box-sizing: border-box; }
-        button { background-color: #06d6a0; color: #0b132b; font-weight: bold; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; width: 100%; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .form-full { grid-column: span 2; }
+        input, select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #3a506b; background-color: #0b132b; color: white; box-sizing: border-box; }
+        button { background-color: #06d6a0; color: #0b132b; font-weight: bold; padding: 12px; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 10px;}
         button:hover { background-color: #05b383; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #0b132b; border-radius: 8px; overflow: hidden; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #3a506b; }
-        th { color: #ffd700; }
-        .btn-salir { background-color: #d62828; color: white; margin-top: 20px; }
+        th { background: #3a506b; color: #ffd700; }
+        
+        .btn-coronar { background-color: #ffd700; color: #0b132b; padding: 5px 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; width: auto; margin:0;}
+        .btn-salir { background-color: #d62828; color: white; margin-top: 20px; max-width: 800px; }
+        
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .form-full { grid-column: span 1; } }
     </style>
 </head>
 <body>
 
-    <h1>PANEL DE CONTROL - DIRECTOR</h1>
+    <h1><i class="fas fa-user-shield"></i> PANEL DE DIRECTOR</h1>
 
     <div class="panel">
-        <h2>Crear Nuevo Alumno/Usuario</h2>
-        <input type="text" id="newUsername" placeholder="Nombre de usuario">
-        <input type="text" id="newPassword" placeholder="Contraseña">
-        <select id="newRol">
-            <!-- AQUÍ ESTÁ LA CORRECCIÓN: Los values ahora coinciden con tu base de datos -->
-            <option value="casual">Jugador Casual</option>
-            <option value="oficial">Jugador Oficial</option>
-            <option value="admin">Administrador</option>
-        </select>
-        <button onclick="crearUsuario()">Registrar Usuario</button>
+        <h2><i class="fas fa-user-plus"></i> Crear Nuevo Alumno</h2>
+        <div class="form-grid">
+            <input type="text" id="newUsername" placeholder="Nombre de usuario">
+            <input type="text" id="newPassword" placeholder="Contraseña">
+            <select id="newRol" class="form-full">
+                <option value="casual">Jugador Casual</option>
+                <option value="oficial">Jugador Oficial</option>
+                <option value="admin">Administrador</option>
+            </select>
+        </div>
+        <button onclick="crearUsuario()">Registrar Alumno</button>
     </div>
 
     <div class="panel">
-        <h2>Crear Torneo</h2>
-        <input type="text" id="torneoNombre" placeholder="Nombre del Torneo (Ej: Torneo Interno FES)">
-        <input type="date" id="torneoFecha">
-        <button onclick="crearTorneo()">Abrir Torneo</button>
+        <h2><i class="fas fa-trophy"></i> Organizar Torneo</h2>
+        <div class="form-grid">
+            <input type="text" id="torneoNombre" class="form-full" placeholder="Nombre (Ej: Torneo Interno FES)">
+            <input type="date" id="torneoFecha">
+            <input type="time" id="torneoHora">
+            <select id="torneoModalidad">
+                <option value="Bala (1 min)">Bala (1 min)</option>
+                <option value="Blitz (5 min)">Blitz (5 min)</option>
+                <option value="Rápido (10 min)">Rápido (10 min)</option>
+                <option value="Clásico (30 min)">Clásico (30 min)</option>
+            </select>
+            <select id="torneoParticipantes">
+                <option value="4">4 Participantes (Semifinales)</option>
+                <option value="8">8 Participantes (Cuartos)</option>
+                <option value="16" selected>16 Participantes (Octavos)</option>
+                <option value="32">32 Participantes</option>
+            </select>
+        </div>
+        <button onclick="crearTorneo()">Abrir Inscripciones de Torneo</button>
     </div>
 
     <div class="panel">
-        <h2>Ranking y Puntuaciones (Elo)</h2>
-        <button onclick="cargarUsuarios()">Actualizar Tabla</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>Usuario</th>
-                    <th>Rol</th>
-                    <th>Elo</th>
-                </tr>
-            </thead>
-            <tbody id="tablaUsuarios"></tbody>
-        </table>
+        <h2><i class="fas fa-flag-checkered"></i> Gestión de Torneos Activos</h2>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>Torneo</th><th>Fecha/Hora</th><th>Modalidad</th><th>Estado</th><th>Acción</th></tr></thead>
+                <tbody id="tablaTorneos"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2><i class="fas fa-list-ol"></i> Ranking Elo de Alumnos</h2>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>Usuario</th><th>Rol</th><th>Elo</th></tr></thead>
+                <tbody id="tablaUsuarios"></tbody>
+            </table>
+        </div>
     </div>
 
     <button class="btn-salir" onclick="cerrarSesion()">Cerrar Sesión</button>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
     <script>
         const API_URL = 'https://juvenchess-api.adrian-camelot32.workers.dev';
 
@@ -67,75 +99,90 @@
             const pass = document.getElementById('newPassword').value;
             const rol = document.getElementById('newRol').value;
             
-            if(!user || !pass) {
-                alert("Por favor, llena tanto el nombre de usuario como la contraseña.");
-                return;
-            }
+            if(!user || !pass) return Swal.fire('Error', 'Llena usuario y contraseña', 'error');
 
             try {
-                const res = await fetch(`${API_URL}/admin/usuarios`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: user, password: pass, rol: rol })
-                });
-                const data = await res.json();
-
+                const res = await fetch(`${API_URL}/admin/usuarios`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: user, password: pass, rol: rol }) });
                 if(res.ok) {
-                    alert('¡Usuario creado exitosamente con 1000 de Elo inicial!');
-                    document.getElementById('newUsername').value = '';
-                    document.getElementById('newPassword').value = '';
-                    cargarUsuarios();
-                } else {
-                    alert('⚠️ Error al crear: ' + data.error);
-                }
-            } catch(e) {
-                alert('⚠️ Error de red al intentar conectar con la base de datos.');
-            }
+                    Swal.fire('¡Éxito!', 'Alumno registrado.', 'success');
+                    document.getElementById('newUsername').value = ''; document.getElementById('newPassword').value = '';
+                    cargarDatos();
+                } else { Swal.fire('Error', 'Usuario ya registrado', 'error'); }
+            } catch(e) { Swal.fire('Error', 'No hay conexión', 'error'); }
         }
 
         async function crearTorneo() {
-            const nombre = document.getElementById('torneoNombre').value;
-            const fecha = document.getElementById('torneoFecha').value;
-            if(!nombre || !fecha) return alert("Llena los datos del torneo");
+            const datos = {
+                nombre: document.getElementById('torneoNombre').value,
+                fecha: document.getElementById('torneoFecha').value,
+                hora: document.getElementById('torneoHora').value,
+                modalidad: document.getElementById('torneoModalidad').value,
+                participantes: document.getElementById('torneoParticipantes').value
+            };
+            if(!datos.nombre || !datos.fecha || !datos.hora) return Swal.fire('Error', 'Llena el nombre, fecha y hora.', 'error');
 
             try {
-                await fetch(`${API_URL}/admin/torneos`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre: nombre, fecha: fecha })
+                await fetch(`${API_URL}/admin/torneos`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos) });
+                Swal.fire('¡Torneo Creado!', 'Ya aparece en la lista de los alumnos.', 'success');
+                cargarDatos();
+            } catch(e) { Swal.fire('Error', 'Fallo al crear torneo', 'error'); }
+        }
+
+        async function coronarGanador(idTorneo, nombreTorneo) {
+            const { value: ganador } = await Swal.fire({
+                title: 'Coronar Campeón',
+                text: `Escribe el usuario que ganó "${nombreTorneo}":`,
+                input: 'text',
+                inputPlaceholder: 'Nombre exacto del usuario (Ej: Peter)',
+                showCancelButton: true, confirmButtonColor: '#ffd700', confirmButtonText: '🏆 Entregar Copa'
+            });
+
+            if (ganador) {
+                await fetch(`${API_URL}/admin/torneos/ganador`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: idTorneo, ganador: ganador })
                 });
-                alert('¡Torneo creado exitosamente!');
-                document.getElementById('torneoNombre').value = '';
-            } catch(e) {
-                alert('Error al crear torneo.');
+                Swal.fire('¡Campeón Coronado!', `${ganador} ha recibido su trofeo.`, 'success');
+                cargarDatos();
             }
         }
 
-        async function cargarUsuarios() {
-            try {
-                const res = await fetch(`${API_URL}/admin/usuarios`);
-                const usuarios = await res.json();
-                const tbody = document.getElementById('tablaUsuarios');
-                tbody.innerHTML = '';
-                
-                usuarios.forEach(u => {
-                    tbody.innerHTML += `<tr>
-                        <td>${u.username}</td>
-                        <td>${u.rol}</td>
-                        <td style="color:#06d6a0; font-weight:bold;">${u.puntuacion}</td>
+        async function cargarDatos() {
+            // Cargar Usuarios
+            const resU = await fetch(`${API_URL}/admin/usuarios`);
+            const usuarios = await resU.json();
+            let htmlU = '';
+            usuarios.forEach(u => htmlU += `<tr><td>${u.username}</td><td>${u.rol}</td><td style="color:#06d6a0; font-weight:bold;">${u.puntuacion}</td></tr>`);
+            document.getElementById('tablaUsuarios').innerHTML = htmlU;
+
+            // Cargar Torneos
+            const resT = await fetch(`${API_URL}/admin/torneos`);
+            const torneos = await resT.json();
+            let htmlT = '';
+            torneos.forEach(t => {
+                if (t.estado === 'Abierto') {
+                    htmlT += `<tr>
+                        <td><b>${t.nombre}</b></td>
+                        <td>${t.fecha} | ${t.hora}</td>
+                        <td>${t.modalidad} (${t.participantes} jug.)</td>
+                        <td style="color:#06d6a0;">${t.estado}</td>
+                        <td><button class="btn-coronar" onclick="coronarGanador(${t.id}, '${t.nombre}')"><i class="fas fa-crown"></i> Coronar</button></td>
                     </tr>`;
-                });
-            } catch(e) {
-                console.log("No se pudo cargar la tabla de usuarios.");
-            }
+                } else {
+                    htmlT += `<tr>
+                        <td style="color:gray;">${t.nombre}</td>
+                        <td style="color:gray;">${t.fecha}</td>
+                        <td style="color:gray;">${t.modalidad}</td>
+                        <td style="color:#ffd700;">Ganador: ${t.ganador} 🏆</td>
+                        <td>Finalizado</td>
+                    </tr>`;
+                }
+            });
+            document.getElementById('tablaTorneos').innerHTML = htmlT;
         }
 
-        function cerrarSesion() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
-
-        cargarUsuarios();
+        function cerrarSesion() { localStorage.clear(); window.location.href = 'index.html'; }
+        cargarDatos();
     </script>
 </body>
 </html>
