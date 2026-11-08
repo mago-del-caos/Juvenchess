@@ -120,7 +120,6 @@
             try {
                 const res = await fetch(`${API_URL}/online/lobby?user=${username}&t=${Date.now()}`);
                 
-                // Si la conexión falla (ej. error 500 del servidor), atrapamos el texto real
                 if (!res.ok) {
                     const errorText = await res.text();
                     mostrarErrorEnPantalla(`Error del Servidor (${res.status}): ${errorText}`);
@@ -129,13 +128,11 @@
 
                 const data = await res.json();
                 
-                // Si el servidor envía un error JSON manejado por nosotros
                 if (data.error) {
                     mostrarErrorEnPantalla(data.error);
                     return;
                 }
                 
-                // Procesar lista de espera de forma segura
                 const esperando = data.esperando || [];
                 let htmlEspera = '';
                 if(esperando.length === 0) {
@@ -153,7 +150,6 @@
                 }
                 document.getElementById('listaEspera').innerHTML = htmlEspera;
 
-                // Procesar partidas activas de forma segura
                 const activas = data.activas || [];
                 let htmlActivas = '';
                 if(activas.length === 0) {
@@ -176,9 +172,8 @@
             }
         }
 
-        // Función auxiliar para imprimir el error en pantalla
         function mostrarErrorEnPantalla(mensaje) {
-            desactivarRadarLobby(); // Apagamos el radar para que el error no parpadee
+            desactivarRadarLobby();
             const errorHtml = `<div class="error-msg"><i class="fas fa-exclamation-triangle"></i> D1/API ERROR:<br>${mensaje}</div>`;
             document.getElementById('listaEspera').innerHTML = errorHtml;
             document.getElementById('listaActivas').innerHTML = errorHtml;
@@ -249,10 +244,17 @@
             desactivarRadarLobby();
             document.getElementById('lobbyContainer').style.display = 'none';
             document.getElementById('boardContainer').style.display = 'block';
+            
             document.getElementById('jugadorLocal').innerText = username;
             document.getElementById('jugadorRival').innerText = nombreRival;
             document.getElementById('estadoJuego').innerText = estadoText;
+
+            // SOLUCIÓN: Dibujar el tablero AHORA que el contenedor es visible
+            var config = { draggable: true, position: 'start', pieceTheme: pieceTheme, onDragStart: onDragStart, onDrop: onDrop, onSnapEnd: onSnapEnd };
+            board = Chessboard('board', config);
+            
             board.orientation(miColor === 'w' ? 'white' : 'black');
+            board.position(game.fen()); // Restaurar piezas si es una partida reanudada
             
             pollingInterval = setInterval(monitorearPartida, 1500);
         }
@@ -298,9 +300,6 @@
 
         function onSnapEnd() { board.position(game.fen()); }
 
-        var config = { draggable: true, position: 'start', pieceTheme: pieceTheme, onDragStart: onDragStart, onDrop: onDrop, onSnapEnd: onSnapEnd };
-        board = Chessboard('board', config);
-        
         cargarLobby(); activarRadarLobby();
     </script>
 </body>
