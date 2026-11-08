@@ -109,9 +109,17 @@
                 });
                 document.getElementById('top10List').innerHTML = htmlTop;
 
-                // 2. OBTENER MIS INSCRIPCIONES
-                const resMisIns = await fetch(`${API_URL}/online/torneos/mis-inscripciones?user=${username}`);
-                const misInscripciones = await resMisIns.json();
+                // 2. OBTENER MIS INSCRIPCIONES (Blindado)
+                let misInscripciones = [];
+                try {
+                    const resMisIns = await fetch(`${API_URL}/online/torneos/mis-inscripciones?user=${username}`);
+                    if (resMisIns.ok) {
+                        const dataIns = await resMisIns.json();
+                        if (Array.isArray(dataIns)) misInscripciones = dataIns;
+                    }
+                } catch(e) {
+                    console.log("No se pudo cargar la tabla de inscripciones.");
+                }
 
                 // 3. TORNEOS Y TROFEOS
                 const resTor = await fetch(`${API_URL}/admin/torneos`);
@@ -121,44 +129,48 @@
                 let htmlTrofeos = '';
                 let tieneTrofeos = false;
 
-                torneos.forEach(t => {
-                    if (t.ganador && t.ganador.toLowerCase() === username.toLowerCase()) {
-                        tieneTrofeos = true;
-                        htmlTrofeos += `
-                            <div class="trofeo-card" title="Ganador del torneo">
-                                <i class="fas fa-trophy"></i>
-                                <div class="trofeo-text">
-                                    <div style="font-size: 0.8rem; text-transform: uppercase;">Campeón</div>
-                                    <div style="font-size: 1rem;">${t.nombre}</div>
-                                    <div style="font-size: 0.7rem;">${t.fecha}</div>
-                                </div>
-                            </div>`;
-                    }
+                if (Array.isArray(torneos)) {
+                    torneos.forEach(t => {
+                        if (t.ganador && t.ganador.toLowerCase() === username.toLowerCase()) {
+                            tieneTrofeos = true;
+                            htmlTrofeos += `
+                                <div class="trofeo-card" title="Ganador del torneo">
+                                    <i class="fas fa-trophy"></i>
+                                    <div class="trofeo-text">
+                                        <div style="font-size: 0.8rem; text-transform: uppercase;">Campeón</div>
+                                        <div style="font-size: 1rem;">${t.nombre}</div>
+                                        <div style="font-size: 0.7rem;">${t.fecha}</div>
+                                    </div>
+                                </div>`;
+                        }
 
-                    if (t.estado === 'Abierto') {
-                        // Verificar si el usuario ya está inscrito en este torneo
-                        let btnInscripcion = misInscripciones.includes(t.id) 
-                            ? `<button class="btn-inscrito"><i class="fas fa-check"></i> Inscrito</button>` 
-                            : `<button class="btn-inscribir" onclick="inscribirse(${t.id}, '${t.nombre}')"><i class="fas fa-bullseye"></i> Inscribirse</button>`;
+                        if (t.estado === 'Abierto') {
+                            let btnInscripcion = misInscripciones.includes(t.id) 
+                                ? `<button class="btn-inscrito"><i class="fas fa-check"></i> Inscrito</button>` 
+                                : `<button class="btn-inscribir" onclick="inscribirse(${t.id}, '${t.nombre}')"><i class="fas fa-bullseye"></i> Inscribirse</button>`;
 
-                        htmlTorneos += `
-                            <div class="list-item" style="flex-direction: column; align-items: flex-start;">
-                                <div style="color: white; font-weight: bold; display: flex; justify-content: space-between; width: 100%;">
-                                    <span><i class="fas fa-chess-tournament"></i> ${t.nombre}</span>
-                                </div>
-                                <div class="tournament-badge"><i class="far fa-calendar-alt"></i> ${t.fecha} a las ${t.hora}</div>
-                                <div class="tournament-details"><i class="fas fa-chess-board"></i> ${t.modalidad} | <i class="fas fa-users"></i> ${t.participantes} plazas</div>
-                                ${btnInscripcion}
-                            </div>`;
-                    }
-                });
+                            htmlTorneos += `
+                                <div class="list-item" style="flex-direction: column; align-items: flex-start;">
+                                    <div style="color: white; font-weight: bold; display: flex; justify-content: space-between; width: 100%;">
+                                        <span><i class="fas fa-chess-tournament"></i> ${t.nombre}</span>
+                                    </div>
+                                    <div class="tournament-badge"><i class="far fa-calendar-alt"></i> ${t.fecha} a las ${t.hora}</div>
+                                    <div class="tournament-details"><i class="fas fa-chess-board"></i> ${t.modalidad} | <i class="fas fa-users"></i> ${t.participantes} plazas</div>
+                                    ${btnInscripcion}
+                                </div>`;
+                        }
+                    });
+                }
 
                 if(htmlTorneos === '') htmlTorneos = '<div style="color: #9aa5ce; text-align: center;">No hay torneos programados.</div>';
                 document.getElementById('torneosList').innerHTML = htmlTorneos;
                 
                 if (tieneTrofeos) document.getElementById('misTrofeos').innerHTML = htmlTrofeos;
 
-            } catch (error) { console.error("Error", error); }
+            } catch (error) { 
+                console.error("Error", error); 
+                document.getElementById('torneosList').innerHTML = '<div style="color: #ff4d4d; text-align: center;">Error al conectar con la base de datos.</div>';
+            }
         }
 
         async function inscribirse(torneoId, nombreTorneo) {
@@ -170,9 +182,9 @@
 
                 if (res.ok) {
                     Swal.fire({ title: '¡Inscrito!', text: `Te has registrado en el torneo "${nombreTorneo}".`, icon: 'success', background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' });
-                    cargarDatos(); // Recargar para mostrar el botón de "Inscrito"
+                    cargarDatos(); 
                 } else {
-                    Swal.fire({ title: 'Error', text: 'Ya estás inscrito o hubo un problema.', icon: 'error', background: '#1c2541', color: '#fff' });
+                    Swal.fire({ title: 'Error', text: 'Ya estás inscrito o hubo un problema de conexión con el servidor.', icon: 'error', background: '#1c2541', color: '#fff' });
                 }
             } catch(e) {
                 Swal.fire({ title: 'Error', text: 'Fallo de conexión.', icon: 'error', background: '#1c2541', color: '#fff' });
