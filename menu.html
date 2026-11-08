@@ -114,12 +114,16 @@
                     canvas.width = 100; canvas.height = 100;
                     const ctx = canvas.getContext('2d');
                     
+                    // Asegurar fondo transparente para PNGs
+                    ctx.clearRect(0, 0, 100, 100);
+                    
                     const size = Math.min(img.width, img.height);
                     const x = (img.width - size) / 2;
                     const y = (img.height - size) / 2;
                     ctx.drawImage(img, x, y, size, size, 0, 0, 100, 100);
                     
-                    const base64Avatar = canvas.toDataURL('image/jpeg', 0.8);
+                    // Guardar como PNG para respetar transparencias
+                    const base64Avatar = canvas.toDataURL('image/png');
                     
                     Swal.fire({ title: 'Guardando foto...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     
@@ -133,12 +137,10 @@
                             cargarDatos();
                             Swal.fire({ title: '¡Éxito!', text: 'Foto actualizada.', icon: 'success', background: '#1c2541', color: '#fff', timer: 1500 });
                         } else {
-                            // Si el servidor responde con error
                             Swal.fire({ title: 'Error', text: data.error || 'No se pudo guardar.', icon: 'error', background: '#1c2541', color: '#fff' });
                         }
                     }).catch(err => {
-                        // Si se rompe la conexión o el servidor no tiene la ruta
-                        Swal.fire({ title: 'Error de servidor', text: 'Asegúrate de que Cloudflare se actualizó.', icon: 'error', background: '#1c2541', color: '#fff' });
+                        Swal.fire({ title: 'Error de servidor', text: 'El servidor rechazó la imagen o no está disponible.', icon: 'error', background: '#1c2541', color: '#fff' });
                     });
                 }
                 img.src = event.target.result;
@@ -148,11 +150,16 @@
 
         async function cargarDatos() {
             try {
-                // SELLO ANTI-CACHÉ (t=${Date.now()}) PARA VER CAMBIOS EN VIVO
+                // 1. CARGA DE USUARIOS BLINDADA
                 const resUsr = await fetch(`${API_URL}/admin/usuarios?t=${Date.now()}`);
                 const usuarios = await resUsr.json();
                 
-                const miUsuario = usuarios.find(u => u.username.toLowerCase() === username.toLowerCase());
+                // Si Cloudflare escupe un error en lugar de una lista, detenemos el choque
+                if (!Array.isArray(usuarios)) {
+                    throw new Error(usuarios.error || "La tabla 'usuarios' no se pudo leer. Revisa la consola.");
+                }
+                
+                const miUsuario = usuarios.find(u => u.username && u.username.toLowerCase() === username.toLowerCase());
                 if(miUsuario) {
                     document.getElementById('menuElo').innerText = miUsuario.puntuacion;
                     const foto = miUsuario.avatar || 'zapata.png';
@@ -176,12 +183,17 @@
                 });
                 document.getElementById('top10List').innerHTML = htmlTop;
 
+                // 2. CARGA DE INSCRIPCIONES BLINDADA
                 let misInscripciones = [];
                 try {
                     const resMisIns = await fetch(`${API_URL}/online/torneos/mis-inscripciones?user=${username}&t=${Date.now()}`);
-                    if (resMisIns.ok) { const dataIns = await resMisIns.json(); if (Array.isArray(dataIns)) misInscripciones = dataIns; }
-                } catch(e) {}
+                    if (resMisIns.ok) { 
+                        const dataIns = await resMisIns.json(); 
+                        if (Array.isArray(dataIns)) misInscripciones = dataIns; 
+                    }
+                } catch(e) { console.warn("Inscripciones no disponibles"); }
 
+                // 3. CARGA DE TORNEOS BLINDADA
                 const resTor = await fetch(`${API_URL}/admin/torneos?t=${Date.now()}`);
                 const torneos = await resTor.json();
                 
@@ -209,11 +221,16 @@
                         }
                     });
                 }
+                
                 if(htmlTorneos === '') htmlTorneos = '<div style="color: #9aa5ce; text-align: center;">No hay torneos programados.</div>';
                 document.getElementById('torneosList').innerHTML = htmlTorneos;
                 if (tieneTrofeos) document.getElementById('misTrofeos').innerHTML = htmlTrofeos;
 
-            } catch (error) { document.getElementById('torneosList').innerHTML = '<div style="color: #ff4d4d; text-align: center;">Error al conectar con la base de datos.</div>'; }
+            } catch (error) { 
+                console.error(error);
+                document.getElementById('torneosList').innerHTML = `<div style="color: #ff4d4d; text-align: center; border: 1px solid #ff4d4d; padding: 10px; border-radius: 5px;"><b>Error D1:</b><br>${error.message}</div>`;
+                document.getElementById('top10List').innerHTML = `<div style="color: #ff4d4d; text-align: center;">Fallo de lectura de datos.</div>`;
+            }
         }
 
         async function inscribirse(torneoId, nombreTorneo) {
