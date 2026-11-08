@@ -9,7 +9,7 @@
     <style>
         body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         h1 { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        .panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; width: 100%; max-width: 900px; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
+        .panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; width: 100%; max-width: 950px; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
         h2 { color: #06d6a0; border-bottom: 1px solid #3a506b; padding-bottom: 10px; }
         
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -22,13 +22,18 @@
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #3a506b; }
         th { background: #3a506b; color: #ffd700; }
         
-        .acciones-container { display: flex; gap: 5px; flex-wrap: wrap;}
-        .btn-ver { background-color: #3a506b; color: #06d6a0; padding: 5px 8px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
-        .btn-coronar { background-color: #ffd700; color: #0b132b; padding: 5px 8px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
-        .btn-elo { background-color: #06d6a0; color: #0b132b; padding: 5px 8px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
-        .btn-borrar { background-color: #d62828; color: white; padding: 5px 8px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
+        /* BOTONES DE ACCIÓN GRANDES Y CON TEXTO */
+        .acciones-container { display: flex; gap: 8px; flex-wrap: wrap;}
+        .btn-ver { background-color: #3a506b; color: #06d6a0; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s;}
+        .btn-ver:hover { background-color: #2a3a4f; }
+        .btn-coronar { background-color: #ffd700; color: #0b132b; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s;}
+        .btn-coronar:hover { background-color: #e6c200; }
+        .btn-elo { background-color: #06d6a0; color: #0b132b; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s;}
+        .btn-elo:hover { background-color: #05b383; }
+        .btn-borrar { background-color: #d62828; color: white; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s;}
+        .btn-borrar:hover { background-color: #a81d1d; }
         
-        .btn-salir { background-color: #d62828; color: white; margin-top: 20px; max-width: 900px; }
+        .btn-salir { background-color: #d62828; color: white; margin-top: 20px; max-width: 950px; }
         
         @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .form-full { grid-column: span 1; } }
     </style>
@@ -100,10 +105,9 @@
         const API_URL = 'https://juvenchess-api.adrian-camelot32.workers.dev';
         const usuarioActual = localStorage.getItem('username');
         if(!usuarioActual || (usuarioActual.toLowerCase() !== 'cifra' && usuarioActual.toLowerCase() !== 'admin')) {
-            window.location.href = 'menu.html'; // Proteger página
+            window.location.href = 'menu.html';
         }
 
-        // --- CREAR ---
         async function crearUsuario() {
             const user = document.getElementById('newUsername').value;
             const pass = document.getElementById('newPassword').value;
@@ -129,7 +133,6 @@
             } catch(e) { Swal.fire('Error', 'Fallo al crear torneo', 'error'); }
         }
 
-        // --- PODERES DE ADMIN ---
         async function eliminarUsuario(username) {
             Swal.fire({
                 title: '¿Expulsar Alumno?', text: `Se borrará la cuenta de ${username} para siempre.`, icon: 'warning',
@@ -164,17 +167,30 @@
                 showCancelButton: true, confirmButtonColor: '#d62828', cancelButtonColor: '#3a506b', confirmButtonText: 'Sí, cancelar', background: '#1c2541', color: '#fff'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    await fetch(`${API_URL}/admin/torneos`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
-                    Swal.fire({title: 'Torneo Cancelado', icon: 'success', background: '#1c2541', color: '#fff'});
-                    cargarDatos();
+                    try {
+                        const res = await fetch(`${API_URL}/admin/torneos`, { 
+                            method: 'DELETE', 
+                            headers: { 'Content-Type': 'application/json' }, 
+                            body: JSON.stringify({ id: Number(id) }) 
+                        });
+                        
+                        if(res.ok) {
+                            Swal.fire({title: 'Torneo Cancelado', icon: 'success', background: '#1c2541', color: '#fff'});
+                            cargarDatos();
+                        } else {
+                            const err = await res.json();
+                            Swal.fire({title: 'Error del Servidor', text: err.error, icon: 'error', background: '#1c2541', color: '#fff'});
+                        }
+                    } catch(e) {
+                        Swal.fire({title: 'Error de Red', text: 'No hay conexión a Cloudflare.', icon: 'error', background: '#1c2541', color: '#fff'});
+                    }
                 }
             });
         }
 
-        // --- FUNCIONES EXISTENTES ---
         async function verInscritos(idTorneo, nombreTorneo) {
             try {
-                const res = await fetch(`${API_URL}/admin/torneos/inscritos?id=${idTorneo}`);
+                const res = await fetch(`${API_URL}/admin/torneos/inscritos?id=${idTorneo}&t=${Date.now()}`);
                 const inscritos = await res.json();
                 if (inscritos.length === 0) { Swal.fire('Inscripciones', `Aún no hay nadie inscrito en "${nombreTorneo}".`, 'info'); return; }
                 let listaHtml = '<ol style="text-align: left; color: #06d6a0;">' + inscritos.map(u => `<li><b style="color:white;">${u}</b></li>`).join('') + '</ol>';
@@ -196,23 +212,21 @@
         }
 
         async function cargarDatos() {
-            // Cargar Usuarios
-            const resU = await fetch(`${API_URL}/admin/usuarios`);
+            const resU = await fetch(`${API_URL}/admin/usuarios?t=${Date.now()}`);
             const usuarios = await resU.json();
             let htmlU = '';
             usuarios.forEach(u => {
                 htmlU += `<tr>
                     <td>${u.username}</td><td>${u.rol}</td><td style="color:#06d6a0; font-weight:bold;">${u.puntuacion}</td>
                     <td class="acciones-container">
-                        <button class="btn-elo" title="Editar Elo" onclick="modificarElo('${u.username}', ${u.puntuacion})"><i class="fas fa-star"></i></button>
-                        <button class="btn-borrar" title="Eliminar Alumno" onclick="eliminarUsuario('${u.username}')"><i class="fas fa-trash"></i></button>
+                        <button class="btn-elo" title="Editar Elo" onclick="modificarElo('${u.username}', ${u.puntuacion})"><i class="fas fa-star"></i> Ajustar Elo</button>
+                        <button class="btn-borrar" title="Eliminar Alumno" onclick="eliminarUsuario('${u.username}')"><i class="fas fa-trash"></i> Borrar</button>
                     </td>
                 </tr>`;
             });
             document.getElementById('tablaUsuarios').innerHTML = htmlU;
 
-            // Cargar Torneos
-            const resT = await fetch(`${API_URL}/admin/torneos`);
+            const resT = await fetch(`${API_URL}/admin/torneos?t=${Date.now()}`);
             const torneos = await resT.json();
             let htmlT = '';
             torneos.forEach(t => {
@@ -220,16 +234,16 @@
                     htmlT += `<tr>
                         <td><b>${t.nombre}</b></td><td>${t.fecha} | ${t.hora}</td><td>${t.modalidad}</td><td style="color:#06d6a0;">${t.estado}</td>
                         <td class="acciones-container">
-                            <button class="btn-ver" onclick="verInscritos(${t.id}, '${t.nombre}')"><i class="fas fa-eye"></i></button>
-                            <button class="btn-coronar" onclick="coronarGanador(${t.id}, '${t.nombre}')"><i class="fas fa-crown"></i></button>
-                            <button class="btn-borrar" title="Cancelar Torneo" onclick="eliminarTorneo(${t.id}, '${t.nombre}')"><i class="fas fa-times-circle"></i></button>
+                            <button class="btn-ver" onclick="verInscritos(${t.id}, '${t.nombre}')"><i class="fas fa-eye"></i> Inscritos</button>
+                            <button class="btn-coronar" onclick="coronarGanador(${t.id}, '${t.nombre}')"><i class="fas fa-crown"></i> Coronar</button>
+                            <button class="btn-borrar" title="Cancelar Torneo" onclick="eliminarTorneo(${t.id}, '${t.nombre}')"><i class="fas fa-times-circle"></i> Cancelar</button>
                         </td>
                     </tr>`;
                 } else {
                     htmlT += `<tr>
                         <td style="color:gray;">${t.nombre}</td><td style="color:gray;">${t.fecha}</td><td style="color:gray;">${t.modalidad}</td>
                         <td style="color:#ffd700;">Ganador: ${t.ganador} 🏆</td>
-                        <td class="acciones-container"><button class="btn-borrar" title="Borrar Historial" onclick="eliminarTorneo(${t.id}, '${t.nombre}')"><i class="fas fa-trash"></i></button></td>
+                        <td class="acciones-container"><button class="btn-borrar" title="Borrar Historial" onclick="eliminarTorneo(${t.id}, '${t.nombre}')"><i class="fas fa-trash"></i> Limpiar</button></td>
                     </tr>`;
                 }
             });
