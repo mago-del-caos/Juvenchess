@@ -3,39 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JUVENCHESS | Puzzles</title>
+    <title>JUVENCHESS | Academia de Puzzles</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        h1 { color: #ffd700; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.8rem; }
-        
-        .info-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 15px; margin-bottom: 15px; text-align: center; width: 100%; max-width: 450px; box-sizing: border-box; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
-        .puzzle-title { color: #06d6a0; font-size: 1.3rem; font-weight: bold; margin-bottom: 5px; }
-        .puzzle-desc { color: #e0e0e0; font-size: 1rem; }
-        
-        .board-wrapper { position: relative; width: 100%; max-width: 450px; margin-bottom: 20px; }
-        #board { width: 100%; border: 4px solid #ffd700; border-radius: 4px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); background-color: #ffffff; }
-        
+        h1 { color: #ffd700; margin-bottom: 8px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.7rem; text-align: center; }
+
+        /* BARRA DE ESTADÍSTICAS Y FILTROS */
+        .top-controls { width: 100%; max-width: 470px; background: #1c2541; border: 2px solid #3a506b; border-radius: 10px; padding: 12px; margin-bottom: 10px; box-sizing: border-box; box-shadow: 0 6px 12px rgba(0,0,0,0.4); }
+        .stats-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.9rem; font-weight: bold; }
+        .stat-badge { background: #0b132b; padding: 4px 10px; border-radius: 20px; border: 1px solid #06d6a0; color: #06d6a0; }
+        .stat-streak { border-color: #ffd700; color: #ffd700; }
+
+        .selectors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        select { background: #0b132b; color: #ffffff; border: 1px solid #3a506b; padding: 8px; border-radius: 6px; font-size: 0.9rem; width: 100%; box-sizing: border-box; }
+
+        /* PANEL DE INFORMACIÓN DEL PUZZLE */
+        .info-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 10px; padding: 12px 15px; margin-bottom: 10px; text-align: center; width: 100%; max-width: 470px; box-sizing: border-box; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
+        .puzzle-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .puzzle-cat { background: #ff9f1c; color: #0b132b; font-size: 0.75rem; font-weight: bold; padding: 2px 8px; border-radius: 12px; text-transform: uppercase; }
+        .puzzle-step { color: #ffd700; font-size: 0.85rem; font-weight: bold; }
+        .puzzle-title { color: #06d6a0; font-size: 1.25rem; font-weight: bold; margin-bottom: 4px; }
+        .puzzle-desc { color: #e0e0e0; font-size: 0.95rem; }
+
+        /* TABLERO */
+        .board-wrapper { position: relative; width: 100%; max-width: 470px; margin-bottom: 12px; }
+        #board { width: 100%; border: 4px solid #ffd700; border-radius: 6px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); background-color: #ffffff; box-sizing: border-box; }
+
+        .board-classic .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
+        .board-classic .black-3c85d { background-color: #b58863; color: #f0d9b5; }
         .board-juven .white-1e1d7 { background-color: #e0e0e0; color: #0b132b; }
         .board-juven .black-3c85d { background-color: #1c2541; color: #e0e0e0; }
 
-        .btn-volver { background-color: #3a506b; color: white; font-weight: bold; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; max-width: 450px; font-size: 1.1rem; margin-bottom: 10px; transition: 0.3s;}
-        .btn-volver:hover { background-color: #2a3a4f; }
-        
-        .btn-siguiente { background-color: #06d6a0; color: #0b132b; font-weight: bold; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; max-width: 450px; font-size: 1.1rem; display: none; margin-bottom: 10px; transition: 0.3s; box-shadow: 0 0 10px #06d6a0;}
-        .btn-siguiente:hover { background-color: #05b383; }
-        
-        .highlight-wrong { box-shadow: inset 0 0 3px 3px red !important; }
-        .highlight-correct { box-shadow: inset 0 0 3px 3px #06d6a0 !important; }
+        /* RESALTADOS */
+        .highlight-wrong { box-shadow: inset 0 0 0 4px #d62828 !important; background-color: rgba(214, 40, 40, 0.45) !important; }
+        .highlight-correct { box-shadow: inset 0 0 0 4px #06d6a0 !important; background-color: rgba(6, 214, 160, 0.4) !important; }
+        .highlight-hint { box-shadow: inset 0 0 0 4px #ffd700 !important; background-color: rgba(255, 215, 0, 0.45) !important; animation: pulseHint 1s infinite alternate; }
+        .highlight-rival { box-shadow: inset 0 0 0 4px #ff9f1c !important; background-color: rgba(255, 159, 28, 0.35) !important; }
+        @keyframes pulseHint { from { opacity: 0.6; } to { opacity: 1; } }
+
+        /* BOTONERA DE ACCIONES */
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; width: 100%; max-width: 470px; margin-bottom: 10px; }
+        .btn-tool { border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-pista { background: #ffd700; color: #0b132b; }
+        .btn-pista:hover { background: #e6c200; }
+        .btn-azar { background: #06d6a0; color: #0b132b; }
+        .btn-azar:hover { background: #05b383; }
+        .btn-lichess { background: #ff9f1c; color: #0b132b; }
+        .btn-lichess:hover { background: #e88e15; }
+
+        .btn-siguiente { background-color: #06d6a0; color: #0b132b; font-weight: bold; padding: 13px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; max-width: 470px; font-size: 1.1rem; display: none; margin-bottom: 10px; transition: 0.3s; box-shadow: 0 0 12px rgba(6, 214, 160, 0.6); }
+        .btn-siguiente:hover { background-color: #05b383; transform: scale(1.01); }
+
+        .bottom-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; max-width: 470px; }
+        .btn-volver { background-color: #d62828; color: white; font-weight: bold; padding: 11px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: 0.3s; }
+        .btn-volver:hover { background-color: #a81d1d; }
+        .btn-tema { background-color: #3a506b; color: white; font-weight: bold; padding: 11px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; }
     </style>
 </head>
 <body>
 
-    <h1><i class="fas fa-puzzle-piece"></i> ENTRENAMIENTO</h1>
-    
+    <h1><i class="fas fa-puzzle-piece"></i> ACADEMIA DE TÁCTICA</h1>
+
+    <div class="top-controls">
+        <div class="stats-row">
+            <span class="stat-badge" id="progresoTexto"><i class="fas fa-check-circle"></i> Resueltos: 0 / 30</span>
+            <span class="stat-badge stat-streak" id="rachaTexto"><i class="fas fa-fire"></i> Racha: 0</span>
+        </div>
+        <div class="selectors-grid">
+            <select id="selCategoria" onchange="filtrarCategoria()">
+                <option value="todos">📚 Todas las Categorías (30)</option>
+                <option value="Mate en 1">⚡ Mate en 1 (Básico)</option>
+                <option value="Patrones">👑 Patrones Clásicos</option>
+                <option value="Táctica">⚔️ Táctica y Ganancia Material</option>
+                <option value="Mate en 2">🔥 Mate en 2 (Avanzado)</option>
+            </select>
+            <select id="selPuzzle" onchange="irAPuzzleSeleccionado()"></select>
+        </div>
+    </div>
+
     <div class="info-panel">
+        <div class="puzzle-header">
+            <span class="puzzle-cat" id="pCat">Categoría</span>
+            <span class="puzzle-step" id="pStep">Jugada 1 de 1</span>
+        </div>
         <div class="puzzle-title" id="pTitle">Cargando...</div>
         <div class="puzzle-desc" id="pDesc">Prepárate para resolver.</div>
     </div>
@@ -44,8 +97,18 @@
         <div id="board" class="board-juven"></div>
     </div>
 
-    <button class="btn-siguiente" id="btnSiguiente" onclick="siguientePuzzle()"><i class="fas fa-forward"></i> Siguiente Puzzle</button>
-    <button class="btn-volver" onclick="window.location.href='menu.html';"><i class="fas fa-arrow-left"></i> Volver al Menú</button>
+    <button class="btn-siguiente" id="btnSiguiente" onclick="siguientePuzzle()"><i class="fas fa-forward"></i> Siguiente Ejercicio</button>
+
+    <div class="action-grid">
+        <button class="btn-tool btn-pista" onclick="mostrarPista()"><i class="fas fa-lightbulb"></i> Pista</button>
+        <button class="btn-tool btn-azar" onclick="puzzleAleatorio()"><i class="fas fa-random"></i> Al Azar</button>
+        <button class="btn-tool btn-lichess" onclick="cargarRetoLichess()"><i class="fas fa-cloud-download-alt"></i> Reto Lichess</button>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="btn-tema" onclick="alternarPiezas()"><i class="fas fa-chess-knight"></i> Cambiar Piezas</button>
+        <button class="btn-volver" onclick="window.location.href='menu.html';"><i class="fas fa-arrow-left"></i> Volver al Menú</button>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
@@ -56,46 +119,131 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 
     <script>
-        // BASE DE DATOS DE PUZZLES (Puedes agregar más siguiendo este formato)
-        const puzzles = [
-            {
-                title: "1. Mate de Pasillo",
-                desc: "Juegan Blancas y dan Jaque Mate en 1 movimiento.",
-                fen: "6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1",
-                from: "d1", to: "d8",
-                orientation: "white"
-            },
-            {
-                title: "2. Mate de Pastor",
-                desc: "Juegan Blancas y dan Jaque Mate en 1 movimiento.",
-                fen: "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
-                from: "h5", to: "f7",
-                orientation: "white"
-            },
-            {
-                title: "3. Mate del Loco",
-                desc: "Juegan Negras y dan Jaque Mate en 1 movimiento.",
-                fen: "rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq - 0 2",
-                from: "d8", to: "h4",
-                orientation: "black"
-            },
-            {
-                title: "4. Beso de la Muerte",
-                desc: "Juegan Blancas y dan Jaque Mate en 1 movimiento.",
-                fen: "7k/7p/7K/8/8/8/8/6Q1 w - - 0 1",
-                from: "g1", to: "g7",
-                orientation: "white"
-            }
+        // --- SONIDOS SINTETIZADOS ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function sonar(tipo) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+                if (tipo === 'exito') {
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now); osc.stop(now + 0.4);
+                } else if (tipo === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(160, now + 0.12);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now); osc.stop(now + 0.3);
+                } else if (tipo === 'mover') {
+                    osc.frequency.setValueAtTime(440, now);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.1);
+                }
+            } catch (e) {}
+        }
+
+        // --- BASE DE DATOS DE 30 EJERCICIOS TÁCTICOS ESCALONADOS ---
+        // Cada solución soporta 1 o múltiples movimientos encadenados: ['d1d8'] o ['f7f8', 'g8h7', 'f8g7']
+        const todosLosPuzzles = [
+            // SECCIÓN 1: MATE EN 1 (FUNDAMENTOS)
+            { id: 1, cat: "Mate en 1", title: "1. Mate del Pasillo", desc: "Blancas juegan y dan mate en la octava fila.", fen: "6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1", moves: ["d1d8"], orientation: "white" },
+            { id: 2, cat: "Mate en 1", title: "2. Mate del Pastor", desc: "Blancas atacan el punto débil f7 para dar mate.", fen: "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4", moves: ["h5f7"], orientation: "white" },
+            { id: 3, cat: "Mate en 1", title: "3. Mate del Loco", desc: "Negras aprovechan la diagonal abierta hacia el Rey blanco.", fen: "rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq - 0 2", moves: ["d8h4"], orientation: "black" },
+            { id: 4, cat: "Mate en 1", title: "4. El Beso de la Muerte", desc: "La Dama blanca da mate apoyada por su propio Rey.", fen: "7k/7p/7K/8/8/8/8/6Q1 w - - 0 1", moves: ["g1g7"], orientation: "white" },
+            { id: 5, cat: "Mate en 1", title: "5. Batería Dama y Alfil", desc: "Blancas rematan en la esquina del flanco de rey.", fen: "r4rk1/ppp2ppp/8/8/8/2B5/PPP2PPP/2KR2Q1 w - - 0 1", moves: ["g1g7"], orientation: "white" },
+            { id: 6, cat: "Mate en 1", title: "6. Escalera de Torres", desc: "Las dos torres blancas se coordinan para el mate lateral.", fen: "7k/1R6/R7/8/8/8/8/6K1 w - - 0 1", moves: ["a6a8"], orientation: "white" },
+            { id: 7, cat: "Mate en 1", title: "7. Pasillo Inverso", desc: "Negras castigan la primera fila desprotegida.", fen: "6k1/5ppp/8/8/8/8/5PPP/1r4K1 b - - 0 1", moves: ["b1d1"], orientation: "black" },
+            { id: 8, cat: "Mate en 1", title: "8. Dama y Caballo en Ataque", desc: "Blancas dan mate en h7 con el apoyo del caballo en g5.", fen: "r1b2rk1/ppp2ppp/8/6N1/8/8/PPP2PPP/R2Q2K1 w - - 0 1", moves: ["d1h5"], orientation: "white" },
+
+            // SECCIÓN 2: PATRONES CLÁSICOS DE CAMPEONES
+            { id: 9, cat: "Patrones", title: "9. Mate de la Coz (Ahogado)", desc: "El Rey negro está encerrado por sus propias piezas; el caballo sentencia.", fen: "6rk/6pp/7N/8/8/8/8/6K1 w - - 0 1", moves: ["h6f7"], orientation: "white" },
+            { id: 10, cat: "Patrones", title: "10. Mate Árabe", desc: "Torre y Caballo forman una red mortal en la esquina.", fen: "7k/2R5/5N2/8/8/8/8/6K1 w - - 0 1", moves: ["c7h7"], orientation: "white" },
+            { id: 11, cat: "Patrones", title: "11. Mate de Anastasia", desc: "El caballo controla las casillas de escape y la torre remata en la columna h.", fen: "5r1k/4N1pp/8/8/8/8/8/6KR w - - 0 1", moves: ["h1h7"], orientation: "white" },
+            { id: 12, cat: "Patrones", title: "12. Mate de Boden", desc: "Dos alfiles cruzados acorralan al Rey enrocado en largo.", fen: "2kr1b1r/pp1npppp/2p5/8/5B2/8/PPP1BPPP/2KR4 w - - 0 1", moves: ["e2a6"], orientation: "white" },
+            { id: 13, cat: "Patrones", title: "13. Mate de las Hombreras (Epaulette)", desc: "Las dos torres negras le quitan el escape a su propio Rey.", fen: "3rkr2/8/8/8/8/8/5PPP/3Q2K1 w - - 0 1", moves: ["d1d6"], orientation: "white" },
+            { id: 14, cat: "Patrones", title: "14. Mate de la Ópera (Morphy)", desc: "Torre apoyada por el alfil da el golpe final como Paul Morphy en 1858.", fen: "4kb1r/p2n1ppp/4q3/4p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 1 1", moves: ["d1d8"], orientation: "white" },
+            { id: 15, cat: "Patrones", title: "15. Mate de Legall", desc: "Tras entregar la Dama, los caballos y el alfil cierran la trampa.", fen: "r1b1k1nr/pppp1ppp/2n5/2b1N3/2B1P3/2N5/PPPP1PPP/R1BbK2R w KQkq - 0 6", moves: ["c4f7"], orientation: "white" },
+            { id: 16, cat: "Patrones", title: "16. Mate de Greco", desc: "El alfil corta la salida en f7 y la Dama entra por la columna h.", fen: "5rk1/5ppp/8/2B5/8/8/5PPP/6KQ w - - 0 1", moves: ["h1h7"], orientation: "white" },
+
+            // SECCIÓN 3: TÁCTICA Y GANANCIA DE MATERIAL
+            { id: 17, cat: "Táctica", title: "17. Tenedor Real", desc: "Da jaque al Rey y ataca la Dama negra al mismo tiempo con tu caballo.", fen: "2q3k1/5ppp/8/3N4/8/8/5PPP/6K1 w - - 0 1", moves: ["d5e7"], orientation: "white" },
+            { id: 18, cat: "Táctica", title: "18. Clavada Absoluta", desc: "Clava la Dama negra contra su propio Rey usando tu torre.", fen: "4k3/4q3/8/8/8/8/5PPP/3R2K1 w - - 0 1", moves: ["d1e1"], orientation: "white" },
+            { id: 19, cat: "Táctica", title: "19. Enfilada de Alfil (Rayos X)", desc: "Ataca al Rey negro en la diagonal para capturar la Dama detrás de él.", fen: "7q/6k1/8/8/3B4/8/5PPP/6K1 w - - 0 1", moves: ["d4e5"], orientation: "white" },
+            { id: 20, cat: "Táctica", title: "20. Ataque a la Descubierta", desc: "Mueve tu alfil dando jaque y descubre el ataque de tu torre sobre la Dama.", fen: "3q2k1/5ppp/8/8/3B4/8/5PPP/3R2K1 w - - 0 1", moves: ["d4g7"], orientation: "white" },
+            { id: 21, cat: "Táctica", title: "21. Coronación con Jaque", desc: "Corona tu peón para ganar la partida de inmediato.", fen: "8/1P4k1/8/8/8/8/6PP/6K1 w - - 0 1", moves: ["b7b8"], orientation: "white" },
+            { id: 22, cat: "Táctica", title: "22. Doblete de Peón", desc: "Avanza el peón para atacar simultáneamente la Torre y el Caballo rivales.", fen: "6k1/5ppp/2r1n3/8/3P4/8/5PPP/6K1 w - - 0 1", moves: ["d4d5"], orientation: "white" },
+
+            // SECCIÓN 4: MATE EN 2 (SECUENCIAS CON RESPUESTA DEL RIVAL)
+            { id: 23, cat: "Mate en 2", title: "23. Sacrificio de Dama en el Pasillo", desc: "Juegan Blancas: Sacrifica la Dama para forzar el mate con la torre (Mate en 2).", fen: "3r2k1/5ppp/8/8/8/8/5PPP/2QR1K2 w - - 0 1", moves: ["c1c8", "d8c8", "d1d8"], orientation: "white" },
+            { id: 24, cat: "Mate en 2", title: "24. Doble Torre Mortal", desc: "Juegan Blancas: Da jaque en la séptima fila y remata en la octava (Mate en 2).", fen: "6k1/R7/1R6/8/8/8/5PPP/6K1 w - - 0 1", moves: ["b6b8", "g8h7", "a7h7"], orientation: "white" },
+            { id: 25, cat: "Mate en 2", title: "25. Atracción al Abismo", desc: "Juegan Blancas: Obliga al Rey negro a salir y dale mate con la Dama (Mate en 2).", fen: "6k1/5p1p/6p1/8/8/6Q1/5PPP/4R1K1 w - - 0 1", moves: ["e1e8", "g8g7", "g3e5"], orientation: "white" },
+            { id: 26, cat: "Mate en 2", title: "26. Combinación de Damiano", desc: "Juegan Blancas: Da jaque con la Dama y cierra la red de mate (Mate en 2).", fen: "5rk1/5p1p/5P2/8/8/7Q/6PP/6K1 w - - 0 1", moves: ["h3g4", "g8h8", "g4g7"], orientation: "white" },
+            { id: 27, cat: "Mate en 2", title: "27. Sacrificio de Torre en h7", desc: "Juegan Blancas: Destruye el enroque con la torre y entra con la Dama (Mate en 2).", fen: "r4rk1/ppp2ppp/8/8/6Q1/8/PPP2PPP/5K1R w - - 0 1", moves: ["h1h7", "g8h7", "g4h5"], orientation: "white" },
+            { id: 28, cat: "Mate en 2", title: "28. Asalto de Dama y Alfil", desc: "Juegan Blancas: Empuja al Rey a la esquina y remata en g7 (Mate en 2).", fen: "5rk1/5p1p/6pB/8/8/2Q5/5PPP/6K1 w - - 0 1", moves: ["c3g7", "g8g7", "h6f8"], orientation: "white" },
+            { id: 29, cat: "Mate en 2", title: "29. Contraataque Negro", desc: "Juegan Negras: Da jaque con la torre en primera fila y remata tras la captura (Mate en 2).", fen: "2k5/ppp5/8/8/8/8/PPP2PPP/1K1R2rr b - - 0 1", moves: ["g1d1", "b1d1", "h1d1"], orientation: "black" },
+            { id: 30, cat: "Mate en 2", title: "30. El Golpe Maestro", desc: "Juegan Blancas: Jaque en h8 para atraer al Rey y mate con la Dama (Mate en 2).", fen: "6k1/5ppp/8/8/8/1Q6/5PPP/6KR w - - 0 1", moves: ["h1h8", "g8h8", "b3h3"], orientation: "white" }
         ];
 
-        let puzzleActual = 0;
+        let puzzlesFiltrados = [...todosLosPuzzles];
+        let indiceActual = 0;
+        let pasoJugada = 0; // Rastrea en qué movimiento de la secuencia vamos
         let resuelto = false;
+        let usarPiezasCustom = true;
+
+        // Progreso guardado en el navegador
+        let resueltosSet = new Set(JSON.parse(localStorage.getItem('juvenchess_puzzles_ok') || '[]'));
+        let rachaActual = parseInt(localStorage.getItem('juvenchess_puzzles_racha') || '0');
 
         var board = null;
         var game = new Chess();
         var $board = $('#board');
 
+        function actualizarMarcadores() {
+            document.getElementById('progresoTexto').innerHTML = `<i class="fas fa-check-circle"></i> Resueltos: ${resueltosSet.size} / ${todosLosPuzzles.length}`;
+            document.getElementById('rachaTexto').innerHTML = `<i class="fas fa-fire"></i> Racha: ${rachaActual}`;
+        }
+
+        function poblarSelectorPuzzles() {
+            const sel = document.getElementById('selPuzzle');
+            sel.innerHTML = '';
+            puzzlesFiltrados.forEach((p, idx) => {
+                const check = resueltosSet.has(p.id) ? '✅ ' : '⬜ ';
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = `${check}${p.title}`;
+                sel.appendChild(opt);
+            });
+            sel.value = indiceActual;
+        }
+
+        function filtrarCategoria() {
+            const cat = document.getElementById('selCategoria').value;
+            if (cat === 'todos') {
+                puzzlesFiltrados = [...todosLosPuzzles];
+            } else {
+                puzzlesFiltrados = todosLosPuzzles.filter(p => p.cat === cat);
+            }
+            indiceActual = 0;
+            poblarSelectorPuzzles();
+            cargarPuzzle();
+        }
+
+        function irAPuzzleSeleccionado() {
+            indiceActual = parseInt(document.getElementById('selPuzzle').value) || 0;
+            cargarPuzzle();
+        }
+
         function pieceTheme(piece) {
+            if (!usarPiezasCustom) return 'https://chessboardjs.com/img/chesspieces/wikipedia/' + piece + '.png';
             const customPieces = {
                 'wP': 'chemapeon.png', 'wN': 'chemacaballo.png', 'wB': 'chemaalfil.png', 'wR': 'chematorre.png', 'wQ': 'chemareyna.png', 'wK': 'chemarey.png',
                 'bP': 'goyopeon.png', 'bN': 'goyocaballo.png', 'bB': 'goyoalfil.png', 'bR': 'goyotorre.png', 'bQ': 'goyoreina.png', 'bK': 'goyorey.png'
@@ -103,55 +251,169 @@
             return customPieces[piece];
         }
 
+        function alternarPiezas() {
+            usarPiezasCustom = !usarPiezasCustom;
+            board.position(game.fen());
+        }
+
+        function limpiarResaltados() {
+            $board.find('.square-55d63').removeClass('highlight-wrong highlight-correct highlight-hint highlight-rival');
+        }
+
+        function actualizarContadorPasos() {
+            const p = puzzlesFiltrados[indiceActual];
+            const totalPasosJugador = Math.ceil(p.moves.length / 2);
+            const pasoJugadorActual = Math.floor(pasoJugada / 2) + 1;
+            document.getElementById('pStep').innerText = `Jugada ${ Math.min(pasoJugadorActual, totalPasosJugador) } de ${totalPasosJugador}`;
+        }
+
         function cargarPuzzle() {
             resuelto = false;
+            pasoJugada = 0;
+            limpiarResaltados();
             document.getElementById('btnSiguiente').style.display = 'none';
             
-            if (puzzleActual >= puzzles.length) {
-                Swal.fire({ title: '¡Felicidades!', text: 'Has completado todos los puzzles disponibles.', icon: 'success', background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' });
-                puzzleActual = 0; // Reiniciar
-            }
+            if (indiceActual >= puzzlesFiltrados.length) indiceActual = 0;
+            document.getElementById('selPuzzle').value = indiceActual;
 
-            const p = puzzles[puzzleActual];
+            const p = puzzlesFiltrados[indiceActual];
+            document.getElementById('pCat').innerText = p.cat;
             document.getElementById('pTitle').innerText = p.title;
             document.getElementById('pDesc').innerText = p.desc;
+            actualizarContadorPasos();
+            actualizarMarcadores();
             
             game.load(p.fen);
             board.orientation(p.orientation);
             board.position(game.fen());
         }
 
+        function mostrarPista() {
+            if (resuelto) return;
+            const p = puzzlesFiltrados[indiceActual];
+            const movEsperado = p.moves[pasoJugada];
+            if (!movEsperado) return;
+            const casillaOrigen = movEsperado.substring(0, 2);
+            limpiarResaltados();
+            $board.find('.square-' + casillaOrigen).addClass('highlight-hint');
+        }
+
+        function puzzleAleatorio() {
+            indiceActual = Math.floor(Math.random() * puzzlesFiltrados.length);
+            cargarPuzzle();
+        }
+
+        // --- CONEXIÓN CON LA API PÚBLICA DE LICHESS ---
+        async function cargarRetoLichess() {
+            Swal.fire({ title: 'Conectando con Lichess...', text: 'Descargando puzzle oficial táctico', allowOutsideClick: false, background: '#1c2541', color: '#fff', didOpen: () => Swal.showLoading() });
+            try {
+                const res = await fetch('https://lichess.org/api/puzzle/daily');
+                const data = await res.json();
+
+                // Reconstruir posición en chess.js hasta el movimiento inicial del puzzle
+                const tempChess = new Chess();
+                tempChess.load_pgn(data.game.pgn);
+                const hist = tempChess.history({ verbose: true });
+
+                const plyObjetivo = data.puzzle.initialPly;
+                const replay = new Chess();
+                for (let i = 0; i <= plyObjetivo && i < hist.length; i++) {
+                    replay.move(hist[i]);
+                }
+
+                const turnoJugador = replay.turn() === 'w' ? 'white' : 'black';
+                const nuevoPuzzleLichess = {
+                    id: 'lichess_' + data.puzzle.id,
+                    cat: `Lichess ELO ${data.puzzle.rating}`,
+                    title: `🌐 Reto Oficial Lichess #${data.puzzle.id}`,
+                    desc: `Juegan ${turnoJugador === 'white' ? 'Blancas' : 'Negras'}. Encuentra la secuencia ganadora (${Math.ceil(data.puzzle.solution.length / 2)} jugadas).`,
+                    fen: replay.fen(),
+                    moves: data.puzzle.solution,
+                    orientation: turnoJugador
+                };
+
+                puzzlesFiltrados.unshift(nuevoPuzzleLichess);
+                indiceActual = 0;
+                poblarSelectorPuzzles();
+                cargarPuzzle();
+                Swal.close();
+            } catch (err) {
+                Swal.fire({ title: 'Aviso', text: 'No se pudo conectar a Lichess en este momento. Cargando ejercicio aleatorio local.', icon: 'info', background: '#1c2541', color: '#fff' });
+                puzzleAleatorio();
+            }
+        }
+
         function onDragStart(source, piece) {
             if (resuelto) return false;
-            // Solo permitir mover el color del turno actual del puzzle
             if ((game.turn() === 'w' && piece.search(/^b/) !== -1) || (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
                 return false;
             }
         }
 
         function onDrop(source, target) {
-            const p = puzzles[puzzleActual];
-            
-            // Verificar si el movimiento es legal en ajedrez
-            var move = game.move({ from: source, to: target, promotion: 'q' });
-            
+            const p = puzzlesFiltrados[indiceActual];
+            const movEsperado = p.moves[pasoJugada];
+            if (!movEsperado) return 'snapback';
+
+            const fromEsperado = movEsperado.substring(0, 2);
+            const toEsperado = movEsperado.substring(2, 4);
+            const promoEsperada = movEsperado.length > 4 ? movEsperado.substring(4, 5) : 'q';
+
+            var move = game.move({ from: source, to: target, promotion: promoEsperada });
             if (move === null) return 'snapback';
 
-            // Comprobar si resolvió el puzzle
-            if (source === p.from && target === p.to) {
-                resuelto = true;
-                lanzarConfeti();
+            limpiarResaltados();
+
+            if (source === fromEsperado && target === toEsperado) {
                 $board.find('.square-' + target).addClass('highlight-correct');
-                
-                Swal.fire({ title: '¡Brillante!', text: 'Movimiento correcto.', icon: 'success', timer: 2000, showConfirmButton: false, background: '#1c2541', color: '#fff' });
-                document.getElementById('btnSiguiente').style.display = 'block';
+                pasoJugada++;
+
+                // Verificar si ya completó todos los movimientos del puzzle
+                if (pasoJugada >= p.moves.length) {
+                    resuelto = true;
+                    sonar('exito');
+                    lanzarConfeti();
+                    resueltosSet.add(p.id);
+                    rachaActual++;
+                    localStorage.setItem('juvenchess_puzzles_ok', JSON.stringify([...resueltosSet]));
+                    localStorage.setItem('juvenchess_puzzles_racha', rachaActual.toString());
+                    poblarSelectorPuzzles();
+                    actualizarMarcadores();
+
+                    Swal.fire({ title: '¡Brillante!', text: 'Secuencia táctica completada con éxito.', icon: 'success', timer: 1800, showConfirmButton: false, background: '#1c2541', color: '#fff' });
+                    document.getElementById('btnSiguiente').style.display = 'block';
+                } else {
+                    // Es un puzzle de múltiples jugadas: la máquina responde automáticamente
+                    sonar('mover');
+                    document.getElementById('pDesc').innerHTML = '✨ ¡Buen primer golpe! <b>El rival responde...</b>';
+                    setTimeout(() => {
+                        const respRival = p.moves[pasoJugada];
+                        const rFrom = respRival.substring(0, 2);
+                        const rTo = respRival.substring(2, 4);
+                        const rPromo = respRival.length > 4 ? respRival.substring(4, 5) : 'q';
+                        game.move({ from: rFrom, to: rTo, promotion: rPromo });
+                        board.position(game.fen());
+                        sonar('mover');
+                        limpiarResaltados();
+                        $board.find('.square-' + rFrom).addClass('highlight-rival');
+                        $board.find('.square-' + rTo).addClass('highlight-rival');
+                        pasoJugada++;
+                        actualizarContadorPasos();
+                        document.getElementById('pDesc').innerHTML = '🔔 <b>¡El rival ha movido!</b> Encuentra el remate ganador.';
+                    }, 550);
+                }
             } else {
-                // Movimiento incorrecto, deshacer y avisar
+                // Movimiento incorrecto
                 game.undo();
+                sonar('error');
+                rachaActual = 0;
+                localStorage.setItem('juvenchess_puzzles_racha', '0');
+                actualizarMarcadores();
+
                 $board.find('.square-' + target).addClass('highlight-wrong');
                 setTimeout(() => $board.find('.square-' + target).removeClass('highlight-wrong'), 1000);
                 
-                Swal.fire({ title: 'Casi...', text: 'Ese movimiento no resuelve el problema. ¡Intenta de nuevo!', icon: 'error', background: '#1c2541', color: '#fff', confirmButtonColor: '#d62828' });
+                Swal.fire({ toast: true, position: 'top', title: 'Movimiento incorrecto, intenta otra jugada', icon: 'error', timer: 2000, showConfirmButton: false, background: '#d62828', color: '#fff' });
                 return 'snapback';
             }
         }
@@ -161,12 +423,12 @@
         }
 
         function siguientePuzzle() {
-            puzzleActual++;
+            indiceActual = (indiceActual + 1) % puzzlesFiltrados.length;
             cargarPuzzle();
         }
 
         function lanzarConfeti() {
-            var duration = 2 * 1000; var end = Date.now() + duration;
+            var duration = 1800; var end = Date.now() + duration;
             (function frame() {
                 confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ffd700', '#06d6a0'] });
                 confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ffd700', '#06d6a0'] });
@@ -180,10 +442,8 @@
         };
         
         board = Chessboard('board', config);
-        
-        // Iniciar el primer puzzle
-        setTimeout(cargarPuzzle, 500);
-
+        poblarSelectorPuzzles();
+        setTimeout(cargarPuzzle, 300);
     </script>
 </body>
 </html>
