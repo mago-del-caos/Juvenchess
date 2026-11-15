@@ -9,83 +9,95 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        h1 { color: #ffd700; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.8rem; }
+        h1 { color: #ffd700; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.7rem; }
         
-        .info-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 450px; box-sizing: border-box; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #06d6a0; object-fit: cover; margin-right: 10px; vertical-align: middle; }
+        .info-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 460px; box-sizing: border-box; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #06d6a0; object-fit: cover; margin-right: 10px; background-color: #0b132b; }
         .player-info { display: flex; align-items: center; font-weight: bold; }
         
-        .clocks { display: flex; flex-direction: column; align-items: flex-end; font-family: monospace; font-size: 1.2rem; }
-        .clock { padding: 2px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 2px; transition: 0.3s; }
-        .clock-active { background-color: #06d6a0; color: #0b132b; box-shadow: 0 0 10px #06d6a0; font-size: 1.4rem; }
-        .clock-inactive { background-color: #3a506b; color: #9aa5ce; }
+        .clocks { display: flex; flex-direction: column; align-items: flex-end; font-family: monospace; font-size: 1.1rem; gap: 4px; }
+        .clock { padding: 3px 10px; border-radius: 6px; font-weight: bold; transition: 0.3s; text-align: right; }
+        .clock-active { background-color: #06d6a0; color: #0b132b; box-shadow: 0 0 10px rgba(6, 214, 160, 0.6); font-size: 1.25rem; }
+        .clock-inactive { background-color: #0b132b; color: #9aa5ce; border: 1px solid #3a506b; }
 
-        .board-wrapper { position: relative; width: 100%; max-width: 450px; margin-bottom: 10px; }
-        #board { width: 100%; border: 4px solid #ffd700; border-radius: 4px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); background-color: #ffffff; }
+        /* BANNER DE AVISO DE JUGADA DEL BOT */
+        .status-bar { width: 100%; max-width: 460px; background: #1c2541; border: 1px solid #3a506b; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
+        #estadoJuego { color: #ffd700; font-weight: bold; font-size: 0.95rem; }
+        #ultimaJugadaBot { color: #06d6a0; font-family: monospace; font-size: 0.9rem; font-weight: bold; }
+
+        .board-wrapper { position: relative; width: 100%; max-width: 460px; margin-bottom: 10px; }
+        #board { width: 100%; border: 4px solid #ffd700; border-radius: 6px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); background-color: #ffffff; box-sizing: border-box; }
         
-        .btn-config { position: absolute; top: -15px; right: -15px; background: #06d6a0; color: #0b132b; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 20px; cursor: pointer; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition: 0.3s; }
+        .btn-config { position: absolute; top: -12px; right: -12px; background: #06d6a0; color: #0b132b; border: none; border-radius: 50%; width: 42px; height: 42px; font-size: 18px; cursor: pointer; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition: 0.3s; }
         .btn-config:hover { background: #05b383; transform: scale(1.1); }
 
-        #configModal { display: none; position: absolute; top: 35px; right: 0; background: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 15px; z-index: 101; box-shadow: 0 8px 16px rgba(0,0,0,0.8); min-width: 250px; }
+        #configModal { display: none; position: absolute; top: 35px; right: 0; background: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 15px; z-index: 101; box-shadow: 0 8px 16px rgba(0,0,0,0.85); min-width: 250px; }
         .config-item { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
-        .config-item select { padding: 5px; border-radius: 4px; background: #0b132b; color: white; border: 1px solid #3a506b; width: 55%; font-size: 0.9rem; }
+        .config-item select { padding: 5px; border-radius: 4px; background: #0b132b; color: white; border: 1px solid #3a506b; width: 58%; font-size: 0.9rem; }
 
-        .btn-accion { background: #06d6a0; border: none; padding: 8px; border-radius: 4px; font-weight: bold; width: 100%; margin-top: 5px; cursor: pointer; color:#0b132b;}
+        .btn-accion { background: #06d6a0; border: none; padding: 8px; border-radius: 5px; font-weight: bold; width: 100%; margin-top: 5px; cursor: pointer; color:#0b132b; }
         .btn-accion:hover { background: #05b383; }
         .btn-danger { background: #d62828; color: white; }
         .btn-danger:hover { background: #a81d1d; }
 
-        .history-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; width: 100%; max-width: 450px; height: 100px; overflow-y: auto; margin-bottom: 15px; padding: 10px; box-sizing: border-box; }
-        .history-panel h3 { margin: 0 0 5px 0; color: #06d6a0; font-size: 1rem; border-bottom: 1px solid #3a506b; padding-bottom: 3px; }
-        .history-list { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 5px; font-size: 0.9rem; color: #e0e0e0; font-family: monospace; }
+        .history-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; width: 100%; max-width: 460px; height: 95px; overflow-y: auto; margin-bottom: 10px; padding: 10px; box-sizing: border-box; }
+        .history-panel h3 { margin: 0 0 5px 0; color: #06d6a0; font-size: 0.95rem; border-bottom: 1px solid #3a506b; padding-bottom: 3px; display: flex; justify-content: space-between; }
+        .history-list { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 4px; font-size: 0.88rem; color: #e0e0e0; font-family: monospace; }
         
-        .highlight1-32417, .highlight2-9c5d2 { box-shadow: inset 0 0 3px 3px yellow; }
+        /* RESALTADO DE CASILLAS */
+        .highlight-hint { box-shadow: inset 0 0 0 3px rgba(6, 214, 160, 0.85) !important; background-color: rgba(6, 214, 160, 0.25) !important; }
+        .highlight-last-move { box-shadow: inset 0 0 0 4px rgba(255, 215, 0, 0.9) !important; background-color: rgba(255, 215, 0, 0.35) !important; }
+        .highlight-check { background: radial-gradient(circle, rgba(214,40,40,0.85) 0%, rgba(214,40,40,0) 70%) !important; }
+
         .board-classic .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
         .board-classic .black-3c85d { background-color: #b58863; color: #f0d9b5; }
         .board-juven .white-1e1d7 { background-color: #e0e0e0; color: #0b132b; }
         .board-juven .black-3c85d { background-color: #1c2541; color: #e0e0e0; }
 
-        .btn-volver { background-color: #d62828; color: white; font-weight: bold; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%; max-width: 450px; font-size: 1.1rem;}
-        .swal2-select { font-size: 1.2rem !important; padding: 10px !important; text-align: center; }
+        .controls-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; width: 100%; max-width: 460px; }
+        .btn-ctrl { padding: 11px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.95rem; transition: 0.2s; }
+        .btn-deshacer { background: #ff9f1c; color: #0b132b; }
+        .btn-reiniciar { background: #3a506b; color: #ffffff; }
+        .btn-volver { background: #d62828; color: #ffffff; }
     </style>
 </head>
 <body>
 
-    <h1>JUVENCHESS</h1>
+    <h1><i class="fas fa-chess"></i> JUVENCHESS</h1>
     
     <div class="info-panel">
         <div class="player-info">
-            <img src="profe.png" alt="Avatar" class="avatar" id="avatarImg" onerror="this.src='zapata.png'">
-            <div style="line-height: 1.2;">
-                <span style="color:#06d6a0;"><i class="fas fa-user"></i> Jugador:</span><br>
-                <span id="nombreJugador" style="color:white;">Invitado</span>
+            <img src="zapata.png" alt="Avatar" class="avatar" id="avatarImg" onerror="this.src='zapata.png'">
+            <div style="line-height: 1.25;">
+                <span style="color:#06d6a0; font-size:0.8rem;"><i class="fas fa-user"></i> Jugador:</span><br>
+                <span id="nombreJugador" style="color:white; font-size:1.05rem;">Invitado</span>
             </div>
         </div>
         <div class="clocks">
-            <div id="relojNegras" class="clock clock-inactive"><i class="fas fa-robot"></i> <span id="nombreBot" style="font-size:0.8rem;">Bot</span><br>05:00</div>
-            <div id="relojBlancas" class="clock clock-inactive"><i class="fas fa-stopwatch"></i> 05:00</div>
+            <div id="relojNegras" class="clock clock-inactive"><i class="fas fa-robot"></i> <span id="nombreBot" style="font-size:0.8rem;">Bot</span>: 05:00</div>
+            <div id="relojBlancas" class="clock clock-inactive"><i class="fas fa-stopwatch"></i> Tú: 05:00</div>
         </div>
     </div>
     
-    <div style="text-align: center; margin-bottom: 5px;">
-        <span id="estadoJuego" style="color:#ffd700; font-weight:bold;">¡Haz tu primer movimiento para iniciar!</span>
+    <div class="status-bar">
+        <span id="estadoJuego">¡Haz tu primer movimiento para iniciar!</span>
+        <span id="ultimaJugadaBot"></span>
     </div>
 
     <div class="board-wrapper">
-        <button class="btn-config" onclick="toggleConfig()"><i class="fas fa-cog"></i></button>
+        <button class="btn-config" onclick="toggleConfig()" title="Ajustes"><i class="fas fa-cog"></i></button>
         
         <div id="configModal">
             <h3 style="margin-top:0; color:#ffd700; border-bottom:1px solid #3a506b; padding-bottom:5px;"><i class="fas fa-sliders-h"></i> Ajustes</h3>
             
             <div class="config-item">
-                <label><i class="fas fa-clock"></i> Modo:</label>
+                <label><i class="fas fa-clock"></i> Reloj:</label>
                 <select id="selTiempo" onchange="cambiarTiempo()">
                     <option value="60">Bala (1 min)</option>
                     <option value="180">Blitz (3 min)</option>
                     <option value="300" selected>Blitz (5 min)</option>
                     <option value="600">Rápido (10 min)</option>
                     <option value="1800">Clásico (30 min)</option>
-                    <option value="custom">Personalizado...</option>
                 </select>
             </div>
             
@@ -104,25 +116,39 @@
                     <option value="board-juven">Oscuro</option>
                 </select>
             </div>
+
+            <div class="config-item">
+                <label><i class="fas fa-volume-up"></i> Sonido:</label>
+                <select id="selSonido">
+                    <option value="on">Activado</option>
+                    <option value="off">Silencio</option>
+                </select>
+            </div>
             
             <div class="config-item">
-                <label><i class="fas fa-lightbulb"></i> Ayuda visual:</label>
+                <label><i class="fas fa-lightbulb"></i> Guía visual:</label>
                 <input type="checkbox" id="chkAyuda" checked onchange="actualizarAjustes()">
             </div>
             
-            <button class="btn-accion" onclick="toggleConfig()"><i class="fas fa-check"></i> Cerrar Opciones</button>
-            <button class="btn-accion btn-danger" onclick="reiniciarPartida()"><i class="fas fa-redo"></i> Reiniciar Partida</button>
+            <button class="btn-accion" onclick="toggleConfig()"><i class="fas fa-check"></i> Listo</button>
         </div>
 
         <div id="board" class="board-classic"></div>
     </div>
 
     <div class="history-panel">
-        <h3><i class="fas fa-list-ol"></i> Historial de Movimientos</h3>
+        <h3>
+            <span><i class="fas fa-list-ol"></i> Historial de Jugadas</span>
+            <span id="nivelBotBadge" style="color:#ffd700; font-size:0.8rem;"></span>
+        </h3>
         <div class="history-list" id="moveHistory"></div>
     </div>
 
-    <button class="btn-volver" onclick="window.location.href='menu.html';"><i class="fas fa-arrow-left"></i> Volver al Menú</button>
+    <div class="controls-bar">
+        <button class="btn-ctrl btn-deshacer" onclick="deshacerJugada()"><i class="fas fa-undo"></i> Deshacer</button>
+        <button class="btn-ctrl btn-reiniciar" onclick="reiniciarPartida()"><i class="fas fa-redo"></i> Reiniciar</button>
+        <button class="btn-ctrl btn-volver" onclick="window.location.href='menu.html';"><i class="fas fa-arrow-left"></i> Menú</button>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
@@ -134,20 +160,31 @@
 
     <script>
         const username = localStorage.getItem('username') || 'INVITADO';
-        const botName = localStorage.getItem('botName') || 'Bot Nivel 1';
+        const botName = localStorage.getItem('botName') || 'Francisco I. Madero (Principiante)';
+        const savedAvatar = localStorage.getItem('avatar');
         
         document.getElementById('nombreJugador').innerText = username;
-        document.getElementById('nombreBot').innerText = botName.split('(')[0].trim(); // Solo muestra el nombre del héroe
+        const nombreCortoBot = botName.split('(')[0].trim();
+        document.getElementById('nombreBot').innerText = nombreCortoBot;
+        document.getElementById('nivelBotBadge').innerText = botName;
         
-        if(username.toLowerCase() === 'cifra' || username.toLowerCase() === 'admin') {
+        if (savedAvatar && savedAvatar !== 'null' && savedAvatar !== 'undefined') {
+            document.getElementById('avatarImg').src = savedAvatar;
+        } else if (username.toLowerCase().includes('cifra') || username.toLowerCase() === 'admin') {
             document.getElementById('avatarImg').src = 'profe.png';
-        } else if (username.toLowerCase() === 'santa') {
-            document.getElementById('avatarImg').src = 'santa.png';
-        } else if (username.toLowerCase() === 'chemita') {
-            document.getElementById('avatarImg').src = 'chemapeon.png'; 
         } else {
             document.getElementById('avatarImg').src = 'zapata.png';
         }
+
+        // --- DETERMINAR NIVEL DE INTELIGENCIA DEL BOT HISTÓRICO ---
+        function obtenerNivelBot(nombre) {
+            if (nombre.includes('Principiante')) return 1; // Movimientos mayormente aleatorios
+            if (nombre.includes('Básico')) return 2;       // Prioriza capturas simples
+            if (nombre.includes('Intermedio')) return 3;   // Evalúa material e intercambios (Profundidad 1)
+            if (nombre.includes('Avanzado')) return 4;     // Minimax Profundidad 2
+            return 5;                                      // Experto / Estratega / Centauro: Minimax Profundidad 3 + Posición
+        }
+        const nivelIA = obtenerNivelBot(botName);
 
         var board = null;
         var game = new Chess();
@@ -158,31 +195,63 @@
         let tiempoNegras = 300;
         let timerInterval = null;
         let juegoIniciado = false;
+        let ultimoOrigen = null;
+        let ultimoDestino = null;
         var configPiezas = 'custom';
         var mostrarAyuda = true;
 
-        const Toast = Swal.mixin({ toast: true, position: 'top', showConfirmButton: false, timer: 2500 });
+        const Toast = Swal.mixin({ toast: true, position: 'top', showConfirmButton: false, timer: 2200 });
+
+        // --- SISTEMA DE SONIDO SINTETIZADO ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function reproducirSonido(tipo) {
+            if (document.getElementById('selSonido') && document.getElementById('selSonido').value === 'off') return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (tipo === 'mover') {
+                    osc.frequency.setValueAtTime(420, now);
+                    osc.frequency.exponentialRampToValueAtTime(560, now + 0.08);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.1);
+                } else if (tipo === 'bot') {
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    gain.gain.setValueAtTime(0.22, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+                    osc.start(now); osc.stop(now + 0.22);
+                } else if (tipo === 'jaque') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(310, now);
+                    osc.frequency.setValueAtTime(220, now + 0.14);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now); osc.stop(now + 0.3);
+                }
+            } catch (e) {}
+        }
 
         function toggleConfig() {
             const modal = document.getElementById('configModal');
             modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
         }
 
-        async function cambiarTiempo() {
+        function cambiarTiempo() {
             if(juegoIniciado) {
-                Swal.fire({ title: '¡Partida en curso!', text: 'Debes reiniciar la partida para cambiar el reloj.', icon: 'warning', background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' });
+                Swal.fire({ title: '¡Partida en curso!', text: 'Reinicia la partida para cambiar el reloj.', icon: 'warning', background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' });
                 document.getElementById('selTiempo').value = tiempoInicial;
                 return;
             }
-            let seleccion = document.getElementById('selTiempo').value;
-            if(seleccion === 'custom') {
-                const { value: minutos } = await Swal.fire({
-                    title: 'Tiempo Personalizado', input: 'number', inputLabel: 'Minutos por jugador',
-                    background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0', showCancelButton: true
-                });
-                if(minutos) { tiempoInicial = minutos * 60; } else { document.getElementById('selTiempo').value = "300"; tiempoInicial = 300; }
-            } else { tiempoInicial = parseInt(seleccion); }
-            tiempoBlancas = tiempoInicial; tiempoNegras = tiempoInicial; actualizarRelojesUI();
+            tiempoInicial = parseInt(document.getElementById('selTiempo').value) || 300;
+            tiempoBlancas = tiempoInicial;
+            tiempoNegras = tiempoInicial;
+            actualizarRelojesUI();
         }
 
         function actualizarAjustes() {
@@ -191,6 +260,7 @@
             $board.removeClass('board-classic board-juven');
             $board.addClass(document.getElementById('selTablero').value);
             board.position(game.fen());
+            pintarUltimaJugada();
         }
 
         function pieceTheme(piece) {
@@ -202,24 +272,58 @@
             return customPieces[piece];
         }
 
+        function deshacerJugada() {
+            if (game.history().length < 2 || game.game_over()) return;
+            game.undo(); // Deshace jugada del Bot
+            game.undo(); // Deshace jugada del Jugador
+            board.position(game.fen());
+            ultimoOrigen = null; ultimoDestino = null;
+            limpiarResaltados();
+            actualizarHistorial();
+            verificarEstado();
+        }
+
         function reiniciarPartida() {
             Swal.fire({
-                title: '¿Reiniciar partida?', text: "Se borrará el progreso actual.", icon: 'question',
-                showCancelButton: true, confirmButtonColor: '#d62828', cancelButtonColor: '#3a506b', confirmButtonText: 'Sí, reiniciar', background: '#1c2541', color: '#fff'
+                title: '¿Reiniciar partida?', text: "Comenzarás un nuevo duelo desde cero.", icon: 'question',
+                showCancelButton: true, confirmButtonColor: '#06d6a0', cancelButtonColor: '#3a506b', confirmButtonText: 'Sí, reiniciar', background: '#1c2541', color: '#fff'
             }).then((result) => {
                 if (result.isConfirmed) {
                     game.reset(); board.start(); clearInterval(timerInterval); juegoIniciado = false;
+                    ultimoOrigen = null; ultimoDestino = null; limpiarResaltados();
                     tiempoBlancas = tiempoInicial; tiempoNegras = tiempoInicial; actualizarRelojesUI();
                     document.getElementById('moveHistory').innerHTML = '';
+                    document.getElementById('ultimaJugadaBot').innerText = '';
                     document.getElementById('estadoJuego').innerText = '¡Haz tu primer movimiento para iniciar!';
-                    document.getElementById('relojBlancas').className = 'clock clock-inactive'; document.getElementById('relojNegras').className = 'clock clock-inactive';
-                    toggleConfig();
+                    document.getElementById('relojBlancas').className = 'clock clock-inactive';
+                    document.getElementById('relojNegras').className = 'clock clock-inactive';
                 }
             });
         }
 
-        function removeHighlights() { $board.find('.square-55d63').removeClass('highlight1-32417 highlight2-9c5d2'); }
-        function greySquare(square) { $board.find('.square-' + square).addClass('highlight1-32417'); }
+        function limpiarResaltados() {
+            $board.find('.square-55d63').removeClass('highlight-hint highlight-last-move highlight-check');
+        }
+
+        function pintarUltimaJugada() {
+            limpiarResaltados();
+            if (mostrarAyuda && ultimoOrigen && ultimoDestino) {
+                $board.find('.square-' + ultimoOrigen).addClass('highlight-last-move');
+                $board.find('.square-' + ultimoDestino).addClass('highlight-last-move');
+            }
+            if (game.in_check()) {
+                const turno = game.turn();
+                const b = game.board();
+                const cols = ['a','b','c','d','e','f','g','h'];
+                for (let r = 0; r < 8; r++) {
+                    for (let c = 0; c < 8; c++) {
+                        if (b[r][c] && b[r][c].type === 'k' && b[r][c].color === turno) {
+                            $board.find('.square-' + cols[c] + (8 - r)).addClass('highlight-check');
+                        }
+                    }
+                }
+            }
+        }
 
         function formatoTiempo(segundos) {
             let min = Math.floor(segundos / 60); let seg = segundos % 60;
@@ -227,8 +331,8 @@
         }
 
         function actualizarRelojesUI() {
-            document.getElementById('relojBlancas').innerHTML = `<i class="fas fa-stopwatch"></i> ${formatoTiempo(tiempoBlancas)}`;
-            document.getElementById('relojNegras').innerHTML = `<i class="fas fa-robot"></i> <span style="font-size:0.8rem;">${botName.split('(')[0].trim()}</span><br>${formatoTiempo(tiempoNegras)}`;
+            document.getElementById('relojBlancas').innerHTML = `<i class="fas fa-stopwatch"></i> Tú: ${formatoTiempo(tiempoBlancas)}`;
+            document.getElementById('relojNegras').innerHTML = `<i class="fas fa-robot"></i> ${nombreCortoBot}: ${formatoTiempo(tiempoNegras)}`;
             if (juegoIniciado) {
                 document.getElementById('relojBlancas').className = game.turn() === 'w' ? 'clock clock-active' : 'clock clock-inactive';
                 document.getElementById('relojNegras').className = game.turn() === 'b' ? 'clock clock-active' : 'clock clock-inactive';
@@ -241,9 +345,9 @@
                 timerInterval = setInterval(() => {
                     if(game.game_over()) { clearInterval(timerInterval); return; }
                     if(game.turn() === 'w') {
-                        tiempoBlancas--; if(tiempoBlancas <= 0) finDelJuego("Tiempo Agotado", "Ganan las Negras", 'error');
+                        tiempoBlancas--; if(tiempoBlancas <= 0) finDelJuego("Tiempo Agotado", `Gana ${nombreCortoBot}`, 'error');
                     } else {
-                        tiempoNegras--; if(tiempoNegras <= 0) finDelJuego("Tiempo Agotado", "¡Ganaste!", 'success');
+                        tiempoNegras--; if(tiempoNegras <= 0) finDelJuego("Tiempo Agotado", "¡Ganaste por tiempo!", 'success');
                     }
                     actualizarRelojesUI();
                 }, 1000);
@@ -260,12 +364,14 @@
 
         function actualizarHistorial() {
             const historial = game.history(); const panel = document.getElementById('moveHistory'); let html = '';
-            for(let i = 0; i < historial.length; i += 2) { html += `<div><b>${(i / 2) + 1}.</b></div> <div>${historial[i]}</div> <div>${historial[i+1] || ''}</div>`; }
+            for(let i = 0; i < historial.length; i += 2) {
+                html += `<div><b>${(i / 2) + 1}.</b></div> <div>${historial[i]}</div> <div style="color:#ffd700;">${historial[i+1] || ''}</div>`;
+            }
             panel.innerHTML = html; panel.parentElement.scrollTop = panel.parentElement.scrollHeight;
         }
 
         function onDragStart(source, piece) {
-            if (game.game_over() || tiempoBlancas <= 0 || tiempoNegras <= 0) return false;
+            if (game.game_over() || game.turn() !== 'w' || tiempoBlancas <= 0 || tiempoNegras <= 0) return false;
             if (piece.search(/^b/) !== -1) return false;
         }
 
@@ -274,7 +380,6 @@
             var isLegal = false;
             var isPromotion = false;
 
-            // Validación estricta FIDE
             for (var i = 0; i < moves.length; i++) {
                 if (moves[i].from === source && moves[i].to === target) {
                     isLegal = true;
@@ -283,7 +388,6 @@
                 }
             }
 
-            // NOTIFICACIÓN SI EL MOVIMIENTO ES ILEGAL O PONE EN JAQUE AL REY
             if (!isLegal) {
                 Toast.fire({ icon: 'error', title: 'Movimiento ilegal o Rey en Jaque', background: '#d62828', color: '#fff' });
                 return 'snapback';
@@ -292,11 +396,11 @@
             if (isPromotion) {
                 setTimeout(async () => {
                     const { value: promoPiece } = await Swal.fire({
-                        title: '¡Coronación!', text: 'Elige tu nueva pieza:', input: 'select',
+                        title: '¡Coronación!', text: 'Elige tu pieza:', input: 'select',
                         inputOptions: { 'q': 'Reina 👑', 'r': 'Torre 🏰', 'b': 'Alfil 🧙‍♂️', 'n': 'Caballo 🐎' },
-                        inputValue: 'q', allowOutsideClick: false, allowEscapeKey: false, background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0'
+                        inputValue: 'q', allowOutsideClick: false, background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0'
                     });
-                    ejecutarMovimiento(source, target, promoPiece);
+                    ejecutarMovimiento(source, target, promoPiece || 'q');
                 }, 10);
                 return; 
             }
@@ -308,40 +412,139 @@
             var move = game.move({ from: source, to: target, promotion: promoPiece });
             if (move === null) { board.position(game.fen()); return; }
             
-            removeHighlights();
+            ultimoOrigen = source;
+            ultimoDestino = target;
+            reproducirSonido(game.in_check() ? 'jaque' : 'mover');
+            pintarUltimaJugada();
             iniciarReloj();
             actualizarHistorial();
             verificarEstado();
             board.position(game.fen());
 
             if (!game.game_over() && tiempoBlancas > 0 && tiempoNegras > 0) {
-                window.setTimeout(hacerMovimientoIA, 250);
+                document.getElementById('estadoJuego').innerHTML = `<i class="fas fa-cog fa-spin"></i> ${nombreCortoBot} está pensando...`;
+                window.setTimeout(hacerMovimientoIA, 350);
             }
         }
 
         function onMouseoverSquare(square) {
-            if (!mostrarAyuda || game.game_over()) return;
+            if (!mostrarAyuda || game.game_over() || game.turn() !== 'w') return;
             var moves = game.moves({ square: square, verbose: true });
             if (moves.length === 0) return;
-            greySquare(square);
-            for (var i = 0; i < moves.length; i++) greySquare(moves[i].to);
+            $board.find('.square-' + square).addClass('highlight-hint');
+            for (var i = 0; i < moves.length; i++) {
+                $board.find('.square-' + moves[i].to).addClass('highlight-hint');
+            }
         }
 
-        function onMouseoutSquare() { removeHighlights(); }
+        function onMouseoutSquare() {
+            $board.find('.square-55d63').removeClass('highlight-hint');
+        }
         function onSnapEnd() { board.position(game.fen()); }
 
-        function hacerMovimientoIA() {
-            var posiblesMovimientos = game.moves();
-            if (posiblesMovimientos.length === 0) return;
+        // --- MOTOR DE INTELIGENCIA ARTIFICIAL POR NIVELES ---
+        const valorPieza = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
 
-            var move = game.move(posiblesMovimientos[Math.floor(Math.random() * posiblesMovimientos.length)]);
+        function evaluarTablero(chessObj) {
+            if (chessObj.in_checkmate()) return chessObj.turn() === 'w' ? 99999 : -99999;
+            if (chessObj.in_draw()) return 0;
+            const b = chessObj.board();
+            let score = 0;
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const p = b[r][c];
+                    if (p) {
+                        // Bonus por controlar el centro del tablero
+                        const bonusCentro = (r >= 2 && r <= 5 && c >= 2 && c <= 5) ? 15 : 0;
+                        const val = valorPieza[p.type] + bonusCentro;
+                        score += (p.color === 'b') ? val : -val;
+                    }
+                }
+            }
+            return score;
+        }
+
+        function minimax(chessObj, depth, alpha, beta, esMaximizador) {
+            if (depth === 0 || chessObj.game_over()) return evaluarTablero(chessObj);
+            const movimientos = chessObj.moves({ verbose: true });
+
+            if (esMaximizador) {
+                let maxEval = -Infinity;
+                for (let m of movimientos) {
+                    chessObj.move(m);
+                    let evaluacion = minimax(chessObj, depth - 1, alpha, beta, false);
+                    chessObj.undo();
+                    maxEval = Math.max(maxEval, evaluacion);
+                    alpha = Math.max(alpha, evaluacion);
+                    if (beta <= alpha) break;
+                }
+                return maxEval;
+            } else {
+                let minEval = Infinity;
+                for (let m of movimientos) {
+                    chessObj.move(m);
+                    let evaluacion = minimax(chessObj, depth - 1, alpha, beta, true);
+                    chessObj.undo();
+                    minEval = Math.min(minEval, evaluacion);
+                    beta = Math.min(beta, evaluacion);
+                    if (beta <= alpha) break;
+                }
+                return minEval;
+            }
+        }
+
+        function elegirJugadaSegunBot() {
+            const movimientos = game.moves({ verbose: true });
+            if (movimientos.length === 0) return null;
+
+            // Nivel 1 (Principiante): 80% azar
+            if (nivelIA === 1 && Math.random() < 0.8) {
+                return movimientos[Math.floor(Math.random() * movimientos.length)];
+            }
+
+            // Nivel 2 (Básico): Busca capturas directas o jaques, si no, azar
+            if (nivelIA <= 2) {
+                const capturas = movimientos.filter(m => m.captured);
+                if (capturas.length > 0 && Math.random() < 0.75) {
+                    return capturas[Math.floor(Math.random() * capturas.length)];
+                }
+                return movimientos[Math.floor(Math.random() * movimientos.length)];
+            }
+
+            // Niveles 3, 4 y 5: Minimax con Poda Alfa-Beta
+            const profundidad = nivelIA === 3 ? 1 : (nivelIA === 4 ? 2 : 3);
+            let mejorMov = movimientos[0];
+            let mejorValor = -Infinity;
+
+            // Mezclar primero para variedad en jugadas equivalentes
+            movimientos.sort(() => Math.random() - 0.5);
+
+            for (let m of movimientos) {
+                game.move(m);
+                let valor = minimax(game, profundidad - 1, -Infinity, Infinity, false);
+                game.undo();
+                if (valor > mejorValor) {
+                    mejorValor = valor;
+                    mejorMov = m;
+                }
+            }
+            return mejorMov;
+        }
+
+        function hacerMovimientoIA() {
+            if (game.game_over()) return;
+            const jugadaElegida = elegirJugadaSegunBot();
+            if (!jugadaElegida) return;
+
+            var move = game.move(jugadaElegida);
             board.position(game.fen());
             
-            if(mostrarAyuda) {
-                removeHighlights();
-                $board.find('.square-' + move.from).addClass('highlight2-9c5d2');
-                $board.find('.square-' + move.to).addClass('highlight2-9c5d2');
-            }
+            ultimoOrigen = move.from;
+            ultimoDestino = move.to;
+            reproducirSonido(game.in_check() ? 'jaque' : 'bot');
+            pintarUltimaJugada();
+
+            document.getElementById('ultimaJugadaBot').innerHTML = `<i class="fas fa-bell"></i> Bot jugó: ${move.from}-${move.to} (${move.san})`;
             
             actualizarRelojesUI();
             actualizarHistorial();
@@ -351,13 +554,14 @@
         function verificarEstado() {
             if (tiempoBlancas <= 0 || tiempoNegras <= 0) return;
             if (game.in_checkmate()) {
-                let ganador = game.turn() === 'b' ? '¡Ganaste!' : 'Ganan las Negras';
-                finDelJuego("¡Jaque Mate!", ganador, game.turn() === 'b' ? 'success' : 'error');
-            } else if (game.in_draw()) {
-                finDelJuego("Empate", "El juego ha terminado en tablas.", 'info');
+                let ganoJugador = game.turn() === 'b';
+                let msg = ganoJugador ? `¡Derrotaste a ${nombreCortoBot}!` : `${nombreCortoBot} te ha dado Jaque Mate.`;
+                finDelJuego("¡Jaque Mate!", msg, ganoJugador ? 'success' : 'error');
+            } else if (game.in_draw() || game.in_stalemate() || game.in_threefold_repetition()) {
+                finDelJuego("Tablas", "La batalla histórica ha terminado en empate.", 'info');
             } else {
-                let status = game.turn() === 'b' ? 'Turno de Negras (IA)' : 'Turno de Blancas (Tú)';
-                if (game.in_check()) status += ' (¡Jaque!)';
+                let status = game.turn() === 'b' ? `Turno de ${nombreCortoBot}` : '🟢 Tu Turno (Blancas)';
+                if (game.in_check()) status = '⚠️ ¡ESTÁS EN JAQUE! Defiende a tu Rey';
                 document.getElementById('estadoJuego').innerText = status;
             }
         }
