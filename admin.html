@@ -7,100 +7,173 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        h1 { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); text-align: center; }
-        .panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; width: 100%; max-width: 950px; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
-        h2 { color: #06d6a0; border-bottom: 1px solid #3a506b; padding-bottom: 10px; }
+        body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; margin: 0; }
+        h1 { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); text-align: center; margin-bottom: 15px; }
+        
+        /* TARJETAS DE RESUMEN EJECUTIVO */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; width: 100%; max-width: 950px; margin-bottom: 20px; }
+        .stat-card { background: #1c2541; border: 2px solid #3a506b; border-radius: 10px; padding: 14px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+        .stat-card i { font-size: 1.5rem; color: #06d6a0; margin-bottom: 5px; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: #ffd700; }
+        .stat-label { font-size: 0.8rem; color: #9aa5ce; text-transform: uppercase; }
+
+        .panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 12px; padding: 20px; width: 100%; max-width: 950px; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); box-sizing: border-box; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3a506b; padding-bottom: 10px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        h2 { color: #06d6a0; margin: 0; font-size: 1.35rem; }
         
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .form-full { grid-column: span 2; }
-        input, select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #3a506b; background-color: #0b132b; color: white; box-sizing: border-box; }
-        button { background-color: #06d6a0; color: #0b132b; font-weight: bold; padding: 12px; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 10px;}
+        input, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #3a506b; background-color: #0b132b; color: white; box-sizing: border-box; font-size: 0.95rem; }
+        button { background-color: #06d6a0; color: #0b132b; font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 10px; font-size: 0.95rem; }
         button:hover { background-color: #05b383; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #0b132b; border-radius: 8px; overflow: hidden; font-size: 0.95rem; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #3a506b; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #0b132b; border-radius: 8px; overflow: hidden; font-size: 0.95rem; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #3a506b; vertical-align: middle; }
         th { background: #3a506b; color: #ffd700; }
         
-        .acciones-container { display: flex; gap: 8px; flex-wrap: wrap;}
-        .btn-ver { background-color: #3a506b; color: #06d6a0; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s;}
+        .user-cell { display: flex; align-items: center; gap: 10px; font-weight: bold; }
+        .mini-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #06d6a0; background: #1c2541; }
+        .rol-tag { padding: 3px 8px; border-radius: 12px; font-size: 0.78rem; font-weight: bold; text-transform: uppercase; }
+        .rol-admin { background: #ffd700; color: #0b132b; }
+        .rol-oficial { background: #06d6a0; color: #0b132b; }
+        .rol-casual { background: #3a506b; color: #ffffff; }
+
+        .acciones-container { display: flex; gap: 6px; flex-wrap: wrap; }
+        .btn-mini { width: auto; margin: 0; padding: 6px 10px; border-radius: 5px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-ver { background-color: #3a506b; color: #06d6a0; }
         .btn-ver:hover { background-color: #2a3a4f; }
-        .btn-coronar { background-color: #ffd700; color: #0b132b; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s;}
+        .btn-sorteo { background-color: #ff9f1c; color: #0b132b; }
+        .btn-sorteo:hover { background-color: #e88e15; }
+        .btn-coronar { background-color: #ffd700; color: #0b132b; }
         .btn-coronar:hover { background-color: #e6c200; }
-        .btn-elo { background-color: #06d6a0; color: #0b132b; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s;}
+        .btn-elo { background-color: #06d6a0; color: #0b132b; }
         .btn-elo:hover { background-color: #05b383; }
-        .btn-borrar { background-color: #d62828; color: white; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s;}
+        .btn-borrar { background-color: #d62828; color: white; }
         .btn-borrar:hover { background-color: #a81d1d; }
+
+        .toolbar-search { display: flex; gap: 10px; align-items: center; width: 100%; max-width: 420px; }
+        .btn-csv { width: auto; margin: 0; padding: 9px 14px; background: #ffd700; color: #0b132b; white-space: nowrap; }
         
-        .btn-jugar { background-color: #ff9f1c; color: #0b132b; margin-top: 20px; max-width: 950px; }
+        .footer-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 950px; margin-bottom: 30px; }
+        .btn-jugar { background-color: #ff9f1c; color: #0b132b; margin: 0; }
         .btn-jugar:hover { background-color: #e88e15; }
-        .btn-salir { background-color: #d62828; color: white; margin-top: 10px; max-width: 950px; }
+        .btn-salir { background-color: #d62828; color: white; margin: 0; }
         
-        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .form-full { grid-column: span 1; } }
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-full { grid-column: span 1; }
+            .footer-btns { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
     <h1><i class="fas fa-user-shield"></i> PANEL DE DIRECTOR SUPREMO</h1>
 
-    <div class="panel">
-        <h2><i class="fas fa-user-plus"></i> Crear Nuevo Alumno</h2>
-        <div class="form-grid">
-            <input type="text" id="newUsername" placeholder="Nombre de usuario">
-            <input type="text" id="newPassword" placeholder="Contraseña">
-            <select id="newRol" class="form-full">
-                <option value="casual">Jugador Casual</option>
-                <option value="oficial">Jugador Oficial</option>
-                <option value="admin">Administrador</option>
-            </select>
+    <!-- RESUMEN EN VIVO -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="fas fa-user-graduate"></i>
+            <div class="stat-value" id="statAlumnos">0</div>
+            <div class="stat-label">Alumnos Registrados</div>
         </div>
-        <button onclick="crearUsuario()">Registrar Alumno</button>
+        <div class="stat-card">
+            <i class="fas fa-chess-king"></i>
+            <div class="stat-value" id="statLider">---</div>
+            <div class="stat-label">Líder del Ranking</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-flag-checkered"></i>
+            <div class="stat-value" id="statTorneosActivos">0</div>
+            <div class="stat-label">Torneos Abiertos</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-trophy"></i>
+            <div class="stat-value" id="statTorneosFin">0</div>
+            <div class="stat-label">Copas Entregadas</div>
+        </div>
     </div>
 
+    <!-- CREAR ALUMNO -->
     <div class="panel">
-        <h2><i class="fas fa-trophy"></i> Organizar Torneo</h2>
+        <div class="panel-header">
+            <h2><i class="fas fa-user-plus"></i> Registrar Nuevo Alumno</h2>
+        </div>
         <div class="form-grid">
-            <input type="text" id="torneoNombre" class="form-full" placeholder="Nombre (Ej: Torneo Interno FES)">
+            <input type="text" id="newUsername" placeholder="Nombre de usuario (Ej: Sofia_UNAM)">
+            <input type="text" id="newPassword" placeholder="Contraseña de acceso">
+            <select id="newRol" class="form-full">
+                <option value="casual">Jugador Casual</option>
+                <option value="oficial">Jugador Oficial de Torneo</option>
+                <option value="admin">Administrador / Profesor</option>
+            </select>
+        </div>
+        <button onclick="crearUsuario()"><i class="fas fa-check-circle"></i> Registrar Alumno</button>
+    </div>
+
+    <!-- CREAR TORNEO -->
+    <div class="panel">
+        <div class="panel-header">
+            <h2><i class="fas fa-trophy"></i> Organizar Nuevo Torneo</h2>
+        </div>
+        <div class="form-grid">
+            <input type="text" id="torneoNombre" class="form-full" placeholder="Nombre del Torneo (Ej: Gran Torneo Institucional)">
             <input type="date" id="torneoFecha">
             <input type="time" id="torneoHora">
             <select id="torneoModalidad">
                 <option value="Bala (1 min)">Bala (1 min)</option>
-                <option value="Blitz (5 min)">Blitz (5 min)</option>
+                <option value="Blitz (3 min)">Blitz (3 min)</option>
+                <option value="Blitz (5 min)" selected>Blitz (5 min)</option>
                 <option value="Rápido (10 min)">Rápido (10 min)</option>
                 <option value="Clásico (30 min)">Clásico (30 min)</option>
             </select>
             <select id="torneoParticipantes">
                 <option value="4">4 Participantes (Semifinales)</option>
-                <option value="8">8 Participantes (Cuartos)</option>
-                <option value="16" selected>16 Participantes (Octavos)</option>
+                <option value="8">8 Participantes (Cuartos de Final)</option>
+                <option value="16" selected>16 Participantes (Octavos de Final)</option>
                 <option value="32">32 Participantes</option>
+                <option value="64">64 Participantes</option>
             </select>
         </div>
-        <button onclick="crearTorneo()">Abrir Inscripciones de Torneo</button>
+        <button onclick="crearTorneo()"><i class="fas fa-bullhorn"></i> Publicar y Abrir Inscripciones</button>
     </div>
 
+    <!-- GESTIÓN DE TORNEOS -->
     <div class="panel">
-        <h2><i class="fas fa-flag-checkered"></i> Gestión de Torneos Activos</h2>
+        <div class="panel-header">
+            <h2><i class="fas fa-flag-checkered"></i> Control de Torneos y Sorteo de Rondas</h2>
+            <button class="btn-mini btn-ver" onclick="cargarDatos()"><i class="fas fa-sync-alt"></i> Actualizar</button>
+        </div>
         <div style="overflow-x:auto;">
             <table>
-                <thead><tr><th>Torneo</th><th>Fecha/Hora</th><th>Modalidad</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <thead><tr><th>Torneo</th><th>Fecha y Hora</th><th>Modalidad</th><th>Estado</th><th>Acciones de Director</th></tr></thead>
                 <tbody id="tablaTorneos"></tbody>
             </table>
         </div>
     </div>
 
+    <!-- GESTIÓN DE ALUMNOS -->
     <div class="panel">
-        <h2><i class="fas fa-users-cog"></i> Gestión y Ranking de Alumnos</h2>
+        <div class="panel-header">
+            <h2><i class="fas fa-users-cog"></i> Padrón y Ranking Elo de Alumnos</h2>
+            <div class="toolbar-search">
+                <input type="text" id="buscarInput" placeholder="🔍 Buscar alumno por nombre o rol..." oninput="filtrarTablaUsuarios()">
+                <button class="btn-csv" onclick="exportarCSV()" title="Descargar en Excel/CSV"><i class="fas fa-file-csv"></i> Exportar CSV</button>
+            </div>
+        </div>
         <div style="overflow-x:auto;">
             <table>
-                <thead><tr><th>Usuario</th><th>Rol</th><th>Elo</th><th>Acciones</th></tr></thead>
+                <thead><tr><th>#</th><th>Alumno</th><th>Rol</th><th>ELO</th><th>Acciones</th></tr></thead>
                 <tbody id="tablaUsuarios"></tbody>
             </table>
         </div>
     </div>
 
-    <button class="btn-jugar" onclick="window.location.href='menu.html'"><i class="fas fa-gamepad"></i> Ir a Jugar (Menú Normal)</button>
-    <button class="btn-salir" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+    <div class="footer-btns">
+        <button class="btn-jugar" onclick="window.location.href='menu.html'"><i class="fas fa-gamepad"></i> Ir al Menú de Juego</button>
+        <button class="btn-salir" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
     <script>
@@ -109,45 +182,75 @@
         const usuarioActual = localStorage.getItem('username');
         const rolActual = localStorage.getItem('rol');
 
-        // SOLUCIÓN: Verifica que tenga el rol 'admin' sin importar su nombre exacto
-        if(!usuarioActual || (rolActual !== 'admin' && rolActual !== 'Admin')) {
+        if (!usuarioActual || !rolActual || rolActual.toLowerCase() !== 'admin') {
             window.location.href = 'menu.html';
         }
 
+        // Prellenar fecha y hora de hoy por comodidad
+        document.getElementById('torneoFecha').valueAsDate = new Date();
+        document.getElementById('torneoHora').value = "12:00";
+
+        let cacheUsuarios = [];
+        let cacheTorneos = [];
+
         async function crearUsuario() {
-            const user = document.getElementById('newUsername').value;
-            const pass = document.getElementById('newPassword').value;
+            const user = document.getElementById('newUsername').value.trim();
+            const pass = document.getElementById('newPassword').value.trim();
             const rol = document.getElementById('newRol').value;
-            if(!user || !pass) return Swal.fire('Error', 'Llena usuario y contraseña', 'error');
+            if(!user || !pass) return Swal.fire('Atención', 'Completa el nombre de usuario y la contraseña.', 'warning');
             try {
-                const res = await fetch(`${API_URL}/admin/usuarios`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: user, password: pass, rol: rol }) });
+                const res = await fetch(`${API_URL}/admin/usuarios`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass, rol: rol })
+                });
                 if(res.ok) {
-                    Swal.fire('¡Éxito!', 'Alumno registrado.', 'success');
-                    document.getElementById('newUsername').value = ''; document.getElementById('newPassword').value = '';
+                    Swal.fire({ title: '¡Registrado!', text: `El alumno ${user} ya puede iniciar sesión.`, icon: 'success', background: '#1c2541', color: '#fff', timer: 1600, showConfirmButton: false });
+                    document.getElementById('newUsername').value = '';
+                    document.getElementById('newPassword').value = '';
                     cargarDatos();
-                } else { Swal.fire('Error', 'Usuario ya registrado', 'error'); }
-            } catch(e) { Swal.fire('Error', 'No hay conexión', 'error'); }
+                } else {
+                    Swal.fire('Aviso', 'Ese nombre de usuario ya existe.', 'error');
+                }
+            } catch(e) { Swal.fire('Error', 'No hay conexión con el servidor.', 'error'); }
         }
 
         async function crearTorneo() {
-            const datos = { nombre: document.getElementById('torneoNombre').value, fecha: document.getElementById('torneoFecha').value, hora: document.getElementById('torneoHora').value, modalidad: document.getElementById('torneoModalidad').value, participantes: document.getElementById('torneoParticipantes').value };
-            if(!datos.nombre || !datos.fecha || !datos.hora) return Swal.fire('Error', 'Llena el nombre, fecha y hora.', 'error');
+            const datos = {
+                nombre: document.getElementById('torneoNombre').value.trim(),
+                fecha: document.getElementById('torneoFecha').value,
+                hora: document.getElementById('torneoHora').value,
+                modalidad: document.getElementById('torneoModalidad').value,
+                participantes: document.getElementById('torneoParticipantes').value
+            };
+            if(!datos.nombre || !datos.fecha || !datos.hora) return Swal.fire('Atención', 'Completa el nombre, fecha y hora del torneo.', 'warning');
             try {
-                await fetch(`${API_URL}/admin/torneos`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos) });
-                Swal.fire('¡Torneo Creado!', 'Ya aparece en la lista de los alumnos.', 'success');
+                await fetch(`${API_URL}/admin/torneos`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+                document.getElementById('torneoNombre').value = '';
+                Swal.fire({ title: '¡Torneo Publicado!', text: 'Los alumnos ya pueden inscribirse desde su menú.', icon: 'success', background: '#1c2541', color: '#fff' });
                 cargarDatos();
             } catch(e) { Swal.fire('Error', 'Fallo al crear torneo', 'error'); }
         }
 
         async function eliminarUsuario(username) {
             Swal.fire({
-                title: '¿Expulsar Alumno?', text: `Se borrará la cuenta de ${username} para siempre.`, icon: 'warning',
+                title: '¿Eliminar Cuenta?', text: `Se borrará permanentemente a "${username}".`, icon: 'warning',
                 showCancelButton: true, confirmButtonColor: '#d62828', cancelButtonColor: '#3a506b', confirmButtonText: 'Sí, borrar', background: '#1c2541', color: '#fff'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    const res = await fetch(`${API_URL}/admin/usuarios`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username }) });
-                    if(res.ok) { Swal.fire({title: 'Borrado', icon: 'success', background: '#1c2541', color: '#fff'}); cargarDatos(); }
-                    else { const err = await res.json(); Swal.fire({title: 'No permitido', text: err.error, icon: 'error', background: '#1c2541', color: '#fff'}); }
+                    const res = await fetch(`${API_URL}/admin/usuarios`, {
+                        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: username })
+                    });
+                    if(res.ok) {
+                        Swal.fire({ title: 'Eliminado', icon: 'success', background: '#1c2541', color: '#fff', timer: 1200, showConfirmButton: false });
+                        cargarDatos();
+                    } else {
+                        const err = await res.json();
+                        Swal.fire({ title: 'Protegido', text: err.error, icon: 'error', background: '#1c2541', color: '#fff' });
+                    }
                 }
             });
         }
@@ -155,105 +258,284 @@
         async function modificarElo(username, eloActual) {
             const { value: nuevoElo } = await Swal.fire({
                 title: `Ajustar ELO de ${username}`,
-                text: `ELO Actual: ${eloActual}`,
-                input: 'number', inputPlaceholder: 'Ingresa el nuevo ELO',
-                showCancelButton: true, confirmButtonColor: '#06d6a0', cancelButtonColor: '#3a506b', confirmButtonText: 'Guardar', background: '#1c2541', color: '#fff'
+                html: `<p style="color:#9aa5ce;">ELO actual: <b style="color:#ffd700;">${eloActual}</b></p>`,
+                input: 'number',
+                inputValue: eloActual,
+                showCancelButton: true, confirmButtonColor: '#06d6a0', cancelButtonColor: '#3a506b', confirmButtonText: 'Guardar ELO', background: '#1c2541', color: '#fff'
             });
 
-            if (nuevoElo) {
-                await fetch(`${API_URL}/admin/usuarios/elo`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username, nuevoElo: parseInt(nuevoElo) }) });
-                Swal.fire({title: 'Elo Actualizado', icon: 'success', background: '#1c2541', color: '#fff', timer: 1500, showConfirmButton: false});
+            if (nuevoElo !== undefined && nuevoElo !== '') {
+                await fetch(`${API_URL}/admin/usuarios/elo`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, nuevoElo: parseInt(nuevoElo) })
+                });
+                Swal.fire({ title: 'ELO Actualizado', icon: 'success', background: '#1c2541', color: '#fff', timer: 1200, showConfirmButton: false });
                 cargarDatos();
             }
         }
 
         async function eliminarTorneo(id, nombreTorneo) {
             Swal.fire({
-                title: '¿Cancelar Torneo?', text: `Se borrará "${nombreTorneo}" y sus inscripciones.`, icon: 'warning',
-                showCancelButton: true, confirmButtonColor: '#d62828', cancelButtonColor: '#3a506b', confirmButtonText: 'Sí, cancelar', background: '#1c2541', color: '#fff'
+                title: '¿Eliminar Torneo?', text: `Se borrará "${nombreTorneo}" y su lista de inscritos.`, icon: 'warning',
+                showCancelButton: true, confirmButtonColor: '#d62828', cancelButtonColor: '#3a506b', confirmButtonText: 'Sí, eliminar', background: '#1c2541', color: '#fff'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    try {
-                        const res = await fetch(`${API_URL}/admin/torneos`, { 
-                            method: 'DELETE', 
-                            headers: { 'Content-Type': 'application/json' }, 
-                            body: JSON.stringify({ id: Number(id) }) 
-                        });
-                        
-                        if(res.ok) {
-                            Swal.fire({title: 'Torneo Cancelado', icon: 'success', background: '#1c2541', color: '#fff'});
-                            cargarDatos();
-                        } else {
-                            const err = await res.json();
-                            Swal.fire({title: 'Error del Servidor', text: err.error, icon: 'error', background: '#1c2541', color: '#fff'});
-                        }
-                    } catch(e) {
-                        Swal.fire({title: 'Error de Red', text: 'No hay conexión a Cloudflare.', icon: 'error', background: '#1c2541', color: '#fff'});
+                    const res = await fetch(`${API_URL}/admin/torneos`, { 
+                        method: 'DELETE', headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ id: Number(id) }) 
+                    });
+                    if(res.ok) {
+                        Swal.fire({ title: 'Torneo Eliminado', icon: 'success', background: '#1c2541', color: '#fff', timer: 1200, showConfirmButton: false });
+                        cargarDatos();
+                    } else {
+                        const err = await res.json();
+                        Swal.fire({ title: 'Error', text: err.error, icon: 'error', background: '#1c2541', color: '#fff' });
                     }
                 }
             });
         }
 
-        async function verInscritos(idTorneo, nombreTorneo) {
+        // --- VER INSCRITOS Y GENERAR EMPAREJAMIENTOS (SORTEO DE MESAS) ---
+        async function verInscritosYSorteo(idTorneo, nombreTorneo, cupoMax) {
             try {
                 const res = await fetch(`${API_URL}/admin/torneos/inscritos?id=${idTorneo}&t=${Date.now()}`);
                 const inscritos = await res.json();
-                if (inscritos.length === 0) { Swal.fire('Inscripciones', `Aún no hay nadie inscrito en "${nombreTorneo}".`, 'info'); return; }
-                let listaHtml = '<ol style="text-align: left; color: #06d6a0;">' + inscritos.map(u => `<li><b style="color:white;">${u}</b></li>`).join('') + '</ol>';
-                Swal.fire({ title: `Inscritos: ${nombreTorneo}`, html: listaHtml, background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' });
+                if (!Array.isArray(inscritos) || inscritos.length === 0) {
+                    return Swal.fire({ title: nombreTorneo, text: 'Aún no hay alumnos inscritos en este torneo.', icon: 'info', background: '#1c2541', color: '#fff' });
+                }
+
+                // Cruzar inscritos con su ELO actual
+                const listaConElo = inscritos.map(nombre => {
+                    const u = cacheUsuarios.find(x => x.username.toLowerCase() === nombre.toLowerCase());
+                    return { username: nombre, elo: u ? u.puntuacion : 1000 };
+                });
+
+                let htmlLista = `<div style="text-align:left; margin-bottom:10px; color:#9aa5ce;">Inscritos: <b style="color:#06d6a0;">${inscritos.length} / ${cupoMax}</b></div>`;
+                htmlLista += '<ol style="text-align:left; max-height:180px; overflow-y:auto; background:#0b132b; padding:12px 28px; border-radius:8px; border:1px solid #3a506b;">';
+                listaConElo.forEach(jug => {
+                    htmlLista += `<li style="margin-bottom:4px;"><b>${jug.username}</b> <span style="color:#ffd700; font-family:monospace;">(ELO ${jug.elo})</span></li>`;
+                });
+                htmlLista += '</ol>';
+
+                const modal = await Swal.fire({
+                    title: `Inscritos: ${nombreTorneo}`,
+                    html: htmlLista,
+                    showCancelButton: true,
+                    showDenyButton: true,
+                    confirmButtonColor: '#ff9f1c',
+                    denyButtonColor: '#06d6a0',
+                    cancelButtonColor: '#3a506b',
+                    confirmButtonText: '🎲 Sortear Parejas al Azar',
+                    denyButtonText: '📊 Emparejar por ELO (Suizo)',
+                    cancelButtonText: 'Cerrar',
+                    background: '#1c2541', color: '#fff'
+                });
+
+                if (modal.isConfirmed || modal.isDenied) {
+                    let participantes = [...listaConElo];
+                    if (modal.isConfirmed) {
+                        participantes.sort(() => Math.random() - 0.5);
+                    } else {
+                        participantes.sort((a, b) => b.elo - a.elo);
+                    }
+
+                    let textoPlano = `🏆 EMPAREJAMIENTOS - ${nombreTorneo}\n`;
+                    let htmlMesas = `<div style="text-align:left; background:#0b132b; padding:12px; border-radius:8px; border:1px solid #06d6a0; max-height:240px; overflow-y:auto;">`;
+                    let mesa = 1;
+
+                    for (let i = 0; i < participantes.length; i += 2) {
+                        const blancas = participantes[i];
+                        const negras = participantes[i + 1];
+                        if (negras) {
+                            htmlMesas += `<div style="padding:6px 0; border-bottom:1px solid #3a506b;"><b>Mesa ${mesa}:</b> ⚪ ${blancas.username} <span style="color:#ffd700;">vs</span> ⚫ ${negras.username}</div>`;
+                            textoPlano += `Mesa ${mesa}: ⚪ ${blancas.username} vs ⚫ ${negras.username}\n`;
+                        } else {
+                            htmlMesas += `<div style="padding:6px 0; color:#06d6a0;"><b>Mesa ${mesa}:</b> ${blancas.username} <i>(Pasa directo / BYE)</i></div>`;
+                            textoPlano += `Mesa ${mesa}: ${blancas.username} (BYE - Pasa directo)\n`;
+                        }
+                        mesa++;
+                    }
+                    htmlMesas += `</div>`;
+
+                    Swal.fire({
+                        title: '⚔️ Parejas de la Ronda',
+                        html: htmlMesas,
+                        confirmButtonText: '📋 Copiar Lista de Parejas',
+                        confirmButtonColor: '#06d6a0',
+                        background: '#1c2541', color: '#fff'
+                    }).then(r => {
+                        if (r.isConfirmed && navigator.clipboard) {
+                            navigator.clipboard.writeText(textoPlano);
+                            Swal.fire({ toast: true, position: 'top', title: '¡Parejas copiadas al portapapeles!', icon: 'success', timer: 1800, showConfirmButton: false, background: '#1c2541', color: '#fff' });
+                        }
+                    });
+                }
             } catch(e) { Swal.fire('Error', 'No se pudieron cargar los inscritos.', 'error'); }
         }
 
+        // --- CORONAR CAMPEÓN CON SELECTOR Y BONO DE ELO ---
         async function coronarGanador(idTorneo, nombreTorneo) {
-            const { value: ganador } = await Swal.fire({
-                title: 'Coronar Campeón', text: `Escribe el usuario que ganó "${nombreTorneo}":`,
-                input: 'text', inputPlaceholder: 'Nombre exacto (Ej: Peter)',
-                showCancelButton: true, confirmButtonColor: '#ffd700', confirmButtonText: '🏆 Entregar Copa', background: '#1c2541', color: '#fff'
+            let inscritos = [];
+            try {
+                const res = await fetch(`${API_URL}/admin/torneos/inscritos?id=${idTorneo}&t=${Date.now()}`);
+                inscritos = await res.json();
+            } catch (e) {}
+
+            // Si hay inscritos los mostramos primero; si no, mostramos todos los alumnos
+            const candidatos = (Array.isArray(inscritos) && inscritos.length > 0)
+                ? inscritos
+                : cacheUsuarios.map(u => u.username);
+
+            const opcionesHtml = candidatos.map(u => `<option value="${u}">${u}</option>`).join('');
+
+            const { value: form } = await Swal.fire({
+                title: `🏆 Coronar Campeón`,
+                html: `
+                    <p style="color:#9aa5ce; margin-bottom:8px;">Torneo: <b style="color:#ffd700;">${nombreTorneo}</b></p>
+                    <select id="swal-ganador" style="width:100%; padding:10px; background:#0b132b; color:white; border:1px solid #06d6a0; border-radius:6px; margin-bottom:12px;">
+                        ${opcionesHtml}
+                    </select>
+                    <label style="display:flex; align-items:center; justify-content:center; gap:8px; font-size:0.9rem; color:#06d6a0; cursor:pointer;">
+                        <input type="checkbox" id="swal-bono" checked style="width:auto;"> Otorgar +50 puntos de ELO al Campeón
+                    </label>
+                `,
+                showCancelButton: true,
+                confirmButtonColor: '#ffd700',
+                cancelButtonColor: '#3a506b',
+                confirmButtonText: '👑 Entregar Copa',
+                background: '#1c2541', color: '#fff',
+                preConfirm: () => {
+                    return {
+                        ganador: document.getElementById('swal-ganador').value,
+                        darBono: document.getElementById('swal-bono').checked
+                    };
+                }
             });
-            if (ganador) {
-                await fetch(`${API_URL}/admin/torneos/ganador`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: idTorneo, ganador: ganador }) });
-                Swal.fire({ title: '¡Campeón Coronado!', text: `${ganador} ha recibido su trofeo.`, icon: 'success', background: '#1c2541', color: '#fff' });
+
+            if (form && form.ganador) {
+                await fetch(`${API_URL}/admin/torneos/ganador`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: idTorneo, ganador: form.ganador })
+                });
+
+                if (form.darBono) {
+                    const usr = cacheUsuarios.find(u => u.username.toLowerCase() === form.ganador.toLowerCase());
+                    if (usr) {
+                        await fetch(`${API_URL}/admin/usuarios/elo`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username: usr.username, nuevoElo: parseInt(usr.puntuacion) + 50 })
+                        });
+                    }
+                }
+
+                Swal.fire({ title: '¡Campeón Coronado!', text: `${form.ganador} ha recibido la copa del torneo ${form.darBono ? 'y +50 ELO' : ''}.`, icon: 'success', background: '#1c2541', color: '#fff' });
                 cargarDatos();
             }
         }
 
-        async function cargarDatos() {
-            const resU = await fetch(`${API_URL}/admin/usuarios?t=${Date.now()}`);
-            const usuarios = await resU.json();
+        function renderizarTablaUsuarios(lista) {
             let htmlU = '';
-            usuarios.forEach(u => {
+            lista.forEach((u, idx) => {
+                const foto = u.avatar || 'zapata.png';
+                const claseRol = u.rol === 'admin' ? 'rol-admin' : (u.rol === 'oficial' ? 'rol-oficial' : 'rol-casual');
+                const nombreSeguro = (u.username || '').replace(/'/g, "\\'");
+
                 htmlU += `<tr>
-                    <td>${u.username}</td><td>${u.rol}</td><td style="color:#06d6a0; font-weight:bold;">${u.puntuacion}</td>
+                    <td style="color:#9aa5ce; font-weight:bold;">${idx + 1}</td>
+                    <td>
+                        <div class="user-cell">
+                            <img src="${foto}" class="mini-avatar" onerror="this.src='zapata.png'">
+                            <span>${u.username}</span>
+                        </div>
+                    </td>
+                    <td><span class="rol-tag ${claseRol}">${u.rol}</span></td>
+                    <td style="color:#ffd700; font-weight:bold; font-family:monospace; font-size:1.05rem;">${u.puntuacion}</td>
                     <td class="acciones-container">
-                        <button class="btn-elo" title="Editar Elo" onclick="modificarElo('${u.username}', ${u.puntuacion})"><i class="fas fa-star"></i> Elo</button>
-                        <button class="btn-borrar" title="Eliminar Alumno" onclick="eliminarUsuario('${u.username}')"><i class="fas fa-trash"></i> Borrar</button>
+                        <button class="btn-mini btn-elo" onclick="modificarElo('${nombreSeguro}', ${u.puntuacion})"><i class="fas fa-star"></i> ELO</button>
+                        <button class="btn-mini btn-borrar" onclick="eliminarUsuario('${nombreSeguro}')"><i class="fas fa-trash"></i> Borrar</button>
                     </td>
                 </tr>`;
             });
-            document.getElementById('tablaUsuarios').innerHTML = htmlU;
+            document.getElementById('tablaUsuarios').innerHTML = htmlU || '<tr><td colspan="5" style="text-align:center; color:#9aa5ce;">No se encontraron alumnos.</td></tr>';
+        }
 
-            const resT = await fetch(`${API_URL}/admin/torneos?t=${Date.now()}`);
-            const torneos = await resT.json();
-            let htmlT = '';
-            torneos.forEach(t => {
-                if (t.estado === 'Abierto') {
-                    htmlT += `<tr>
-                        <td><b>${t.nombre}</b></td><td>${t.fecha} | ${t.hora}</td><td>${t.modalidad}</td><td style="color:#06d6a0;">${t.estado}</td>
-                        <td class="acciones-container">
-                            <button class="btn-ver" onclick="verInscritos(${t.id}, '${t.nombre}')"><i class="fas fa-eye"></i> Inscritos</button>
-                            <button class="btn-coronar" onclick="coronarGanador(${t.id}, '${t.nombre}')"><i class="fas fa-crown"></i> Coronar</button>
-                            <button class="btn-borrar" title="Cancelar Torneo" onclick="eliminarTorneo(${t.id}, '${t.nombre}')"><i class="fas fa-times-circle"></i> Cancelar</button>
-                        </td>
-                    </tr>`;
-                } else {
-                    htmlT += `<tr>
-                        <td style="color:gray;">${t.nombre}</td><td style="color:gray;">${t.fecha}</td><td style="color:gray;">${t.modalidad}</td>
-                        <td style="color:#ffd700;">Ganador: ${t.ganador} 🏆</td>
-                        <td class="acciones-container"><button class="btn-borrar" title="Borrar Historial" onclick="eliminarTorneo(${t.id}, '${t.nombre}')"><i class="fas fa-trash"></i> Limpiar</button></td>
-                    </tr>`;
-                }
+        function filtrarTablaUsuarios() {
+            const q = document.getElementById('buscarInput').value.toLowerCase().trim();
+            if (!q) return renderizarTablaUsuarios(cacheUsuarios);
+            const filtrados = cacheUsuarios.filter(u =>
+                (u.username && u.username.toLowerCase().includes(q)) ||
+                (u.rol && u.rol.toLowerCase().includes(q))
+            );
+            renderizarTablaUsuarios(filtrados);
+        }
+
+        function exportarCSV() {
+            if (cacheUsuarios.length === 0) return;
+            let csv = "Posicion,Usuario,Rol,ELO\n";
+            cacheUsuarios.forEach((u, idx) => {
+                csv += `${idx + 1},"${u.username}","${u.rol}",${u.puntuacion}\n`;
             });
-            document.getElementById('tablaTorneos').innerHTML = htmlT;
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Juvenchess_Ranking_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
+
+        async function cargarDatos() {
+            try {
+                const resU = await fetch(`${API_URL}/admin/usuarios?t=${Date.now()}`);
+                const usuarios = await resU.json();
+                if (Array.isArray(usuarios)) {
+                    cacheUsuarios = usuarios;
+                    document.getElementById('statAlumnos').innerText = usuarios.length;
+                    document.getElementById('statLider').innerText = usuarios.length > 0 ? usuarios[0].username : '---';
+                    filtrarTablaUsuarios();
+                }
+
+                const resT = await fetch(`${API_URL}/admin/torneos?t=${Date.now()}`);
+                const torneos = await resT.json();
+                let htmlT = '';
+                let abiertos = 0;
+                let finalizados = 0;
+
+                if (Array.isArray(torneos)) {
+                    cacheTorneos = torneos;
+                    torneos.forEach(t => {
+                        const nombreSeguro = (t.nombre || '').replace(/'/g, "\\'");
+                        if (t.estado === 'Abierto') {
+                            abiertos++;
+                            htmlT += `<tr>
+                                <td><b>${t.nombre}</b></td>
+                                <td>${t.fecha} | ${t.hora || '--:--'}</td>
+                                <td>${t.modalidad || 'Estándar'} (${t.participantes || 16} jug.)</td>
+                                <td style="color:#06d6a0; font-weight:bold;">🟢 Abierto</td>
+                                <td class="acciones-container">
+                                    <button class="btn-mini btn-sorteo" onclick="verInscritosYSorteo(${t.id}, '${nombreSeguro}', ${t.participantes || 16})"><i class="fas fa-users"></i> Inscritos / Sortear</button>
+                                    <button class="btn-mini btn-coronar" onclick="coronarGanador(${t.id}, '${nombreSeguro}')"><i class="fas fa-crown"></i> Coronar</button>
+                                    <button class="btn-mini btn-borrar" onclick="eliminarTorneo(${t.id}, '${nombreSeguro}')"><i class="fas fa-times-circle"></i> Cancelar</button>
+                                </td>
+                            </tr>`;
+                        } else {
+                            finalizados++;
+                            htmlT += `<tr>
+                                <td style="color:#9aa5ce;">${t.nombre}</td>
+                                <td style="color:#9aa5ce;">${t.fecha}</td>
+                                <td style="color:#9aa5ce;">${t.modalidad || 'Estándar'}</td>
+                                <td style="color:#ffd700; font-weight:bold;">🏆 Campeón: ${t.ganador}</td>
+                                <td class="acciones-container">
+                                    <button class="btn-mini btn-borrar" onclick="eliminarTorneo(${t.id}, '${nombreSeguro}')"><i class="fas fa-trash"></i> Limpiar</button>
+                                </td>
+                            </tr>`;
+                        }
+                    });
+                }
+
+                document.getElementById('statTorneosActivos').innerText = abiertos;
+                document.getElementById('statTorneosFin').innerText = finalizados;
+                document.getElementById('tablaTorneos').innerHTML = htmlT || '<tr><td colspan="5" style="text-align:center; color:#9aa5ce;">No hay torneos registrados.</td></tr>';
+            } catch (e) {}
         }
 
         function cerrarSesion() { localStorage.clear(); window.location.href = 'index.html'; }
