@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUVENCHESS | Ajedrez para 4 Jugadores</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+        h1 { color: #ffd700; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.6rem; text-align: center; }
+
+        .players-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; max-width: 560px; margin-bottom: 8px; }
+        .p-chip { background: #1c2541; border: 2px solid #3a506b; border-radius: 8px; padding: 6px 8px; text-align: center; transition: 0.25s; }
+        .p-chip .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 4px; vertical-align: middle; border: 1px solid rgba(255,255,255,0.5); }
+        .p-chip .pname { font-weight: bold; font-size: 0.9rem; }
+        .p-chip .pscore { color: #ffd700; font-family: monospace; font-size: 0.85rem; }
+        .p-chip .pstatus { color: #9aa5ce; font-size: 0.72rem; }
+        .p-chip.turno { border-color: #ffd700; box-shadow: 0 0 12px rgba(255, 215, 0, 0.45); transform: scale(1.03); }
+        .p-chip.eliminado { opacity: 0.45; }
+
+        .turn-banner { width: 100%; max-width: 560px; background: #1c2541; border: 1px solid #3a506b; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; box-sizing: border-box; text-align: center; font-weight: bold; color: #ffd700; min-height: 38px; }
+
+        #board4 { position: relative; width: min(94vw, 560px); aspect-ratio: 1 / 1; touch-action: none; user-select: none; -webkit-user-select: none; }
+        #board4 .sq { position: absolute; width: 7.1429%; height: 7.1429%; }
+        #board4 .sq.light { background-color: #f0d9b5; }
+        #board4 .sq.dark { background-color: #b58863; }
+        .hl4 { position: absolute; width: 7.1429%; height: 7.1429%; pointer-events: none; z-index: 2; }
+        .hl4-last { background-color: rgba(255, 215, 0, 0.38); }
+        .hl4-sel { background-color: rgba(6, 214, 160, 0.38); box-shadow: inset 0 0 0 3px rgba(6, 214, 160, 0.9); }
+        .hl4-check { background: radial-gradient(circle, rgba(214,40,40,0.85) 0%, rgba(214,40,40,0) 70%); }
+        .hl4-dot { background: radial-gradient(circle, rgba(10, 20, 10, 0.22) 0 27%, transparent 28%); }
+        .hl4-cap { background: radial-gradient(circle, transparent 0 79%, rgba(10, 20, 10, 0.22) 80% 100%); }
+
+        .p4 { position: absolute; left: 0; top: 0; width: 7.1429%; height: 7.1429%; display: flex; align-items: center; justify-content: center; z-index: 3; cursor: grab; transition: transform 0.18s ease-in-out, opacity 0.15s ease; line-height: 1; }
+        .p4 span { font-size: min(6.4vw, 40px); text-shadow: 0 0 3px rgba(0,0,0,0.9), 0 2px 3px rgba(0,0,0,0.6); pointer-events: none; }
+        .p4.c0 span { color: #e53935; }
+        .p4.c1 span { color: #1e88e5; }
+        .p4.c2 span { color: #f9a825; }
+        .p4.c3 span { color: #43a047; }
+        .p4.muerta span { color: #9e9e9e; }
+        .p4.muerta { opacity: 0.5; }
+        .p4.drag { transition: none; z-index: 10; cursor: grabbing; filter: drop-shadow(0 10px 8px rgba(0,0,0,0.5)); }
+
+        .controls4 { display: flex; gap: 8px; width: 100%; max-width: 560px; margin-top: 12px; }
+        .btn4 { flex: 1; padding: 11px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.95rem; transition: 0.2s; }
+        .btn-nueva { background: #06d6a0; color: #0b132b; }
+        .btn-rendir { background: #ff9f1c; color: #0b132b; }
+        .btn-reglas { background: #3a506b; color: #ffffff; }
+        .btn-volver { background: #d62828; color: #ffffff; }
+
+        .log4 { width: 100%; max-width: 560px; background: #1c2541; border: 2px solid #3a506b; border-radius: 8px; margin-top: 10px; padding: 8px 12px; box-sizing: border-box; height: 92px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; color: #e0e0e0; }
+        .log4 div { margin-bottom: 2px; }
+
+        #reglasPanel { display: none; width: 100%; max-width: 560px; background: #1c2541; border: 2px solid #3a506b; border-radius: 8px; margin-top: 10px; padding: 12px 16px; box-sizing: border-box; font-size: 0.9rem; line-height: 1.5; color: #e0e0e0; }
+        #reglasPanel h3 { color: #ffd700; margin-top: 0; }
+        #reglasPanel li { margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+    <h1><i class="fas fa-chess"></i> JUVENCHESS · 4 JUGADORES</h1>
+
+    <div class="players-bar" id="playersBar"></div>
+    <div class="turn-banner" id="turnoBanner">Cargando…</div>
+
+    <div id="board4">
+        <div id="sqLayer4"></div>
+        <div id="hlLayer4"></div>
+        <div id="pcLayer4"></div>
+    </div>
+
+    <div class="controls4">
+        <button class="btn4 btn-nueva" onclick="nuevaPartida()"><i class="fas fa-redo"></i> Nueva</button>
+        <button class="btn4 btn-rendir" onclick="rendirse()"><i class="fas fa-flag"></i> Rendirse</button>
+        <button class="btn4 btn-reglas" onclick="toggleReglas()"><i class="fas fa-book"></i> Reglas</button>
+        <button class="btn4 btn-volver" onclick="window.location.href='menu.html';"><i class="fas fa-arrow-left"></i> Menú</button>
+    </div>
+
+    <div id="reglasPanel">
+        <h3><i class="fas fa-book"></i> Cómo se juega</h3>
+        <ul>
+            <li>Tablero especial de 14×14 sin las esquinas: cuatro ejércitos (Rojo, Azul, Amarillo y Verde) juegan por turnos, en pantalla compartida.</li>
+            <li>Las piezas se mueven como en el ajedrez clásico. Aquí <b>no hay enroque ni captura al paso</b>, como en el Ajedrez para 4 clásico.</li>
+            <li>El peón corona a Reina al llegar al último escaque posible de su columna o fila.</li>
+            <li>Los reyes <b>no se capturan</b>: si al llegar tu turno estás en jaque mate o ahogado (sin movimientos legales), quedas <b>eliminado</b>. Tu rey sale del tablero y tus demás piezas quedan grises: ya no se mueven ni dan jaque, pero sí pueden ser capturadas.</li>
+            <li>Puntos: peón 1, caballo y alfil 3, torre 5, reina 9, y 20 puntos por eliminar a un rival con jaque mate.</li>
+            <li>Gana el último jugador que quede en pie.</li>
+            <li>Arrastra la pieza o toca una casilla y luego el destino: los puntos verdes marcan los movimientos legales.</li>
+        </ul>
+    </div>
+
+    <div class="log4" id="log4"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+
+    <script id="motor4">
+    // ============ MOTOR DE AJEDREZ PARA 4 JUGADORES ============
+    // Tablero 14x14 con las esquinas 3x3 recortadas (el tablero especial clásico).
+    // Coordenadas: f = columna 0..13 (a..n), r = fila 0..13 (rango 1..14, desde abajo).
+    // Jugadores: 0 Rojo (abajo), 1 Azul (izquierda), 2 Amarillo (arriba), 3 Verde (derecha).
+    var DIRS4 = [{ f: 0, r: 1 }, { f: 1, r: 0 }, { f: 0, r: -1 }, { f: -1, r: 0 }];
+    var VALORES4 = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+    var NOMBRES4 = ['Rojo', 'Azul', 'Amarillo', 'Verde'];
+
+    function esVacia4(f, r) {
+        return (f < 3 && r < 3) || (f > 10 && r < 3) || (f < 3 && r > 10) || (f > 10 && r > 10);
+    }
+    function dentro4(f, r) {
+        return f >= 0 && f < 14 && r >= 0 && r < 14 && !esVacia4(f, r);
+    }
+    function nombreCasilla4(f, r) {
+        return 'abcdefghijklmn'[f] + (r + 1);
+    }
+
+    function estadoInicial4() {
+        var b = [];
+        for (var r = 0; r < 14; r++) { var fila = []; for (var f = 0; f < 14; f++) fila.push(null); b.push(fila); }
+        function poner(f, r, t, c) { b[r][f] = { t: t, c: c }; }
+        var orden = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'];
+        for (var i = 0; i < 8; i++) {
+            poner(3 + i, 0, orden[i], 0);       poner(3 + i, 1, 'p', 0);        // Rojo
+            poner(3 + i, 13, orden[7 - i], 2);  poner(3 + i, 12, 'p', 2);       // Amarillo
+            poner(0, 10 - i, orden[i], 1);      poner(1, 10 - i, 'p', 1);       // Azul
+            poner(13, 3 + i, orden[i], 3);      poner(12, 3 + i, 'p', 3);       // Verde
+        }
+        return {
+            b: b, turno: 0,
+            activos: [true, true, true, true],
+            puntos: [0, 0, 0, 0],
+            ultimoQueMovio: -1,
+            terminado: false, ganador: -1
+        };
+    }
+
+    function piezaEn(st, f, r) { return dentro4(f, r) ? st.b[r][f] : null; }
+
+    function pseudoLegales4(st, c) {
+        var movs = [];
+        var dir = DIRS4[c];
+        var perp = { f: dir.r, r: dir.f };
+        function destinoOk(f, r) {
+            if (!dentro4(f, r)) return 0;              // fuera o hueco: no
+            var p = st.b[r][f];
+            if (!p) return 1;                          // vacío: sí
+            if (p.t === 'k') return 0;                 // los reyes no se capturan
+            return p.c === c ? 0 : 2;                  // propia: no; enemiga: captura
+        }
+        function deslizar(f, r, df, dr) {
+            var nf = f + df, nr = r + dr;
+            while (true) {
+                var ok = destinoOk(nf, nr);
+                if (ok === 0) break;
+                movs.push({ de: [f, r], a: [nf, nr], captura: ok === 2 });
+                if (ok === 2) break;
+                nf += df; nr += dr;
+            }
+        }
+        for (var r = 0; r < 14; r++) {
+            for (var f = 0; f < 14; f++) {
+                var cell = st.b[r][f];
+                if (!cell || cell.c !== c) continue;
+                var i, nf, nr, ok;
+                if (cell.t === 'p') {
+                    nf = f + dir.f; nr = r + dir.r;
+                    if (dentro4(nf, nr) && !st.b[nr][nf]) {
+                        movs.push({ de: [f, r], a: [nf, nr], captura: false });
+                        var esInicio = (c === 0 && r === 1) || (c === 2 && r === 12) || (c === 1 && f === 1) || (c === 3 && f === 12);
+                        var f2 = f + dir.f * 2, r2 = r + dir.r * 2;
+                        if (esInicio && dentro4(f2, r2) && !st.b[r2][f2]) {
+                            movs.push({ de: [f, r], a: [f2, r2], captura: false });
+                        }
+                    }
+                    var diagonales = [[f + dir.f + perp.f, r + dir.r + perp.r], [f + dir.f - perp.f, r + dir.r - perp.r]];
+                    for (i = 0; i < 2; i++) {
+                        nf = diagonales[i][0]; nr = diagonales[i][1];
+                        if (destinoOk(nf, nr) === 2) movs.push({ de: [f, r], a: [nf, nr], captura: true });
+                    }
+                } else if (cell.t === 'n') {
+                    var saltos = [[1, 2], [2, 1], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]];
+                    for (i = 0; i < 8; i++) {
+                        nf = f + saltos[i][0]; nr = r + saltos[i][1];
+                        ok = destinoOk(nf, nr);
+                        if (ok) movs.push({ de: [f, r], a: [nf, nr], captura: ok === 2 });
+                    }
+                } else if (cell.t === 'k') {
+                    for (var df = -1; df <= 1; df++) for (var dr = -1; dr <= 1; dr++) {
+                        if (!df && !dr) continue;
+                        nf = f + df; nr = r + dr;
+                        ok = destinoOk(nf, nr);
+                        if (ok) movs.push({ de: [f, r], a: [nf, nr], captura: ok === 2 });
+                    }
+                } else {
+                    var dirs = [];
+                    if (cell.t === 'b' || cell.t === 'q') dirs = dirs.concat([[1, 1], [1, -1], [-1, 1], [-1, -1]]);
+                    if (cell.t === 'r' || cell.t === 'q') dirs = dirs.concat([[1, 0], [-1, 0], [0, 1], [0, -1]]);
+                    for (i = 0; i < dirs.length; i++) deslizar(f, r, dirs[i][0], dirs[i][1]);
+                }
+            }
+        }
+        return movs;
+    }
+
+    function casillaAtacada4(st, f, r, por) {
+        // ¿Alguna pieza ACTIVA del jugador "por" ataca la casilla (f, r)?
+        var dir = DIRS4[por];
+        var perp = { f: dir.r, r: dir.f };
+        var origenesPeon = [[f - dir.f - perp.f, r - dir.r - perp.r], [f - dir.f + perp.f, r - dir.r + perp.r]];
+        var i, nf, nr, p;
+        for (i = 0; i < 2; i++) {
+            p = piezaEn(st, origenesPeon[i][0], origenesPeon[i][1]);
+            if (p && p.c === por && p.t === 'p') return true;
+        }
+        var saltos = [[1, 2], [2, 1], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]];
+        for (i = 0; i < 8; i++) {
+            p = piezaEn(st, f + saltos[i][0], r + saltos[i][1]);
+            if (p && p.c === por && p.t === 'n') return true;
+        }
+        for (var df = -1; df <= 1; df++) for (var dr = -1; dr <= 1; dr++) {
+            if (!df && !dr) continue;
+            p = piezaEn(st, f + df, r + dr);
+            if (p && p.c === por && p.t === 'k') return true;
+        }
+        var rayos = [
+            { d: [1, 1], tipos: ['b', 'q'] }, { d: [1, -1], tipos: ['b', 'q'] },
+            { d: [-1, 1], tipos: ['b', 'q'] }, { d: [-1, -1], tipos: ['b', 'q'] },
+            { d: [1, 0], tipos: ['r', 'q'] }, { d: [-1, 0], tipos: ['r', 'q'] },
+            { d: [0, 1], tipos: ['r', 'q'] }, { d: [0, -1], tipos: ['r', 'q'] }
+        ];
+        for (i = 0; i < rayos.length; i++) {
+            nf = f + rayos[i].d[0]; nr = r + rayos[i].d[1];
+            while (dentro4(nf, nr)) {
+                p = st.b[nr][nf];
+                if (p) {
+                    if (p.c === por && rayos[i].tipos.indexOf(p.t) !== -1) return true;
+                    break;
+                }
+                nf += rayos[i].d[0]; nr += rayos[i].d[1];
+            }
+        }
+        return false;
+    }
+
+    function posicionRey4(st, c) {
+        for (var r = 0; r < 14; r++) for (var f = 0; f < 14; f++) {
+            var p = st.b[r][f];
+            if (p && p.t === 'k' && p.c === c) return [f, r];
+        }
+        return null;
+    }
+
+    function enJaque4(st, c) {
+        var rey = posicionRey4(st, c);
+        if (!rey) return false;
+        for (var j = 0; j < 4; j++) {
+            if (j !== c && st.activos[j] && casillaAtacada4(st, rey[0], rey[1], j)) return true;
+        }
+        return false;
+    }
+
+    function aplicarEnTablero4(st, mov) {
+        var pieza = st.b[mov.de[1]][mov.de[0]];
+        var capturada = st.b[mov.a[1]][mov.a[0]];
+        st.b[mov.a[1]][mov.a[0]] = pieza;
+        st.b[mov.de[1]][mov.de[0]] = null;
+        return capturada;
+    }
+
+    function movimientosLegales4(st, c) {
+        if (!st.activos[c]) return [];
+        return pseudoLegales4(st, c).filter(function (mov) {
+            var copia = { b: st.b.map(function (fila) { return fila.slice(); }), activos: st.activos };
+            aplicarEnTablero4(copia, mov);
+            return !enJaque4(copia, c);
+        });
+    }
+
+    function esFinDeLinea4(st, f, r, c) {
+        var dir = DIRS4[c];
+        return !dentro4(f + dir.f, r + dir.r);
+    }
+
+    function hacerMovimiento4(st, mov) {
+        var pieza = st.b[mov.de[1]][mov.de[0]];
+        var capturada = aplicarEnTablero4(st, mov);
+        if (capturada) st.puntos[pieza.c] += VALORES4[capturada.t];
+        var promocion = false;
+        if (pieza.t === 'p' && esFinDeLinea4(st, mov.a[0], mov.a[1], pieza.c)) {
+            pieza.t = 'q';
+            promocion = true;
+        }
+        st.ultimoQueMovio = pieza.c;
+        return { capturada: capturada, promocion: promocion };
+    }
+
+    function eliminarJugador4(st, c) {
+        st.activos[c] = false;
+        var rey = posicionRey4(st, c);
+        if (rey) st.b[rey[1]][rey[0]] = null;
+    }
+
+    // Avanza el turno tras un movimiento. Devuelve los eventos ocurridos:
+    // [{tipo:'eliminado', jugador, porMate}, {tipo:'fin', ganador}]
+    function avanzarTurno4(st) {
+        var eventos = [];
+        var activosCount = function () { return st.activos.filter(Boolean).length; };
+        if (activosCount() <= 1) {
+            st.terminado = true;
+            st.ganador = st.activos.indexOf(true);
+            eventos.push({ tipo: 'fin', ganador: st.ganador });
+            return eventos;
+        }
+        var siguiente = st.turno;
+        while (true) {
+            siguiente = (siguiente + 1) % 4;
+            if (!st.activos[siguiente]) continue;
+            st.turno = siguiente;
+            var movs = movimientosLegales4(st, siguiente);
+            if (movs.length > 0) break;
+            var mate = enJaque4(st, siguiente);
+            eliminarJugador4(st, siguiente);
+            if (mate && st.ultimoQueMovio >= 0 && st.activos[st.ultimoQueMovio]) {
+                st.puntos[st.ultimoQueMovio] += 20;
+            }
+            eventos.push({ tipo: 'eliminado', jugador: siguiente, porMate: mate });
+            if (activosCount() <= 1) {
+                st.terminado = true;
+                st.ganador = st.activos.indexOf(true);
+                eventos.push({ tipo: 'fin', ganador: st.ganador });
+                return eventos;
+            }
+            siguiente = st.turno; // seguir buscando desde el eliminado
+        }
+        return eventos;
+    }
+    </script>
+
+    <script>
+    // ============ INTERFAZ DEL MODO 4 JUGADORES ============
+    const GLIFOS4 = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
+    const COLORES4 = ['#e53935', '#1e88e5', '#f9a825', '#43a047'];
+    const board4El = document.getElementById('board4');
+    const sqLayer4 = document.getElementById('sqLayer4');
+    const hlLayer4 = document.getElementById('hlLayer4');
+    const pcLayer4 = document.getElementById('pcLayer4');
+    const banner4 = document.getElementById('turnoBanner');
+    const log4El = document.getElementById('log4');
+
+    let st4 = estadoInicial4();
+    let pieceEls4 = {};       // "f,r" -> elemento
+    let seleccion4 = null;    // [f, r]
+    let destinos4 = [];
+    let arrastrando4 = null;
+    let animando4 = false;
+    let ultMov4 = null;       // {de:[f,r], a:[f,r]}
+
+    const audioCtx4 = new (window.AudioContext || window.webkitAudioContext)();
+    function sonido4(tipo) {
+        try {
+            if (audioCtx4.state === 'suspended') audioCtx4.resume();
+            const now = audioCtx4.currentTime;
+            function tono(freq, t0, dur, vol, type) {
+                const o = audioCtx4.createOscillator(), g = audioCtx4.createGain();
+                o.type = type || 'sine';
+                o.frequency.setValueAtTime(freq, now + t0);
+                g.gain.setValueAtTime(vol, now + t0);
+                g.gain.exponentialRampToValueAtTime(0.01, now + t0 + dur);
+                o.connect(g); g.connect(audioCtx4.destination);
+                o.start(now + t0); o.stop(now + t0 + dur);
+            }
+            if (tipo === 'mover') tono(440, 0, 0.1, 0.15);
+            else if (tipo === 'captura') { tono(200, 0, 0.1, 0.22, 'square'); tono(140, 0.03, 0.1, 0.18, 'square'); }
+            else if (tipo === 'jaque') { tono(310, 0, 0.16, 0.2, 'sawtooth'); tono(220, 0.12, 0.22, 0.2, 'sawtooth'); }
+            else if (tipo === 'eliminado') { tono(392, 0, 0.15, 0.2); tono(330, 0.14, 0.15, 0.2); tono(262, 0.28, 0.3, 0.2); }
+            else if (tipo === 'victoria') { [523, 659, 784, 1047].forEach((f, i) => tono(f, i * 0.13, 0.25, 0.2)); }
+        } catch (e) {}
+    }
+
+    function clave(f, r) { return f + ',' + r; }
+    function posPantalla(f, r) { return { x: f, y: 13 - r }; }  // fila de pantalla (0 arriba)
+
+    function construirCasillas4() {
+        sqLayer4.innerHTML = '';
+        for (let r = 0; r < 14; r++) {
+            for (let f = 0; f < 14; f++) {
+                if (esVacia4(f, r)) continue;
+                const d = document.createElement('div');
+                d.className = 'sq ' + (((f + r) % 2 === 0) ? 'light' : 'dark');
+                const p = posPantalla(f, r);
+                d.style.left = (p.x * 100 / 14) + '%';
+                d.style.top = (p.y * 100 / 14) + '%';
+                sqLayer4.appendChild(d);
+            }
+        }
+    }
+
+    function colocar4(el, f, r, escala) {
+        const p = posPantalla(f, r);
+        el.style.transform = 'translate(' + (p.x * 100) + '%, ' + (p.y * 100) + '%)' + (escala ? ' scale(' + escala + ')' : '');
+    }
+
+    function renderAll4() {
+        pcLayer4.innerHTML = '';
+        pieceEls4 = {};
+        for (let r = 0; r < 14; r++) {
+            for (let f = 0; f < 14; f++) {
+                const cell = st4.b[r][f];
+                if (!cell) continue;
+                const el = document.createElement('div');
+                el.className = 'p4 c' + cell.c + (st4.activos[cell.c] ? '' : ' muerta');
+                el.innerHTML = '<span>' + GLIFOS4[cell.t] + '</span>';
+                colocar4(el, f, r);
+                pieceEls4[clave(f, r)] = el;
+                pcLayer4.appendChild(el);
+            }
+        }
+    }
+
+    function agregarHL4(f, r, clase) {
+        const p = posPantalla(f, r);
+        const d = document.createElement('div');
+        d.className = 'hl4 ' + clase;
+        d.style.left = (p.x * 100 / 14) + '%';
+        d.style.top = (p.y * 100 / 14) + '%';
+        hlLayer4.appendChild(d);
+    }
+
+    function pintarResaltados4() {
+        hlLayer4.innerHTML = '';
+        if (ultMov4) {
+            agregarHL4(ultMov4.de[0], ultMov4.de[1], 'hl4-last');
+            agregarHL4(ultMov4.a[0], ultMov4.a[1], 'hl4-last');
+        }
+        if (!st4.terminado && st4.activos[st4.turno] && enJaque4(st4, st4.turno)) {
+            const rey = posicionRey4(st4, st4.turno);
+            if (rey) agregarHL4(rey[0], rey[1], 'hl4-check');
+        }
+        if (seleccion4) {
+            agregarHL4(seleccion4[0], seleccion4[1], 'hl4-sel');
+            destinos4.forEach(m => agregarHL4(m.a[0], m.a[1], m.captura ? 'hl4-cap' : 'hl4-dot'));
+        }
+    }
+
+    function pintarChips4() {
+        const bar = document.getElementById('playersBar');
+        bar.innerHTML = '';
+        for (let c = 0; c < 4; c++) {
+            const d = document.createElement('div');
+            d.className = 'p-chip' + (st4.turno === c && !st4.terminado ? ' turno' : '') + (st4.activos[c] ? '' : ' eliminado');
+            d.innerHTML = '<span class="dot" style="background:' + COLORES4[c] + '"></span>' +
+                '<span class="pname">' + NOMBRES4[c] + '</span><br>' +
+                '<span class="pscore">' + st4.puntos[c] + ' pts</span><br>' +
+                '<span class="pstatus">' + (st4.activos[c] ? (st4.turno === c && !st4.terminado ? 'En turno' : 'En pie') : 'Eliminado') + '</span>';
+            bar.appendChild(d);
+        }
+    }
+
+    function pintarBanner4(extra) {
+        if (st4.terminado) {
+            banner4.innerHTML = '🏆 ¡Ganó <b>' + NOMBRES4[st4.ganador] + '</b> con ' + st4.puntos[st4.ganador] + ' puntos!';
+            return;
+        }
+        let txt = 'Turno de <b style="color:' + COLORES4[st4.turno] + '">' + NOMBRES4[st4.turno] + '</b>';
+        if (enJaque4(st4, st4.turno)) txt += ' · ⚠️ ¡Está en jaque!';
+        if (extra) txt += ' · ' + extra;
+        banner4.innerHTML = txt;
+    }
+
+    function log4(texto) {
+        const d = document.createElement('div');
+        d.innerHTML = texto;
+        log4El.prepend(d);
+    }
+
+    function seleccionar4(f, r) {
+        seleccion4 = (f === null) ? null : [f, r];
+        destinos4 = seleccion4 ? movimientosLegales4(st4, st4.turno).filter(m => m.de[0] === f && m.de[1] === r) : [];
+        pintarResaltados4();
+    }
+
+    function animarMovimiento4(mov, resultado) {
+        const el = pieceEls4[clave(mov.de[0], mov.de[1])];
+        if (!el) { renderAll4(); return; }
+        animando4 = true;
+        if (resultado.capturada) {
+            const cel = pieceEls4[clave(mov.a[0], mov.a[1])];
+            if (cel) {
+                delete pieceEls4[clave(mov.a[0], mov.a[1])];
+                cel.style.opacity = '0';
+                colocar4(cel, mov.a[0], mov.a[1], 0.5);
+                setTimeout(() => cel.remove(), 180);
+            }
+        }
+        delete pieceEls4[clave(mov.de[0], mov.de[1])];
+        pieceEls4[clave(mov.a[0], mov.a[1])] = el;
+        el.style.zIndex = 6;
+        colocar4(el, mov.a[0], mov.a[1]);
+        if (resultado.promocion) {
+            setTimeout(() => { el.querySelector('span').textContent = GLIFOS4.q; }, 170);
+        }
+        setTimeout(() => { animando4 = false; el.style.zIndex = 3; renderAll4(); pintarResaltados4(); }, 210);
+    }
+
+    function ejecutarMovimiento4(mov) {
+        const jugador = st4.turno;
+        const pieza = st4.b[mov.de[1]][mov.de[0]];
+        const tipoPieza = pieza.t;
+        const resultado = hacerMovimiento4(st4, mov);
+        ultMov4 = mov;
+        seleccion4 = null; destinos4 = [];
+        animarMovimiento4(mov, resultado);
+
+        let texto = '<b style="color:' + COLORES4[jugador] + '">' + NOMBRES4[jugador] + '</b>: ' +
+            GLIFOS4[tipoPieza] + ' ' + nombreCasilla4(mov.de[0], mov.de[1]) + ' → ' + nombreCasilla4(mov.a[0], mov.a[1]);
+        if (resultado.capturada) texto += ' · captura ' + GLIFOS4[resultado.capturada.t] + ' (+' + VALORES4[resultado.capturada.t] + ')';
+        if (resultado.promocion) texto += ' · 👑 ¡Coronó a Reina!';
+        log4(texto);
+        sonido4(resultado.capturada ? 'captura' : 'mover');
+
+        const eventos = avanzarTurno4(st4);
+        let extra = '';
+        eventos.forEach(ev => {
+            if (ev.tipo === 'eliminado') {
+                log4('💀 <b>' + NOMBRES4[ev.jugador] + '</b> eliminado por ' + (ev.porMate ? 'jaque mate (+20 a ' + NOMBRES4[st4.ultimoQueMovio] + ')' : 'ahogado: sin movimientos') + '. Sus piezas quedan grises.');
+                extra = NOMBRES4[ev.jugador] + ' eliminado';
+                sonido4('eliminado');
+            }
+            if (ev.tipo === 'fin') {
+                sonido4('victoria');
+                setTimeout(() => {
+                    Swal.fire({
+                        title: '🏆 ¡Ganó ' + NOMBRES4[ev.ganador] + '!',
+                        html: 'Puntos finales:<br>' + NOMBRES4.map((n, c) => '<b style="color:' + COLORES4[c] + '">' + n + '</b>: ' + st4.puntos[c]).join(' · '),
+                        icon: 'success', background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0', confirmButtonText: 'Jugar otra vez'
+                    }).then(() => nuevaPartida(true));
+                }, 450);
+            }
+        });
+
+        if (!st4.terminado && enJaque4(st4, st4.turno)) sonido4('jaque');
+        pintarChips4();
+        pintarBanner4(extra);
+        pintarResaltados4();
+    }
+
+    // ============ INTERACCIÓN: arrastrar y clic-clic ============
+    function casillaDesdeEvento4(e) {
+        const rect = board4El.getBoundingClientRect();
+        const fx = Math.floor((e.clientX - rect.left) / rect.width * 14);
+        const ry = Math.floor((e.clientY - rect.top) / rect.height * 14);
+        const f = fx, r = 13 - ry;
+        if (f < 0 || f > 13 || r < 0 || r > 13 || esVacia4(f, r)) return null;
+        return [f, r];
+    }
+
+    function puedeMover4() {
+        return !animando4 && !st4.terminado && st4.activos[st4.turno];
+    }
+
+    board4El.addEventListener('pointerdown', e => {
+        if (!puedeMover4()) return;
+        const sq = casillaDesdeEvento4(e);
+        if (!sq) return;
+        e.preventDefault();
+
+        if (seleccion4 && destinos4.some(m => m.a[0] === sq[0] && m.a[1] === sq[1])) {
+            const mov = destinos4.find(m => m.a[0] === sq[0] && m.a[1] === sq[1]);
+            ejecutarMovimiento4(mov);
+            return;
+        }
+
+        const cell = st4.b[sq[1]][sq[0]];
+        if (cell && cell.c === st4.turno) {
+            const eraSeleccion = seleccion4 && seleccion4[0] === sq[0] && seleccion4[1] === sq[1];
+            seleccionar4(sq[0], sq[1]);
+            const el = pieceEls4[clave(sq[0], sq[1])];
+            if (el) {
+                arrastrando4 = { de: sq, el: el, startX: e.clientX, startY: e.clientY, activo: false, eraSeleccion: eraSeleccion };
+                board4El.setPointerCapture(e.pointerId);
+            }
+        } else {
+            seleccionar4(null);
+        }
+    });
+
+    board4El.addEventListener('pointermove', e => {
+        if (!arrastrando4) return;
+        const dx = e.clientX - arrastrando4.startX;
+        const dy = e.clientY - arrastrando4.startY;
+        if (!arrastrando4.activo && Math.hypot(dx, dy) > 6) {
+            arrastrando4.activo = true;
+            arrastrando4.el.classList.add('drag');
+        }
+        if (arrastrando4.activo) {
+            const rect = board4El.getBoundingClientRect();
+            const sqSize = rect.width / 14;
+            const p = posPantalla(arrastrando4.de[0], arrastrando4.de[1]);
+            arrastrando4.el.style.transform = 'translate(' + (p.x * sqSize + dx) + 'px, ' + (p.y * sqSize + dy) + 'px) scale(1.15)';
+        }
+    });
+
+    function finArrastre4(e) {
+        if (!arrastrando4) return;
+        const d = arrastrando4;
+        arrastrando4 = null;
+        d.el.classList.remove('drag');
+
+        if (!d.activo) {
+            colocar4(d.el, d.de[0], d.de[1]);
+            if (d.eraSeleccion) seleccionar4(null);
+            return;
+        }
+        const destino = casillaDesdeEvento4(e);
+        const mov = destino ? destinos4.find(m => m.a[0] === destino[0] && m.a[1] === destino[1]) : null;
+        if (mov) {
+            d.el.style.transition = 'transform 0.12s ease-out';
+            ejecutarMovimiento4(mov);
+            setTimeout(() => { d.el.style.transition = ''; }, 140);
+        } else if (destino && destino[0] === d.de[0] && destino[1] === d.de[1]) {
+            colocar4(d.el, d.de[0], d.de[1]);
+        } else {
+            colocar4(d.el, d.de[0], d.de[1]);
+            seleccionar4(null);
+        }
+    }
+    board4El.addEventListener('pointerup', finArrastre4);
+    board4El.addEventListener('pointercancel', finArrastre4);
+
+    // ============ CONTROLES ============
+    function nuevaPartida(silenciosa) {
+        const arrancar = () => {
+            st4 = estadoInicial4();
+            seleccion4 = null; destinos4 = []; ultMov4 = null; arrastrando4 = null;
+            log4El.innerHTML = '';
+            renderAll4();
+            pintarChips4();
+            pintarBanner4();
+            pintarResaltados4();
+            log4('Nueva partida: mueve primero <b style="color:' + COLORES4[0] + '">Rojo</b>.');
+        };
+        if (silenciosa) { arrancar(); return; }
+        Swal.fire({
+            title: '¿Nueva partida?', text: 'Se reinicia el tablero para los 4 jugadores.', icon: 'question',
+            showCancelButton: true, confirmButtonColor: '#06d6a0', cancelButtonColor: '#3a506b',
+            confirmButtonText: 'Sí, reiniciar', background: '#1c2541', color: '#fff'
+        }).then(res => { if (res.isConfirmed) arrancar(); });
+    }
+
+    function rendirse() {
+        if (st4.terminado) return;
+        const c = st4.turno;
+        Swal.fire({
+            title: '¿' + NOMBRES4[c] + ' se rinde?', text: 'Quedará eliminado y sus piezas quedarán grises.', icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#d62828', cancelButtonColor: '#3a506b',
+            confirmButtonText: 'Sí, rendirse', background: '#1c2541', color: '#fff'
+        }).then(res => {
+            if (!res.isConfirmed) return;
+            eliminarJugador4(st4, c);
+            log4('🏳️ <b>' + NOMBRES4[c] + '</b> se rindió. Sus piezas quedan grises.');
+            sonido4('eliminado');
+            st4.ultimoQueMovio = -1;
+            const eventos = avanzarTurno4(st4);
+            eventos.forEach(ev => {
+                if (ev.tipo === 'fin') {
+                    sonido4('victoria');
+                    Swal.fire({
+                        title: '🏆 ¡Ganó ' + NOMBRES4[ev.ganador] + '!',
+                        html: 'Puntos finales:<br>' + NOMBRES4.map((n, cc) => '<b style="color:' + COLORES4[cc] + '">' + n + '</b>: ' + st4.puntos[cc]).join(' · '),
+                        icon: 'success', background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0', confirmButtonText: 'Jugar otra vez'
+                    }).then(() => nuevaPartida(true));
+                }
+            });
+            renderAll4();
+            pintarChips4();
+            pintarBanner4();
+            pintarResaltados4();
+        });
+    }
+
+    function toggleReglas() {
+        const p = document.getElementById('reglasPanel');
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // --- ARRANQUE ---
+    construirCasillas4();
+    renderAll4();
+    pintarChips4();
+    pintarBanner4();
+    pintarResaltados4();
+    log4('Partida lista: mueve primero <b style="color:' + COLORES4[0] + '">Rojo</b>. Toca una pieza para ver sus movimientos.');
+    </script>
+</body>
+</html>

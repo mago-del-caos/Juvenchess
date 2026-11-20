@@ -4,30 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JUVENCHESS | Tablero Ultra Pro</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         body { background-color: #0b132b; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
         h1 { color: #ffd700; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.7rem; }
-        
+
         .info-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 460px; box-sizing: border-box; }
         .avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #06d6a0; object-fit: cover; margin-right: 10px; background-color: #0b132b; }
         .player-info { display: flex; align-items: center; font-weight: bold; }
-        
+
         .clocks { display: flex; flex-direction: column; align-items: flex-end; font-family: monospace; font-size: 1.1rem; gap: 4px; }
         .clock { padding: 3px 10px; border-radius: 6px; font-weight: bold; transition: 0.3s; text-align: right; }
         .clock-active { background-color: #06d6a0; color: #0b132b; box-shadow: 0 0 10px rgba(6, 214, 160, 0.6); font-size: 1.25rem; }
         .clock-inactive { background-color: #0b132b; color: #9aa5ce; border: 1px solid #3a506b; }
 
-        /* BANNER DE AVISO DE JUGADA DEL BOT */
         .status-bar { width: 100%; max-width: 460px; background: #1c2541; border: 1px solid #3a506b; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
         #estadoJuego { color: #ffd700; font-weight: bold; font-size: 0.95rem; }
         #ultimaJugadaBot { color: #06d6a0; font-family: monospace; font-size: 0.9rem; font-weight: bold; }
 
+        .captured-bar { width: 100%; max-width: 460px; display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; box-sizing: border-box; }
+        .captured-side { flex: 1; background: #1c2541; border: 1px solid #3a506b; border-radius: 8px; padding: 4px 8px; min-height: 32px; display: flex; align-items: center; flex-wrap: wrap; gap: 1px; box-sizing: border-box; }
+        .captured-side img { width: 22px; height: 22px; }
+        .captured-diff { color: #ffd700; font-weight: bold; font-size: 0.85rem; margin-left: 4px; }
+        .captured-label { color: #9aa5ce; font-size: 0.72rem; width: 100%; }
+
         .board-wrapper { position: relative; width: 100%; max-width: 460px; margin-bottom: 10px; }
-        #board { width: 100%; border: 4px solid #ffd700; border-radius: 6px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); background-color: #ffffff; box-sizing: border-box; }
-        
+        #board { position: relative; width: 100%; aspect-ratio: 1 / 1; border: 4px solid #ffd700; border-radius: 6px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); box-sizing: border-box; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+        #board .sq { position: absolute; width: 12.5%; height: 12.5%; }
+        #board.board-classic .sq.light { background-color: #f0d9b5; }
+        #board.board-classic .sq.dark { background-color: #b58863; }
+        #board.board-juven .sq.light { background-color: #e0e0e0; }
+        #board.board-juven .sq.dark { background-color: #1c2541; }
+        #board .coord { position: absolute; font-size: 10px; font-weight: 700; pointer-events: none; }
+        #board .coord.rank { top: 2px; left: 3px; }
+        #board .coord.file { bottom: 1px; right: 3px; }
+        #board.board-classic .sq.light .coord { color: #b58863; }
+        #board.board-classic .sq.dark .coord { color: #f0d9b5; }
+        #board.board-juven .sq.light .coord { color: #1c2541; }
+        #board.board-juven .sq.dark .coord { color: #e0e0e0; }
+
+        .hl { position: absolute; width: 12.5%; height: 12.5%; pointer-events: none; z-index: 2; }
+        .hl-last { background-color: rgba(255, 215, 0, 0.38); }
+        .hl-sel { background-color: rgba(6, 214, 160, 0.38); box-shadow: inset 0 0 0 3px rgba(6, 214, 160, 0.9); }
+        .hl-check { background: radial-gradient(circle, rgba(214,40,40,0.85) 0%, rgba(214,40,40,0) 70%); }
+        .hl-dot { background: radial-gradient(circle, rgba(10, 20, 10, 0.22) 0 27%, transparent 28%); }
+        .hl-cap { background: radial-gradient(circle, transparent 0 79%, rgba(10, 20, 10, 0.22) 80% 100%); }
+
+        .piece { position: absolute; left: 0; top: 0; width: 12.5%; height: 12.5%; background-size: contain; background-position: center; background-repeat: no-repeat; transition: transform 0.18s ease-in-out, opacity 0.15s ease; z-index: 3; cursor: grab; }
+        .piece.drag { transition: none; z-index: 10; cursor: grabbing; filter: drop-shadow(0 12px 10px rgba(0,0,0,0.45)); }
+
+        #promo { position: absolute; z-index: 30; display: flex; flex-direction: column; width: 12.5%; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border-radius: 4px; overflow: hidden; }
+        #promo.hidden { display: none; }
+        .promo-opt { width: 100%; aspect-ratio: 1 / 1; background-color: rgba(27, 32, 48, 0.95); background-size: contain; background-position: center; background-repeat: no-repeat; cursor: pointer; }
+        .promo-opt:hover { background-color: rgba(6, 214, 160, 0.85); }
+        #promoBackdrop { position: absolute; inset: 0; z-index: 25; }
+        #promoBackdrop.hidden { display: none; }
+
         .btn-config { position: absolute; top: -12px; right: -12px; background: #06d6a0; color: #0b132b; border: none; border-radius: 50%; width: 42px; height: 42px; font-size: 18px; cursor: pointer; z-index: 100; box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition: 0.3s; }
         .btn-config:hover { background: #05b383; transform: scale(1.1); }
 
@@ -43,16 +76,6 @@
         .history-panel { background-color: #1c2541; border: 2px solid #3a506b; border-radius: 8px; width: 100%; max-width: 460px; height: 95px; overflow-y: auto; margin-bottom: 10px; padding: 10px; box-sizing: border-box; }
         .history-panel h3 { margin: 0 0 5px 0; color: #06d6a0; font-size: 0.95rem; border-bottom: 1px solid #3a506b; padding-bottom: 3px; display: flex; justify-content: space-between; }
         .history-list { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 4px; font-size: 0.88rem; color: #e0e0e0; font-family: monospace; }
-        
-        /* RESALTADO DE CASILLAS */
-        .highlight-hint { box-shadow: inset 0 0 0 3px rgba(6, 214, 160, 0.85) !important; background-color: rgba(6, 214, 160, 0.25) !important; }
-        .highlight-last-move { box-shadow: inset 0 0 0 4px rgba(255, 215, 0, 0.9) !important; background-color: rgba(255, 215, 0, 0.35) !important; }
-        .highlight-check { background: radial-gradient(circle, rgba(214,40,40,0.85) 0%, rgba(214,40,40,0) 70%) !important; }
-
-        .board-classic .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
-        .board-classic .black-3c85d { background-color: #b58863; color: #f0d9b5; }
-        .board-juven .white-1e1d7 { background-color: #e0e0e0; color: #0b132b; }
-        .board-juven .black-3c85d { background-color: #1c2541; color: #e0e0e0; }
 
         .controls-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; width: 100%; max-width: 460px; }
         .btn-ctrl { padding: 11px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.95rem; transition: 0.2s; }
@@ -64,7 +87,7 @@
 <body>
 
     <h1><i class="fas fa-chess"></i> JUVENCHESS</h1>
-    
+
     <div class="info-panel">
         <div class="player-info">
             <img src="zapata.png" alt="Avatar" class="avatar" id="avatarImg" onerror="this.src='zapata.png'">
@@ -78,18 +101,23 @@
             <div id="relojBlancas" class="clock clock-inactive"><i class="fas fa-stopwatch"></i> Tú: 05:00</div>
         </div>
     </div>
-    
+
     <div class="status-bar">
         <span id="estadoJuego">¡Haz tu primer movimiento para iniciar!</span>
         <span id="ultimaJugadaBot"></span>
     </div>
 
+    <div class="captured-bar">
+        <div class="captured-side"><span class="captured-label">Tú capturaste</span><span id="capPorMi"></span><span class="captured-diff" id="difMia"></span></div>
+        <div class="captured-side"><span class="captured-label">El bot capturó</span><span id="capPorBot"></span><span class="captured-diff" id="difBot"></span></div>
+    </div>
+
     <div class="board-wrapper">
         <button class="btn-config" onclick="toggleConfig()" title="Ajustes"><i class="fas fa-cog"></i></button>
-        
+
         <div id="configModal">
             <h3 style="margin-top:0; color:#ffd700; border-bottom:1px solid #3a506b; padding-bottom:5px;"><i class="fas fa-sliders-h"></i> Ajustes</h3>
-            
+
             <div class="config-item">
                 <label><i class="fas fa-clock"></i> Reloj:</label>
                 <select id="selTiempo" onchange="cambiarTiempo()">
@@ -100,7 +128,7 @@
                     <option value="1800">Clásico (30 min)</option>
                 </select>
             </div>
-            
+
             <div class="config-item">
                 <label><i class="fas fa-chess-knight"></i> Piezas:</label>
                 <select id="selPiezas" onchange="actualizarAjustes()">
@@ -108,7 +136,7 @@
                     <option value="classic">Clásicas</option>
                 </select>
             </div>
-            
+
             <div class="config-item">
                 <label><i class="fas fa-chess-board"></i> Tablero:</label>
                 <select id="selTablero" onchange="actualizarAjustes()">
@@ -124,16 +152,22 @@
                     <option value="off">Silencio</option>
                 </select>
             </div>
-            
+
             <div class="config-item">
                 <label><i class="fas fa-lightbulb"></i> Guía visual:</label>
                 <input type="checkbox" id="chkAyuda" checked onchange="actualizarAjustes()">
             </div>
-            
+
             <button class="btn-accion" onclick="toggleConfig()"><i class="fas fa-check"></i> Listo</button>
         </div>
 
-        <div id="board" class="board-classic"></div>
+        <div id="board" class="board-classic">
+            <div id="sqLayer"></div>
+            <div id="hlLayer"></div>
+            <div id="pcLayer"></div>
+            <div id="promoBackdrop" class="hidden"></div>
+            <div id="promo" class="hidden"></div>
+        </div>
     </div>
 
     <div class="history-panel">
@@ -150,10 +184,6 @@
         <button class="btn-ctrl btn-volver" onclick="window.location.href='menu.html';"><i class="fas fa-arrow-left"></i> Menú</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
@@ -162,12 +192,12 @@
         const username = localStorage.getItem('username') || 'INVITADO';
         const botName = localStorage.getItem('botName') || 'Francisco I. Madero (Principiante)';
         const savedAvatar = localStorage.getItem('avatar');
-        
+
         document.getElementById('nombreJugador').innerText = username;
         const nombreCortoBot = botName.split('(')[0].trim();
         document.getElementById('nombreBot').innerText = nombreCortoBot;
         document.getElementById('nivelBotBadge').innerText = botName;
-        
+
         if (savedAvatar && savedAvatar !== 'null' && savedAvatar !== 'undefined') {
             document.getElementById('avatarImg').src = savedAvatar;
         } else if (username.toLowerCase().includes('cifra') || username.toLowerCase() === 'admin') {
@@ -178,20 +208,25 @@
 
         // --- DETERMINAR NIVEL DE INTELIGENCIA DEL BOT HISTÓRICO ---
         function obtenerNivelBot(nombre) {
-            if (nombre.includes('Principiante')) return 1; // Movimientos mayormente aleatorios
-            if (nombre.includes('Básico')) return 2;       // Prioriza capturas simples
-            if (nombre.includes('Intermedio')) return 3;   // Evalúa material e intercambios (Profundidad 1)
-            if (nombre.includes('Avanzado')) return 4;     // Minimax Profundidad 2
-            return 5;                                      // Experto / Estratega / Centauro: Minimax Profundidad 3 + Posición
+            if (nombre.includes('Principiante')) return 1;
+            if (nombre.includes('Básico')) return 2;
+            if (nombre.includes('Intermedio')) return 3;
+            if (nombre.includes('Avanzado')) return 4;
+            return 5;
         }
         const nivelIA = obtenerNivelBot(botName);
 
-        var board = null;
         var game = new Chess();
-        var $board = $('#board');
-        
-        let tiempoInicial = 300; 
-        let tiempoBlancas = 300; 
+        const boardEl = document.getElementById('board');
+        const sqLayer = document.getElementById('sqLayer');
+        const hlLayer = document.getElementById('hlLayer');
+        const pcLayer = document.getElementById('pcLayer');
+        const promoEl = document.getElementById('promo');
+        const promoBackdrop = document.getElementById('promoBackdrop');
+        const FILES = 'abcdefgh';
+
+        let tiempoInicial = 300;
+        let tiempoBlancas = 300;
         let tiempoNegras = 300;
         let timerInterval = null;
         let juegoIniciado = false;
@@ -200,7 +235,13 @@
         var configPiezas = 'custom';
         var mostrarAyuda = true;
 
-        const Toast = Swal.mixin({ toast: true, position: 'top', showConfirmButton: false, timer: 2200 });
+        // --- ESTADO DE INTERACCIÓN (estilo chess.com) ---
+        let pieceEls = {};        // casilla -> elemento DOM de la pieza
+        let seleccion = null;     // casilla seleccionada
+        let destinosSel = [];     // movimientos legales desde la selección
+        let arrastrando = null;   // {from, el, startX, startY, activo, eraSeleccion}
+        let animando = false;
+        let promoPendiente = null;
 
         // --- SISTEMA DE SONIDO SINTETIZADO ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -220,6 +261,13 @@
                     gain.gain.setValueAtTime(0.18, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
                     osc.start(now); osc.stop(now + 0.1);
+                } else if (tipo === 'captura') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(210, now);
+                    osc.frequency.exponentialRampToValueAtTime(110, now + 0.09);
+                    gain.gain.setValueAtTime(0.22, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.11);
+                    osc.start(now); osc.stop(now + 0.11);
                 } else if (tipo === 'bot') {
                     osc.frequency.setValueAtTime(523.25, now);
                     osc.frequency.setValueAtTime(659.25, now + 0.1);
@@ -243,7 +291,7 @@
         }
 
         function cambiarTiempo() {
-            if(juegoIniciado) {
+            if (juegoIniciado) {
                 Swal.fire({ title: '¡Partida en curso!', text: 'Reinicia la partida para cambiar el reloj.', icon: 'warning', background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' });
                 document.getElementById('selTiempo').value = tiempoInicial;
                 return;
@@ -257,10 +305,10 @@
         function actualizarAjustes() {
             configPiezas = document.getElementById('selPiezas').value;
             mostrarAyuda = document.getElementById('chkAyuda').checked;
-            $board.removeClass('board-classic board-juven');
-            $board.addClass(document.getElementById('selTablero').value);
-            board.position(game.fen());
-            pintarUltimaJugada();
+            boardEl.classList.remove('board-classic', 'board-juven');
+            boardEl.classList.add(document.getElementById('selTablero').value);
+            renderAll();
+            pintarResaltados();
         }
 
         function pieceTheme(piece) {
@@ -272,14 +320,333 @@
             return customPieces[piece];
         }
 
+        // ============ TABLERO PROPIO: casillas, piezas y resaltados ============
+        function sqToFR(sq) { return { f: FILES.indexOf(sq[0]), r: 8 - parseInt(sq[1], 10) }; }
+        function frToSq(f, r) { return FILES[f] + (8 - r); }
+        function codeDe(cell) { return cell.color + cell.type.toUpperCase(); }
+
+        function construirCasillas() {
+            sqLayer.innerHTML = '';
+            for (let r = 0; r < 8; r++) {
+                for (let f = 0; f < 8; f++) {
+                    const d = document.createElement('div');
+                    d.className = 'sq ' + (((f + r) % 2 === 0) ? 'light' : 'dark');
+                    d.style.left = (f * 12.5) + '%';
+                    d.style.top = (r * 12.5) + '%';
+                    if (f === 0) {
+                        const c = document.createElement('span');
+                        c.className = 'coord rank'; c.textContent = (8 - r);
+                        d.appendChild(c);
+                    }
+                    if (r === 7) {
+                        const c = document.createElement('span');
+                        c.className = 'coord file'; c.textContent = FILES[f];
+                        d.appendChild(c);
+                    }
+                    sqLayer.appendChild(d);
+                }
+            }
+        }
+
+        function colocar(el, f, r, escala) {
+            el.style.transform = 'translate(' + (f * 100) + '%, ' + (r * 100) + '%)' + (escala ? ' scale(' + escala + ')' : '');
+        }
+
+        function crearPiezaEl(sq, cell) {
+            const el = document.createElement('div');
+            el.className = 'piece';
+            el.style.backgroundImage = 'url("' + pieceTheme(codeDe(cell)) + '")';
+            const p = sqToFR(sq);
+            colocar(el, p.f, p.r);
+            el.dataset.sq = sq;
+            return el;
+        }
+
+        function renderAll() {
+            pcLayer.innerHTML = '';
+            pieceEls = {};
+            const b = game.board();
+            for (let r = 0; r < 8; r++) {
+                for (let f = 0; f < 8; f++) {
+                    const cell = b[r][f];
+                    if (cell) {
+                        const sq = frToSq(f, r);
+                        const el = crearPiezaEl(sq, cell);
+                        pieceEls[sq] = el;
+                        pcLayer.appendChild(el);
+                    }
+                }
+            }
+        }
+
+        function agregarHL(sq, clase) {
+            const p = sqToFR(sq);
+            const d = document.createElement('div');
+            d.className = 'hl ' + clase;
+            d.style.left = (p.f * 12.5) + '%';
+            d.style.top = (p.r * 12.5) + '%';
+            hlLayer.appendChild(d);
+        }
+
+        function pintarResaltados() {
+            hlLayer.innerHTML = '';
+            if (mostrarAyuda && ultimoOrigen && ultimoDestino) {
+                agregarHL(ultimoOrigen, 'hl-last');
+                agregarHL(ultimoDestino, 'hl-last');
+            }
+            if (game.in_check()) {
+                const turno = game.turn();
+                const b = game.board();
+                for (let r = 0; r < 8; r++) {
+                    for (let f = 0; f < 8; f++) {
+                        if (b[r][f] && b[r][f].type === 'k' && b[r][f].color === turno) {
+                            agregarHL(frToSq(f, r), 'hl-check');
+                        }
+                    }
+                }
+            }
+            if (mostrarAyuda && seleccion) {
+                agregarHL(seleccion, 'hl-sel');
+                destinosSel.forEach(m => agregarHL(m.to, m.captured ? 'hl-cap' : 'hl-dot'));
+            }
+        }
+
+        function seleccionar(sq) {
+            seleccion = sq;
+            destinosSel = sq ? game.moves({ square: sq, verbose: true }) : [];
+            pintarResaltados();
+        }
+
+        function animarMovimiento(move) {
+            const el = pieceEls[move.from];
+            if (!el) { renderAll(); return; }
+            animando = true;
+
+            // Pieza capturada (incluye captura al paso)
+            let capSq = move.to;
+            if (move.flags.indexOf('e') !== -1) capSq = move.to[0] + move.from[1];
+            if (move.captured && pieceEls[capSq]) {
+                const cel = pieceEls[capSq];
+                delete pieceEls[capSq];
+                cel.style.opacity = '0';
+                const cp = sqToFR(capSq);
+                colocar(cel, cp.f, cp.r, 0.5);
+                setTimeout(() => cel.remove(), 180);
+            }
+
+            delete pieceEls[move.from];
+            pieceEls[move.to] = el;
+            el.dataset.sq = move.to;
+            el.style.zIndex = 6;
+            const tp = sqToFR(move.to);
+            colocar(el, tp.f, tp.r);
+
+            // Enroque: mover también la torre
+            if (move.flags.indexOf('k') !== -1 || move.flags.indexOf('q') !== -1) {
+                const rank = move.color === 'w' ? '1' : '8';
+                const esCorto = move.flags.indexOf('k') !== -1;
+                const rFrom = (esCorto ? 'h' : 'a') + rank;
+                const rTo = (esCorto ? 'f' : 'd') + rank;
+                const rel = pieceEls[rFrom];
+                if (rel) {
+                    delete pieceEls[rFrom];
+                    pieceEls[rTo] = rel;
+                    rel.dataset.sq = rTo;
+                    const rp = sqToFR(rTo);
+                    colocar(rel, rp.f, rp.r);
+                }
+            }
+
+            if (move.promotion) {
+                const img = pieceTheme(move.color + move.promotion.toUpperCase());
+                setTimeout(() => { el.style.backgroundImage = 'url("' + img + '")'; }, 170);
+            }
+
+            setTimeout(() => { animando = false; el.style.zIndex = 3; renderAll(); }, 210);
+        }
+
+        // ============ FLUJO DE JUGADAS ============
+        function ejecutarJugada(from, to, promo) {
+            const move = game.move({ from: from, to: to, promotion: promo || 'q' });
+            if (move === null) { renderAll(); return; }
+            animarMovimiento(move);
+            despuesDeJugar(move, false);
+        }
+
+        function intentarJugada(from, to) {
+            const cand = game.moves({ square: from, verbose: true }).filter(m => m.to === to);
+            if (cand.length === 0) return false;
+            if (cand[0].promotion) {
+                promoPendiente = { from: from, to: to };
+                mostrarPromo(to);
+                return true;
+            }
+            ejecutarJugada(from, to, 'q');
+            return true;
+        }
+
+        function mostrarPromo(to) {
+            const p = sqToFR(to);
+            promoEl.innerHTML = '';
+            ['q', 'r', 'b', 'n'].forEach(t => {
+                const o = document.createElement('div');
+                o.className = 'promo-opt';
+                o.style.backgroundImage = 'url("' + pieceTheme('w' + t.toUpperCase()) + '")';
+                o.addEventListener('click', ev => {
+                    ev.stopPropagation();
+                    const pend = promoPendiente;
+                    cerrarPromo();
+                    if (pend) ejecutarJugada(pend.from, pend.to, t);
+                });
+                promoEl.appendChild(o);
+            });
+            promoEl.style.left = (p.f * 12.5) + '%';
+            promoEl.style.top = '0%';
+            promoEl.classList.remove('hidden');
+            promoBackdrop.classList.remove('hidden');
+        }
+
+        function cerrarPromo() {
+            promoPendiente = null;
+            promoEl.classList.add('hidden');
+            promoBackdrop.classList.add('hidden');
+        }
+        promoBackdrop.addEventListener('click', () => { cerrarPromo(); seleccionar(null); renderAll(); });
+
+        function despuesDeJugar(move, esBot) {
+            ultimoOrigen = move.from;
+            ultimoDestino = move.to;
+            seleccion = null; destinosSel = [];
+            reproducirSonido(move.captured ? 'captura' : (game.in_check() ? 'jaque' : (esBot ? 'bot' : 'mover')));
+            pintarResaltados();
+            iniciarReloj();
+            actualizarHistorial();
+            actualizarCapturadas();
+            verificarEstado();
+
+            if (!esBot && !game.game_over() && tiempoBlancas > 0 && tiempoNegras > 0) {
+                document.getElementById('estadoJuego').innerHTML = '<i class="fas fa-cog fa-spin"></i> ' + nombreCortoBot + ' está pensando...';
+                window.setTimeout(hacerMovimientoIA, 420);
+            }
+        }
+
+        function actualizarCapturadas() {
+            const valores = { p: 1, n: 3, b: 3, r: 5, q: 9 };
+            const hist = game.history({ verbose: true });
+            let misCap = [], botCap = [], miMat = 0, botMat = 0;
+            hist.forEach(m => {
+                if (!m.captured) return;
+                if (m.color === 'w') { misCap.push(m.captured); miMat += valores[m.captured]; }
+                else { botCap.push(m.captured); botMat += valores[m.captured]; }
+            });
+            const orden = { q: 0, r: 1, b: 2, n: 3, p: 4 };
+            misCap.sort((a, b) => orden[a] - orden[b]);
+            botCap.sort((a, b) => orden[a] - orden[b]);
+            document.getElementById('capPorMi').innerHTML = misCap.map(t => '<img src="' + pieceTheme('b' + t.toUpperCase()) + '" alt="">').join('');
+            document.getElementById('capPorBot').innerHTML = botCap.map(t => '<img src="' + pieceTheme('w' + t.toUpperCase()) + '" alt="">').join('');
+            const dif = miMat - botMat;
+            document.getElementById('difMia').textContent = dif > 0 ? '+' + dif : '';
+            document.getElementById('difBot').textContent = dif < 0 ? '+' + (-dif) : '';
+        }
+
+        // ============ INTERACCIÓN: arrastrar y clic-clic, como en chess.com ============
+        function casillaDesdeEvento(e) {
+            const rect = boardEl.getBoundingClientRect();
+            const borde = 4; // el marco dorado del tablero
+            const f = Math.floor((e.clientX - rect.left - borde) / (rect.width - borde * 2) * 8);
+            const r = Math.floor((e.clientY - rect.top - borde) / (rect.height - borde * 2) * 8);
+            if (f < 0 || f > 7 || r < 0 || r > 7) return null;
+            return frToSq(f, r);
+        }
+
+        function puedeMover() {
+            return !animando && !promoPendiente && !game.game_over() && game.turn() === 'w' && tiempoBlancas > 0 && tiempoNegras > 0;
+        }
+
+        boardEl.addEventListener('pointerdown', e => {
+            if (promoPendiente || !puedeMover()) return;
+            const sq = casillaDesdeEvento(e);
+            if (!sq) return;
+            e.preventDefault();
+
+            // Clic en un destino legal de la pieza ya seleccionada: mover
+            if (seleccion && sq !== seleccion && destinosSel.some(m => m.to === sq)) {
+                intentarJugada(seleccion, sq);
+                return;
+            }
+
+            const cell = game.get(sq);
+            if (cell && cell.color === 'w') {
+                const eraSeleccion = (seleccion === sq);
+                seleccionar(sq);
+                const el = pieceEls[sq];
+                if (el) {
+                    arrastrando = { from: sq, el: el, startX: e.clientX, startY: e.clientY, activo: false, eraSeleccion: eraSeleccion };
+                    boardEl.setPointerCapture(e.pointerId);
+                }
+            } else {
+                seleccionar(null);
+            }
+        });
+
+        boardEl.addEventListener('pointermove', e => {
+            if (!arrastrando) return;
+            const dx = e.clientX - arrastrando.startX;
+            const dy = e.clientY - arrastrando.startY;
+            if (!arrastrando.activo && Math.hypot(dx, dy) > 7) {
+                arrastrando.activo = true;
+                arrastrando.el.classList.add('drag');
+            }
+            if (arrastrando.activo) {
+                const rect = boardEl.getBoundingClientRect();
+                const sqSize = (rect.width - 8) / 8;
+                const p = sqToFR(arrastrando.from);
+                const baseX = p.f * sqSize, baseY = p.r * sqSize;
+                arrastrando.el.style.transform = 'translate(' + (baseX + dx) + 'px, ' + (baseY + dy) + 'px) scale(1.12)';
+            }
+        });
+
+        function finArrastre(e) {
+            if (!arrastrando) return;
+            const d = arrastrando;
+            arrastrando = null;
+            d.el.classList.remove('drag');
+            const origen = sqToFR(d.from);
+
+            if (!d.activo) {
+                // Fue un clic: si la pieza ya estaba seleccionada, se deselecciona
+                colocar(d.el, origen.f, origen.r);
+                if (d.eraSeleccion) seleccionar(null);
+                return;
+            }
+
+            const destino = casillaDesdeEvento(e);
+            if (destino && destino !== d.from && destinosSel.some(m => m.to === destino)) {
+                // La animación de llegada parte de donde soltaste la pieza
+                d.el.style.transition = 'transform 0.12s ease-out';
+                intentarJugada(d.from, destino);
+                setTimeout(() => { d.el.style.transition = ''; }, 140);
+            } else if (destino === d.from) {
+                colocar(d.el, origen.f, origen.r); // soltó en el mismo sitio: queda seleccionada
+            } else {
+                colocar(d.el, origen.f, origen.r); // destino ilegal: regresa y se deselecciona
+                seleccionar(null);
+            }
+        }
+        boardEl.addEventListener('pointerup', finArrastre);
+        boardEl.addEventListener('pointercancel', finArrastre);
+
         function deshacerJugada() {
             if (game.history().length < 2 || game.game_over()) return;
-            game.undo(); // Deshace jugada del Bot
-            game.undo(); // Deshace jugada del Jugador
-            board.position(game.fen());
+            game.undo();
+            game.undo();
+            cerrarPromo();
+            seleccion = null; destinosSel = [];
+            renderAll();
             ultimoOrigen = null; ultimoDestino = null;
-            limpiarResaltados();
+            pintarResaltados();
             actualizarHistorial();
+            actualizarCapturadas();
             verificarEstado();
         }
 
@@ -289,40 +656,24 @@
                 showCancelButton: true, confirmButtonColor: '#06d6a0', cancelButtonColor: '#3a506b', confirmButtonText: 'Sí, reiniciar', background: '#1c2541', color: '#fff'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    game.reset(); board.start(); clearInterval(timerInterval); juegoIniciado = false;
-                    ultimoOrigen = null; ultimoDestino = null; limpiarResaltados();
+                    game.reset();
+                    cerrarPromo();
+                    seleccion = null; destinosSel = [];
+                    renderAll();
+                    clearInterval(timerInterval); juegoIniciado = false;
+                    ultimoOrigen = null; ultimoDestino = null; pintarResaltados();
                     tiempoBlancas = tiempoInicial; tiempoNegras = tiempoInicial; actualizarRelojesUI();
                     document.getElementById('moveHistory').innerHTML = '';
+                    document.getElementById('capPorMi').innerHTML = '';
+                    document.getElementById('capPorBot').innerHTML = '';
+                    document.getElementById('difMia').textContent = '';
+                    document.getElementById('difBot').textContent = '';
                     document.getElementById('ultimaJugadaBot').innerText = '';
                     document.getElementById('estadoJuego').innerText = '¡Haz tu primer movimiento para iniciar!';
                     document.getElementById('relojBlancas').className = 'clock clock-inactive';
                     document.getElementById('relojNegras').className = 'clock clock-inactive';
                 }
             });
-        }
-
-        function limpiarResaltados() {
-            $board.find('.square-55d63').removeClass('highlight-hint highlight-last-move highlight-check');
-        }
-
-        function pintarUltimaJugada() {
-            limpiarResaltados();
-            if (mostrarAyuda && ultimoOrigen && ultimoDestino) {
-                $board.find('.square-' + ultimoOrigen).addClass('highlight-last-move');
-                $board.find('.square-' + ultimoDestino).addClass('highlight-last-move');
-            }
-            if (game.in_check()) {
-                const turno = game.turn();
-                const b = game.board();
-                const cols = ['a','b','c','d','e','f','g','h'];
-                for (let r = 0; r < 8; r++) {
-                    for (let c = 0; c < 8; c++) {
-                        if (b[r][c] && b[r][c].type === 'k' && b[r][c].color === turno) {
-                            $board.find('.square-' + cols[c] + (8 - r)).addClass('highlight-check');
-                        }
-                    }
-                }
-            }
         }
 
         function formatoTiempo(segundos) {
@@ -340,14 +691,14 @@
         }
 
         function iniciarReloj() {
-            if(!juegoIniciado) {
+            if (!juegoIniciado) {
                 juegoIniciado = true;
                 timerInterval = setInterval(() => {
-                    if(game.game_over()) { clearInterval(timerInterval); return; }
-                    if(game.turn() === 'w') {
-                        tiempoBlancas--; if(tiempoBlancas <= 0) finDelJuego("Tiempo Agotado", `Gana ${nombreCortoBot}`, 'error');
+                    if (game.game_over()) { clearInterval(timerInterval); return; }
+                    if (game.turn() === 'w') {
+                        tiempoBlancas--; if (tiempoBlancas <= 0) finDelJuego("Tiempo Agotado", `Gana ${nombreCortoBot}`, 'error');
                     } else {
-                        tiempoNegras--; if(tiempoNegras <= 0) finDelJuego("Tiempo Agotado", "¡Ganaste por tiempo!", 'success');
+                        tiempoNegras--; if (tiempoNegras <= 0) finDelJuego("Tiempo Agotado", "¡Ganaste por tiempo!", 'success');
                     }
                     actualizarRelojesUI();
                 }, 1000);
@@ -358,89 +709,17 @@
         function finDelJuego(titulo, mensaje, icono) {
             clearInterval(timerInterval);
             document.getElementById('estadoJuego').innerText = titulo + " - " + mensaje;
-            if(icono === 'success') lanzarConfeti();
+            if (icono === 'success') lanzarConfeti();
             Swal.fire({ title: titulo, text: mensaje, icon: icono, background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0' });
         }
 
         function actualizarHistorial() {
             const historial = game.history(); const panel = document.getElementById('moveHistory'); let html = '';
-            for(let i = 0; i < historial.length; i += 2) {
-                html += `<div><b>${(i / 2) + 1}.</b></div> <div>${historial[i]}</div> <div style="color:#ffd700;">${historial[i+1] || ''}</div>`;
+            for (let i = 0; i < historial.length; i += 2) {
+                html += `<div><b>${(i / 2) + 1}.</b></div> <div>${historial[i]}</div> <div style="color:#ffd700;">${historial[i + 1] || ''}</div>`;
             }
             panel.innerHTML = html; panel.parentElement.scrollTop = panel.parentElement.scrollHeight;
         }
-
-        function onDragStart(source, piece) {
-            if (game.game_over() || game.turn() !== 'w' || tiempoBlancas <= 0 || tiempoNegras <= 0) return false;
-            if (piece.search(/^b/) !== -1) return false;
-        }
-
-        function onDrop(source, target) {
-            var moves = game.moves({ verbose: true });
-            var isLegal = false;
-            var isPromotion = false;
-
-            for (var i = 0; i < moves.length; i++) {
-                if (moves[i].from === source && moves[i].to === target) {
-                    isLegal = true;
-                    if (moves[i].promotion) isPromotion = true; 
-                    break;
-                }
-            }
-
-            if (!isLegal) {
-                Toast.fire({ icon: 'error', title: 'Movimiento ilegal o Rey en Jaque', background: '#d62828', color: '#fff' });
-                return 'snapback';
-            }
-
-            if (isPromotion) {
-                setTimeout(async () => {
-                    const { value: promoPiece } = await Swal.fire({
-                        title: '¡Coronación!', text: 'Elige tu pieza:', input: 'select',
-                        inputOptions: { 'q': 'Reina 👑', 'r': 'Torre 🏰', 'b': 'Alfil 🧙‍♂️', 'n': 'Caballo 🐎' },
-                        inputValue: 'q', allowOutsideClick: false, background: '#1c2541', color: '#fff', confirmButtonColor: '#06d6a0'
-                    });
-                    ejecutarMovimiento(source, target, promoPiece || 'q');
-                }, 10);
-                return; 
-            }
-
-            ejecutarMovimiento(source, target, 'q');
-        }
-
-        function ejecutarMovimiento(source, target, promoPiece) {
-            var move = game.move({ from: source, to: target, promotion: promoPiece });
-            if (move === null) { board.position(game.fen()); return; }
-            
-            ultimoOrigen = source;
-            ultimoDestino = target;
-            reproducirSonido(game.in_check() ? 'jaque' : 'mover');
-            pintarUltimaJugada();
-            iniciarReloj();
-            actualizarHistorial();
-            verificarEstado();
-            board.position(game.fen());
-
-            if (!game.game_over() && tiempoBlancas > 0 && tiempoNegras > 0) {
-                document.getElementById('estadoJuego').innerHTML = `<i class="fas fa-cog fa-spin"></i> ${nombreCortoBot} está pensando...`;
-                window.setTimeout(hacerMovimientoIA, 350);
-            }
-        }
-
-        function onMouseoverSquare(square) {
-            if (!mostrarAyuda || game.game_over() || game.turn() !== 'w') return;
-            var moves = game.moves({ square: square, verbose: true });
-            if (moves.length === 0) return;
-            $board.find('.square-' + square).addClass('highlight-hint');
-            for (var i = 0; i < moves.length; i++) {
-                $board.find('.square-' + moves[i].to).addClass('highlight-hint');
-            }
-        }
-
-        function onMouseoutSquare() {
-            $board.find('.square-55d63').removeClass('highlight-hint');
-        }
-        function onSnapEnd() { board.position(game.fen()); }
 
         // --- MOTOR DE INTELIGENCIA ARTIFICIAL POR NIVELES ---
         const valorPieza = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
@@ -454,7 +733,6 @@
                 for (let c = 0; c < 8; c++) {
                     const p = b[r][c];
                     if (p) {
-                        // Bonus por controlar el centro del tablero
                         const bonusCentro = (r >= 2 && r <= 5 && c >= 2 && c <= 5) ? 15 : 0;
                         const val = valorPieza[p.type] + bonusCentro;
                         score += (p.color === 'b') ? val : -val;
@@ -497,12 +775,10 @@
             const movimientos = game.moves({ verbose: true });
             if (movimientos.length === 0) return null;
 
-            // Nivel 1 (Principiante): 80% azar
             if (nivelIA === 1 && Math.random() < 0.8) {
                 return movimientos[Math.floor(Math.random() * movimientos.length)];
             }
 
-            // Nivel 2 (Básico): Busca capturas directas o jaques, si no, azar
             if (nivelIA <= 2) {
                 const capturas = movimientos.filter(m => m.captured);
                 if (capturas.length > 0 && Math.random() < 0.75) {
@@ -511,12 +787,10 @@
                 return movimientos[Math.floor(Math.random() * movimientos.length)];
             }
 
-            // Niveles 3, 4 y 5: Minimax con Poda Alfa-Beta
             const profundidad = nivelIA === 3 ? 1 : (nivelIA === 4 ? 2 : 3);
             let mejorMov = movimientos[0];
             let mejorValor = -Infinity;
 
-            // Mezclar primero para variedad en jugadas equivalentes
             movimientos.sort(() => Math.random() - 0.5);
 
             for (let m of movimientos) {
@@ -532,23 +806,17 @@
         }
 
         function hacerMovimientoIA() {
-            if (game.game_over()) return;
+            if (game.game_over() || game.turn() !== 'b') return;
             const jugadaElegida = elegirJugadaSegunBot();
             if (!jugadaElegida) return;
 
             var move = game.move(jugadaElegida);
-            board.position(game.fen());
-            
+            animarMovimiento(move);
+
             ultimoOrigen = move.from;
             ultimoDestino = move.to;
-            reproducirSonido(game.in_check() ? 'jaque' : 'bot');
-            pintarUltimaJugada();
-
             document.getElementById('ultimaJugadaBot').innerHTML = `<i class="fas fa-bell"></i> Bot jugó: ${move.from}-${move.to} (${move.san})`;
-            
-            actualizarRelojesUI();
-            actualizarHistorial();
-            verificarEstado();
+            despuesDeJugar(move, true);
         }
 
         function verificarEstado() {
@@ -575,13 +843,10 @@
             }());
         }
 
-        var config = {
-            draggable: true, position: 'start', showNotation: true,
-            pieceTheme: pieceTheme, onDragStart: onDragStart, onDrop: onDrop,
-            onMouseoutSquare: onMouseoutSquare, onMouseoverSquare: onMouseoverSquare, onSnapEnd: onSnapEnd
-        };
-        
-        board = Chessboard('board', config);
+        // --- ARRANQUE ---
+        construirCasillas();
+        renderAll();
+        pintarResaltados();
         actualizarRelojesUI();
     </script>
 </body>

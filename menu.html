@@ -54,6 +54,7 @@
         .btn-bots { background: #06d6a0; } .btn-bots:hover { background: #05b383; transform: scale(1.02); }
         .btn-puzzles { background: #ffd700; } .btn-puzzles:hover { background: #e6c200; transform: scale(1.02); }
         .btn-online { background: #ff9f1c; } .btn-online:hover { background: #e88e15; transform: scale(1.02); }
+        .btn-cuatro { background: #e53935; color: #ffffff; } .btn-cuatro:hover { background: #c62828; transform: scale(1.02); }
         .btn-admin-panel { background: #3a506b; color: #ffd700; border: 1px solid #ffd700; display: none; }
         .btn-admin-panel:hover { background: #2b3d54; transform: scale(1.02); }
 
@@ -115,6 +116,7 @@
             <div class="game-modes">
                 <button class="btn-mode btn-bots" onclick="seleccionarBot()"><i class="fas fa-robot"></i> Jugar contra Bots Históricos</button>
                 <button class="btn-mode btn-puzzles" onclick="irAPuzzles()"><i class="fas fa-puzzle-piece"></i> Entrenar con Puzzles</button>
+                <button class="btn-mode btn-cuatro" onclick="modoCuatro()"><i class="fas fa-users"></i> Ajedrez para 4 Jugadores</button>
                 <button class="btn-mode btn-online" onclick="modoOnline()">
                     <i class="fas fa-globe"></i> Arena Online
                     <span class="badge-notificacion" id="badgeTurnos">0</span>
@@ -370,6 +372,7 @@
         }
 
         function irAPuzzles() { window.location.href = 'puzzles.html'; }
+        function modoCuatro() { window.location.href = 'cuatro.html'; }
         function modoOnline() { window.location.href = 'online.html'; }
         function cerrarSesion() { localStorage.clear(); window.location.href = 'index.html'; }
 
