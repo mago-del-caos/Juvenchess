@@ -132,8 +132,8 @@
             <div class="config-item">
                 <label><i class="fas fa-chess-knight"></i> Piezas:</label>
                 <select id="selPiezas" onchange="actualizarAjustes()">
+                    <option value="classic" selected>Normales</option>
                     <option value="custom">Chema/Goyo</option>
-                    <option value="classic">Clásicas</option>
                 </select>
             </div>
 
@@ -232,7 +232,7 @@
         let juegoIniciado = false;
         let ultimoOrigen = null;
         let ultimoDestino = null;
-        var configPiezas = 'custom';
+        var configPiezas = 'classic';
         var mostrarAyuda = true;
 
         // --- ESTADO DE INTERACCIÓN (estilo chess.com) ---

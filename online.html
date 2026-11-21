@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JUVENCHESS | Arena Online</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
@@ -55,11 +54,36 @@
         .clock-badge.clock-low { color: #ff4d4d; border-color: #ff4d4d; animation: pulse 1s infinite; }
 
         .board-wrapper { position: relative; width: 100%; margin-bottom: 10px; }
-        #board { width: 100%; border: 4px solid #ffd700; border-radius: 6px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); background-color: #ffffff; box-sizing: border-box; }
-        
-        /* RESALTADO DEL ÚLTIMO MOVIMIENTO Y JAQUE */
-        .highlight-last-move { box-shadow: inset 0 0 0 4px rgba(255, 215, 0, 0.85) !important; background-color: rgba(255, 215, 0, 0.35) !important; }
-        .highlight-check { background: radial-gradient(circle, rgba(214,40,40,0.85) 0%, rgba(214,40,40,0) 70%) !important; }
+        #board { position: relative; width: 100%; aspect-ratio: 1 / 1; border: 4px solid #ffd700; border-radius: 6px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); box-sizing: border-box; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+        #board .sq { position: absolute; width: 12.5%; height: 12.5%; }
+        #board.board-classic .sq.light { background-color: #f0d9b5; }
+        #board.board-classic .sq.dark { background-color: #b58863; }
+        #board.board-juven .sq.light { background-color: #e0e0e0; }
+        #board.board-juven .sq.dark { background-color: #1c2541; }
+        #board .coord { position: absolute; font-size: 10px; font-weight: 700; pointer-events: none; }
+        #board .coord.rank { top: 2px; left: 3px; }
+        #board .coord.file { bottom: 1px; right: 3px; }
+        #board.board-classic .sq.light .coord { color: #b58863; }
+        #board.board-classic .sq.dark .coord { color: #f0d9b5; }
+        #board.board-juven .sq.light .coord { color: #1c2541; }
+        #board.board-juven .sq.dark .coord { color: #e0e0e0; }
+
+        .hl { position: absolute; width: 12.5%; height: 12.5%; pointer-events: none; z-index: 2; }
+        .hl-last { background-color: rgba(255, 215, 0, 0.38); }
+        .hl-sel { background-color: rgba(6, 214, 160, 0.38); box-shadow: inset 0 0 0 3px rgba(6, 214, 160, 0.9); }
+        .hl-check { background: radial-gradient(circle, rgba(214,40,40,0.85) 0%, rgba(214,40,40,0) 70%); }
+        .hl-dot { background: radial-gradient(circle, rgba(10, 20, 10, 0.22) 0 27%, transparent 28%); }
+        .hl-cap { background: radial-gradient(circle, transparent 0 79%, rgba(10, 20, 10, 0.22) 80% 100%); }
+
+        .piece { position: absolute; left: 0; top: 0; width: 12.5%; height: 12.5%; background-size: contain; background-position: center; background-repeat: no-repeat; transition: transform 0.18s ease-in-out, opacity 0.15s ease; z-index: 3; cursor: grab; }
+        .piece.drag { transition: none; z-index: 10; cursor: grabbing; filter: drop-shadow(0 12px 10px rgba(0,0,0,0.45)); }
+
+        #promo { position: absolute; z-index: 30; display: flex; flex-direction: column; width: 12.5%; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border-radius: 4px; overflow: hidden; }
+        #promo.hidden { display: none; }
+        .promo-opt { width: 100%; aspect-ratio: 1 / 1; background-color: rgba(27, 32, 48, 0.95); background-size: contain; background-position: center; background-repeat: no-repeat; cursor: pointer; }
+        .promo-opt:hover { background-color: rgba(6, 214, 160, 0.85); }
+        #promoBackdrop { position: absolute; inset: 0; z-index: 25; }
+        #promoBackdrop.hidden { display: none; }
 
         /* HISTORIAL PGN Y CONTROLES */
         .movimientos-box { background: #1c2541; border: 1px solid #3a506b; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.85rem; color: #9aa5ce; max-height: 60px; overflow-y: auto; font-family: monospace; }
@@ -74,11 +98,6 @@
         .config-item { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
         .config-item select { padding: 5px; border-radius: 4px; background: #0b132b; color: white; border: 1px solid #3a506b; width: 55%; }
         .btn-accion { background: #06d6a0; border: none; padding: 8px; border-radius: 4px; font-weight: bold; width: 100%; margin-top: 5px; cursor: pointer; color:#0b132b; }
-
-        .board-classic .white-1e1d7 { background-color: #f0d9b5; color: #b58863; }
-        .board-classic .black-3c85d { background-color: #b58863; color: #f0d9b5; }
-        .board-juven .white-1e1d7 { background-color: #e0e0e0; color: #0b132b; }
-        .board-juven .black-3c85d { background-color: #1c2541; color: #e0e0e0; }
 
         .radar-icon { animation: pulse 2s infinite; color: #06d6a0; font-size: 0.85rem; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.35; } 100% { opacity: 1; } }
@@ -145,7 +164,7 @@
                 <h3 style="margin-top:0; color:#ffd700; border-bottom:1px solid #3a506b; padding-bottom:5px;"><i class="fas fa-sliders-h"></i> Ajustes</h3>
                 <div class="config-item">
                     <label>Piezas:</label>
-                    <select id="selPiezas" onchange="actualizarAjustes()"><option value="custom">Chema/Goyo</option><option value="classic">Clásicas</option></select>
+                    <select id="selPiezas" onchange="actualizarAjustes()"><option value="classic" selected>Normales</option><option value="custom">Chema/Goyo</option></select>
                 </div>
                 <div class="config-item">
                     <label>Tablero:</label>
@@ -157,7 +176,13 @@
                 </div>
                 <button class="btn-accion" onclick="toggleConfig()"><i class="fas fa-check"></i> Listo</button>
             </div>
-            <div id="board" class="board-classic"></div>
+            <div id="board" class="board-classic">
+                <div id="sqLayer"></div>
+                <div id="hlLayer"></div>
+                <div id="pcLayer"></div>
+                <div id="promoBackdrop" class="hidden"></div>
+                <div id="promo" class="hidden"></div>
+            </div>
         </div>
 
         <div class="movimientos-box" id="historialBox">Historial de jugadas aparecerá aquí...</div>
@@ -168,10 +193,6 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 
@@ -189,13 +210,29 @@
 
         let tiempoBlancas = 300;
         let tiempoNegras = 300;
+        let tiempoInicial = 300;
+        let sinTiempo = false;
+        let relojesListos = false;
         let estadoPartidaActual = 'esperando';
         let ultimoFenRecibido = '';
         let ultimoMovRegistrado = '';
+        let ultimoOrigen = null;
+        let ultimoDestino = null;
 
-        var configPiezas = 'custom';
-        var board = null;
+        var configPiezas = 'classic';
         var game = new Chess();
+
+        // --- ESTADO DE INTERACCIÓN DEL TABLERO (estilo chess.com) ---
+        let pieceEls = {};
+        let seleccion = null;
+        let destinosSel = [];
+        let arrastrando = null;
+        let animando = false;
+        let promoPendiente = null;
+
+        // Etiqueta de tiempo para el lobby: 0 = sin tiempo; nulo = 5 min por defecto
+        function segundosDe(t) { return (t === null || t === undefined || t === '') ? 300 : Number(t); }
+        function etiquetaTiempo(t) { const s = segundosDe(t); return s === 0 ? '♾️ Sin tiempo' : '⏱️ ' + Math.round(s / 60) + ' min'; }
 
         // --- SISTEMA DE SONIDO SINTETIZADO (SIN ARCHIVOS EXTERNOS) ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -273,12 +310,11 @@
                     panelMisRetos.style.display = 'block';
                     let htmlMisRetos = '';
                     misRetos.forEach(p => {
-                        let min = Math.round((p.tiempo || 300) / 60);
                         htmlMisRetos += `
                             <div class="list-item">
-                                <div><i class="fas fa-spinner fa-spin" style="color:#ffd700;"></i> Esperando oponente (${min} min)</div>
+                                <div><i class="fas fa-spinner fa-spin" style="color:#ffd700;"></i> Esperando oponente (${etiquetaTiempo(p.tiempo)})</div>
                                 <div style="display:flex; gap:6px;">
-                                    <button class="btn-jugar" onclick="entrarSalaEspera('${p.id}', '${p.color_creador}', ${p.tiempo || 300})">Abrir Tablero</button>
+                                    <button class="btn-jugar" onclick="entrarSalaEspera('${p.id}', '${p.color_creador}', ${segundosDe(p.tiempo)})">Abrir Tablero</button>
                                     <button class="btn-cancelar-reto" onclick="cancelarMiReto('${p.id}')"><i class="fas fa-times"></i></button>
                                 </div>
                             </div>`;
@@ -295,12 +331,11 @@
                     htmlEspera = '<div style="color: #9aa5ce; text-align: center;">Nadie está buscando partida en este momento. ¡Crea un reto!</div>';
                 } else {
                     esperando.forEach(p => {
-                        let tiempo = Math.round((p.tiempo || 300) / 60);
                         let juegaCon = p.color_creador === 'w' ? 'Negras' : 'Blancas'; 
                         htmlEspera += `
                             <div class="list-item">
-                                <div><i class="fas fa-user"></i> <b>${p.creador}</b> <br> <small style="color:#06d6a0;">⏱️ ${tiempo} min | Juegas con: ${juegaCon}</small></div>
-                                <button class="btn-jugar" onclick="unirseReto('${p.id}', '${p.color_creador}', '${p.creador}')"><i class="fas fa-play"></i> Aceptar Reto</button>
+                                <div><i class="fas fa-user"></i> <b>${p.creador}</b> <br> <small style="color:#06d6a0;">${etiquetaTiempo(p.tiempo)} | Juegas con: ${juegaCon}</small></div>
+                                <button class="btn-jugar" onclick="unirseReto('${p.id}', '${p.color_creador}', '${p.creador}', ${segundosDe(p.tiempo)})"><i class="fas fa-play"></i> Aceptar Reto</button>
                             </div>`;
                     });
                 }
@@ -343,7 +378,7 @@
         async function crearReto() {
             const { value: formValues } = await Swal.fire({
                 title: 'Configurar Reto',
-                html: `<select id="swal-tiempo" class="swal2-select" style="width: 85%; background:#0b132b; color:white; border:1px solid #3a506b;"><option value="180">Blitz (3 min)</option><option value="300" selected>Blitz (5 min)</option><option value="600">Rápido (10 min)</option><option value="1800">Clásico (30 min)</option></select>
+                html: `<select id="swal-tiempo" class="swal2-select" style="width: 85%; background:#0b132b; color:white; border:1px solid #3a506b;"><option value="180">Blitz (3 min)</option><option value="300" selected>Blitz (5 min)</option><option value="600">Rápido (10 min)</option><option value="1800">Clásico (30 min)</option><option value="0">Libre (sin tiempo)</option></select>
                        <select id="swal-color" class="swal2-select" style="width: 85%; background:#0b132b; color:white; border:1px solid #3a506b;"><option value="w">Jugar con Blancas</option><option value="b">Jugar con Negras</option></select>`,
                 focusConfirm: false, background: '#1c2541', color: '#fff', confirmButtonColor: '#ff9f1c', confirmButtonText: 'Crear Reto', showCancelButton: true,
                 preConfirm: () => { return { tiempo: document.getElementById('swal-tiempo').value, color: document.getElementById('swal-color').value } }
@@ -363,8 +398,12 @@
         function entrarSalaEspera(id, color, segundos) {
             partidaId = id;
             miColor = color;
-            tiempoBlancas = segundos;
-            tiempoNegras = segundos;
+            tiempoInicial = segundosDe(segundos);
+            sinTiempo = tiempoInicial === 0;
+            tiempoBlancas = tiempoInicial;
+            tiempoNegras = tiempoInicial;
+            relojesListos = true;
+            ultimoOrigen = null; ultimoDestino = null;
             game.reset();
             ultimoFenRecibido = game.fen();
             prepararTablero("Esperando...", "Esperando rival...");
@@ -378,9 +417,15 @@
             cargarLobby();
         }
 
-        async function unirseReto(id, colorCreador, nombreCreador) {
+        async function unirseReto(id, colorCreador, nombreCreador, segundos) {
             partidaId = id;
             miColor = colorCreador === 'w' ? 'b' : 'w';
+            tiempoInicial = segundosDe(segundos);
+            sinTiempo = tiempoInicial === 0;
+            tiempoBlancas = tiempoInicial;
+            tiempoNegras = tiempoInicial;
+            relojesListos = true;
+            ultimoOrigen = null; ultimoDestino = null;
             await fetch(`${API_URL}/online/unirse`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: partidaId, username: username })
@@ -394,6 +439,9 @@
             partidaId = id;
             miColor = color;
             let rival = creador.toLowerCase() === username.toLowerCase() ? oponente : creador;
+            relojesListos = false; // la primera sincronización adopta los relojes del servidor
+            ultimoOrigen = null; ultimoDestino = null;
+            game.reset();
             ultimoFenRecibido = '';
             prepararTablero(rival, "Sincronizando...");
         }
@@ -407,14 +455,20 @@
         }
 
         function actualizarRelojesUI() {
+            const elLocal = document.getElementById('relojLocal');
+            const elRival = document.getElementById('relojRival');
+            if (sinTiempo) {
+                elLocal.textContent = '∞';
+                elRival.textContent = '∞';
+                elLocal.classList.remove('clock-low');
+                elRival.classList.remove('clock-low');
+                return;
+            }
             const miTiempo = miColor === 'w' ? tiempoBlancas : tiempoNegras;
             const rivalTiempo = miColor === 'w' ? tiempoNegras : tiempoBlancas;
 
-            const elLocal = document.getElementById('relojLocal');
-            const elRival = document.getElementById('relojRival');
-
-            elLocal.innerText = formatearTiempo(miTiempo);
-            elRival.innerText = formatearTiempo(rivalTiempo);
+            elLocal.textContent = formatearTiempo(miTiempo);
+            elRival.textContent = formatearTiempo(rivalTiempo);
 
             elLocal.classList.toggle('clock-low', miTiempo <= 30);
             elRival.classList.toggle('clock-low', rivalTiempo <= 30);
@@ -422,6 +476,7 @@
 
         function iniciarRelojLocal() {
             if (timerInterval) clearInterval(timerInterval);
+            if (sinTiempo) { actualizarRelojesUI(); return; }
             timerInterval = setInterval(() => {
                 if (estadoPartidaActual !== 'jugando' || game.game_over()) return;
                 if (game.turn() === 'w') {
@@ -435,31 +490,420 @@
             }, 1000);
         }
 
-        function resaltarCasillas(ultimoMovStr) {
-            $('#board .square-55d63').removeClass('highlight-last-move highlight-check');
-            if (ultimoMovStr && ultimoMovStr.includes('-')) {
-                const partes = ultimoMovStr.split(' ')[0].split('-');
-                if (partes.length === 2) {
-                    $(`#board .square-${partes[0]}`).addClass('highlight-last-move');
-                    $(`#board .square-${partes[1]}`).addClass('highlight-last-move');
+        // Al volver a la pestaña se resincroniza una vez con el servidor (los intervalos se frenan en segundo plano)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && partidaId && estadoPartidaActual === 'jugando') {
+                relojesListos = false;
+                monitorearPartida();
+            }
+        });
+
+        // ============ TABLERO PROPIO: casillas, piezas y resaltados ============
+        const boardEl = document.getElementById('board');
+        const sqLayer = document.getElementById('sqLayer');
+        const hlLayer = document.getElementById('hlLayer');
+        const pcLayer = document.getElementById('pcLayer');
+        const promoEl = document.getElementById('promo');
+        const promoBackdrop = document.getElementById('promoBackdrop');
+        const FILES = 'abcdefgh';
+
+        function volteado() { return miColor === 'b'; }
+        function sqToFR(sq) {
+            const f = FILES.indexOf(sq[0]), r = 8 - parseInt(sq[1], 10);
+            return volteado() ? { f: 7 - f, r: 7 - r } : { f: f, r: r };
+        }
+        function frToSq(f, r) {
+            if (volteado()) { f = 7 - f; r = 7 - r; }
+            return FILES[f] + (8 - r);
+        }
+        function codeDe(cell) { return cell.color + cell.type.toUpperCase(); }
+
+        function construirCasillas() {
+            sqLayer.innerHTML = '';
+            for (let r = 0; r < 8; r++) {
+                for (let f = 0; f < 8; f++) {
+                    const sq = frToSq(f, r);
+                    const d = document.createElement('div');
+                    d.className = 'sq ' + (((f + r) % 2 === 0) ? 'light' : 'dark');
+                    d.style.left = (f * 12.5) + '%';
+                    d.style.top = (r * 12.5) + '%';
+                    if (f === 0) {
+                        const c = document.createElement('span');
+                        c.className = 'coord rank'; c.textContent = sq[1];
+                        d.appendChild(c);
+                    }
+                    if (r === 7) {
+                        const c = document.createElement('span');
+                        c.className = 'coord file'; c.textContent = sq[0];
+                        d.appendChild(c);
+                    }
+                    sqLayer.appendChild(d);
                 }
             }
-            // Si hay jaque, resaltar el rey en rojo
-            if (game.in_check()) {
-                const turnoActual = game.turn();
-                const boardState = game.board();
-                const cols = ['a','b','c','d','e','f','g','h'];
-                for (let r = 0; r < 8; r++) {
-                    for (let c = 0; c < 8; c++) {
-                        const pieza = boardState[r][c];
-                        if (pieza && pieza.type === 'k' && pieza.color === turnoActual) {
-                            const sq = cols[c] + (8 - r);
-                            $(`#board .square-${sq}`).addClass('highlight-check');
-                        }
+        }
+
+        function colocar(el, f, r, escala) {
+            el.style.transform = 'translate(' + (f * 100) + '%, ' + (r * 100) + '%)' + (escala ? ' scale(' + escala + ')' : '');
+        }
+
+        function crearPiezaEl(sq, cell) {
+            const el = document.createElement('div');
+            el.className = 'piece';
+            el.style.backgroundImage = 'url("' + pieceTheme(codeDe(cell)) + '")';
+            const p = sqToFR(sq);
+            colocar(el, p.f, p.r);
+            el.dataset.sq = sq;
+            return el;
+        }
+
+        function renderAll() {
+            pcLayer.innerHTML = '';
+            pieceEls = {};
+            const b = game.board();
+            for (let r = 0; r < 8; r++) {
+                for (let f = 0; f < 8; f++) {
+                    const cell = b[r][f];
+                    if (cell) {
+                        const sq = FILES[f] + (8 - r);
+                        const el = crearPiezaEl(sq, cell);
+                        pieceEls[sq] = el;
+                        pcLayer.appendChild(el);
                     }
                 }
             }
         }
+
+        function agregarHL(sq, clase) {
+            const p = sqToFR(sq);
+            const d = document.createElement('div');
+            d.className = 'hl ' + clase;
+            d.style.left = (p.f * 12.5) + '%';
+            d.style.top = (p.r * 12.5) + '%';
+            hlLayer.appendChild(d);
+        }
+
+        function pintarResaltados() {
+            hlLayer.innerHTML = '';
+            if (ultimoOrigen && ultimoDestino) {
+                agregarHL(ultimoOrigen, 'hl-last');
+                agregarHL(ultimoDestino, 'hl-last');
+            }
+            if (game.in_check()) {
+                const turno = game.turn();
+                const b = game.board();
+                for (let r = 0; r < 8; r++) {
+                    for (let f = 0; f < 8; f++) {
+                        if (b[r][f] && b[r][f].type === 'k' && b[r][f].color === turno) {
+                            agregarHL(FILES[f] + (8 - r), 'hl-check');
+                        }
+                    }
+                }
+            }
+            if (seleccion) {
+                agregarHL(seleccion, 'hl-sel');
+                destinosSel.forEach(m => agregarHL(m.to, m.captured ? 'hl-cap' : 'hl-dot'));
+            }
+        }
+
+        function seleccionar(sq) {
+            seleccion = sq;
+            destinosSel = sq ? game.moves({ square: sq, verbose: true }) : [];
+            pintarResaltados();
+        }
+
+        function animarMovimiento(move) {
+            const el = pieceEls[move.from];
+            if (!el) { renderAll(); return; }
+            animando = true;
+
+            let capSq = move.to;
+            if (move.flags.indexOf('e') !== -1) capSq = move.to[0] + move.from[1];
+            if (move.captured && pieceEls[capSq]) {
+                const cel = pieceEls[capSq];
+                delete pieceEls[capSq];
+                cel.style.opacity = '0';
+                const cp = sqToFR(capSq);
+                colocar(cel, cp.f, cp.r, 0.5);
+                setTimeout(() => cel.remove(), 180);
+            }
+
+            delete pieceEls[move.from];
+            pieceEls[move.to] = el;
+            el.dataset.sq = move.to;
+            el.style.zIndex = 6;
+            const tp = sqToFR(move.to);
+            colocar(el, tp.f, tp.r);
+
+            if (move.flags.indexOf('k') !== -1 || move.flags.indexOf('q') !== -1) {
+                const rank = move.color === 'w' ? '1' : '8';
+                const esCorto = move.flags.indexOf('k') !== -1;
+                const rFrom = (esCorto ? 'h' : 'a') + rank;
+                const rTo = (esCorto ? 'f' : 'd') + rank;
+                const rel = pieceEls[rFrom];
+                if (rel) {
+                    delete pieceEls[rFrom];
+                    pieceEls[rTo] = rel;
+                    rel.dataset.sq = rTo;
+                    const rp = sqToFR(rTo);
+                    colocar(rel, rp.f, rp.r);
+                }
+            }
+
+            if (move.promotion) {
+                const img = pieceTheme(move.color + move.promotion.toUpperCase());
+                setTimeout(() => { el.style.backgroundImage = 'url("' + img + '")'; }, 170);
+            }
+
+            setTimeout(() => { animando = false; el.style.zIndex = 3; renderAll(); }, 210);
+        }
+
+        // ============ NOTACIÓN: se reconstruye localmente, jugada a jugada ============
+        function actualizarHistorialUI() {
+            const hist = game.history();
+            const partes = [];
+            for (let i = 0; i < hist.length; i += 2) {
+                partes.push(((i / 2) + 1) + '. ' + hist[i] + (hist[i + 1] ? ' ' + hist[i + 1] : ''));
+            }
+            const box = document.getElementById('historialBox');
+            box.textContent = partes.length ? partes.join('  ') : 'Historial de jugadas aparecerá aquí...';
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function fenClave(fen) { return (fen || '').split(' ').slice(0, 4).join(' '); }
+
+        function fijarUltimoMovDesdeTexto(txt) {
+            ultimoOrigen = null; ultimoDestino = null;
+            if (txt && txt.includes('-')) {
+                const partes = txt.split(' ')[0].split('-');
+                if (partes.length === 2 && partes[0].length === 2 && partes[1].length >= 2) {
+                    ultimoOrigen = partes[0];
+                    ultimoDestino = partes[1].slice(0, 2);
+                }
+            }
+        }
+
+        // Aplica el FEN que manda el servidor SIN borrar el historial:
+        // deduce la jugada rival probando las legales hasta dar con la posición recibida.
+        function aplicarFenRemoto(data) {
+            const eraPrimeraCarga = (ultimoFenRecibido === '');
+            if (eraPrimeraCarga) {
+                if (data.pgn) {
+                    game.load_pgn(data.pgn);
+                    if (fenClave(game.fen()) !== fenClave(data.fen)) game.load(data.fen);
+                } else if (fenClave(game.fen()) !== fenClave(data.fen)) {
+                    game.load(data.fen);
+                }
+                fijarUltimoMovDesdeTexto(data.ultimo_mov);
+                renderAll();
+                pintarResaltados();
+                return 'carga';
+            }
+            // Eco viejo del servidor: si el FEN recibido es la posición ANTERIOR a mi
+            // última jugada, es un sondeo atrasado; se ignora para no rebobinar la partida.
+            const histV = game.history({ verbose: true });
+            if (histV.length) {
+                const ult = histV[histV.length - 1];
+                game.undo();
+                const esEcoViejo = fenClave(game.fen()) === fenClave(data.fen);
+                game.move(ult);
+                if (esEcoViejo) return 'sin-cambio';
+            }
+            const candidatos = game.moves({ verbose: true });
+            for (const m of candidatos) {
+                game.move(m);
+                if (fenClave(game.fen()) === fenClave(data.fen)) {
+                    ultimoOrigen = m.from;
+                    ultimoDestino = m.to;
+                    animarMovimiento(m);
+                    pintarResaltados();
+                    return 'movimiento';
+                }
+                game.undo();
+            }
+            // No se pudo deducir (desfase mayor): resincronizar conservando el PGN si viene
+            if (data.pgn) {
+                game.load_pgn(data.pgn);
+                if (fenClave(game.fen()) !== fenClave(data.fen)) game.load(data.fen);
+            } else {
+                game.load(data.fen);
+            }
+            fijarUltimoMovDesdeTexto(data.ultimo_mov);
+            renderAll();
+            pintarResaltados();
+            return 'carga';
+        }
+
+        // ============ FLUJO DE MI JUGADA ============
+        function ejecutarJugada(from, to, promo) {
+            const move = game.move({ from: from, to: to, promotion: promo || 'q' });
+            if (move === null) { renderAll(); return; }
+            animarMovimiento(move);
+            enviarJugada(move);
+        }
+
+        function intentarJugada(from, to) {
+            const cand = game.moves({ square: from, verbose: true }).filter(m => m.to === to);
+            if (cand.length === 0) return false;
+            if (cand[0].promotion) {
+                promoPendiente = { from: from, to: to };
+                mostrarPromo(to);
+                return true;
+            }
+            ejecutarJugada(from, to, 'q');
+            return true;
+        }
+
+        function mostrarPromo(to) {
+            const p = sqToFR(to);
+            promoEl.innerHTML = '';
+            ['q', 'r', 'b', 'n'].forEach(t => {
+                const o = document.createElement('div');
+                o.className = 'promo-opt';
+                o.style.backgroundImage = 'url("' + pieceTheme(miColor + t.toUpperCase()) + '")';
+                o.addEventListener('click', ev => {
+                    ev.stopPropagation();
+                    const pend = promoPendiente;
+                    cerrarPromo();
+                    if (pend) ejecutarJugada(pend.from, pend.to, t);
+                });
+                promoEl.appendChild(o);
+            });
+            promoEl.style.left = (p.f * 12.5) + '%';
+            promoEl.style.top = (p.r === 0) ? '0%' : '50%';
+            promoEl.classList.remove('hidden');
+            promoBackdrop.classList.remove('hidden');
+        }
+
+        function cerrarPromo() {
+            promoPendiente = null;
+            promoEl.classList.add('hidden');
+            promoBackdrop.classList.add('hidden');
+        }
+        promoBackdrop.addEventListener('click', () => { cerrarPromo(); seleccionar(null); renderAll(); });
+
+        async function enviarJugada(move) {
+            detenerParpadeoTitulo();
+            document.getElementById('avisoTurnoBanner').style.display = 'none';
+            reproducirSonido(game.in_check() ? 'jaque' : 'mover');
+
+            const etiquetaMov = `${move.from}-${move.to} (${move.san})`;
+            ultimoFenRecibido = game.fen();
+            ultimoMovRegistrado = etiquetaMov;
+            ultimoOrigen = move.from;
+            ultimoDestino = move.to;
+            seleccion = null; destinosSel = [];
+            pintarResaltados();
+            actualizarHistorialUI();
+
+            document.getElementById('estadoJuego').innerText = "Enviando jugada...";
+            document.getElementById('ultimoMovTexto').innerText = `Última: ${etiquetaMov}`;
+
+            await fetch(`${API_URL}/online/mover`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: partidaId,
+                    fen: game.fen(),
+                    pgn: game.pgn(),
+                    ultimo_mov: etiquetaMov,
+                    tiempo_blancas: tiempoBlancas,
+                    tiempo_negras: tiempoNegras
+                })
+            });
+
+            if (game.in_checkmate()) {
+                await reportarFinDePartida(username, 'Jaque Mate');
+            } else if (game.in_draw() || game.in_stalemate() || game.in_threefold_repetition()) {
+                await reportarFinDePartida('empate', 'Tablas reglamentarias');
+            } else {
+                monitorearPartida();
+            }
+        }
+
+        // ============ INTERACCIÓN: arrastrar y clic-clic, como en chess.com ============
+        function casillaDesdeEvento(e) {
+            const rect = boardEl.getBoundingClientRect();
+            const borde = 4;
+            const f = Math.floor((e.clientX - rect.left - borde) / (rect.width - borde * 2) * 8);
+            const r = Math.floor((e.clientY - rect.top - borde) / (rect.height - borde * 2) * 8);
+            if (f < 0 || f > 7 || r < 0 || r > 7) return null;
+            return frToSq(f, r);
+        }
+
+        function puedeMover() {
+            return estadoPartidaActual === 'jugando' && !animando && !promoPendiente && !game.game_over()
+                && game.turn() === miColor && (sinTiempo || (tiempoBlancas > 0 && tiempoNegras > 0));
+        }
+
+        boardEl.addEventListener('pointerdown', e => {
+            if (promoPendiente || !puedeMover()) return;
+            const sq = casillaDesdeEvento(e);
+            if (!sq) return;
+            e.preventDefault();
+
+            if (seleccion && sq !== seleccion && destinosSel.some(m => m.to === sq)) {
+                intentarJugada(seleccion, sq);
+                return;
+            }
+
+            const cell = game.get(sq);
+            if (cell && cell.color === miColor) {
+                const eraSeleccion = (seleccion === sq);
+                seleccionar(sq);
+                const el = pieceEls[sq];
+                if (el) {
+                    arrastrando = { from: sq, el: el, startX: e.clientX, startY: e.clientY, activo: false, eraSeleccion: eraSeleccion };
+                    boardEl.setPointerCapture(e.pointerId);
+                }
+            } else {
+                seleccionar(null);
+            }
+        });
+
+        boardEl.addEventListener('pointermove', e => {
+            if (!arrastrando) return;
+            const dx = e.clientX - arrastrando.startX;
+            const dy = e.clientY - arrastrando.startY;
+            if (!arrastrando.activo && Math.hypot(dx, dy) > 7) {
+                arrastrando.activo = true;
+                arrastrando.el.classList.add('drag');
+            }
+            if (arrastrando.activo) {
+                const rect = boardEl.getBoundingClientRect();
+                const sqSize = (rect.width - 8) / 8;
+                const p = sqToFR(arrastrando.from);
+                const baseX = p.f * sqSize, baseY = p.r * sqSize;
+                arrastrando.el.style.transform = 'translate(' + (baseX + dx) + 'px, ' + (baseY + dy) + 'px) scale(1.12)';
+            }
+        });
+
+        function finArrastre(e) {
+            if (!arrastrando) return;
+            const d = arrastrando;
+            arrastrando = null;
+            d.el.classList.remove('drag');
+            const origen = sqToFR(d.from);
+
+            if (!d.activo) {
+                colocar(d.el, origen.f, origen.r);
+                if (d.eraSeleccion) seleccionar(null);
+                return;
+            }
+
+            const destino = casillaDesdeEvento(e);
+            if (destino && destino !== d.from && destinosSel.some(m => m.to === destino)) {
+                d.el.style.transition = 'transform 0.12s ease-out';
+                intentarJugada(d.from, destino);
+                setTimeout(() => { d.el.style.transition = ''; }, 140);
+            } else if (destino === d.from) {
+                colocar(d.el, origen.f, origen.r);
+            } else {
+                colocar(d.el, origen.f, origen.r);
+                seleccionar(null);
+            }
+        }
+        boardEl.addEventListener('pointerup', finArrastre);
+        boardEl.addEventListener('pointercancel', finArrastre);
 
         function mostrarAvisoRivalMovio(jugadaTexto) {
             const banner = document.getElementById('avisoTurnoBanner');
@@ -479,17 +923,12 @@
             document.getElementById('jugadorRival').innerText = nombreRival;
             document.getElementById('estadoJuego').innerText = estadoText;
 
-            var config = {
-                draggable: true,
-                position: 'start',
-                pieceTheme: pieceTheme,
-                onDragStart: onDragStart,
-                onDrop: onDrop,
-                onSnapEnd: onSnapEnd
-            };
-            board = Chessboard('board', config);
-            board.orientation(miColor === 'w' ? 'white' : 'black');
-            board.position(game.fen());
+            construirCasillas();
+            seleccion = null; destinosSel = [];
+            cerrarPromo();
+            renderAll();
+            pintarResaltados();
+            actualizarHistorialUI();
 
             actualizarRelojesUI();
             iniciarRelojLocal();
@@ -527,28 +966,40 @@
                 const nombreRival = miColor === 'w' ? data.oponente : data.creador;
                 document.getElementById('jugadorRival').innerText = nombreRival || 'Rival';
 
-                if (typeof data.tiempo_blancas === 'number') tiempoBlancas = data.tiempo_blancas;
-                if (typeof data.tiempo_negras === 'number') tiempoNegras = data.tiempo_negras;
-                actualizarRelojesUI();
+                // Los relojes del servidor se adoptan SOLO al sincronizar la partida
+                // y cuando cae una jugada nueva; entre jugadas manda el reloj local,
+                // para que la cuenta no salte con cada sondeo.
+                if (!relojesListos && typeof data.tiempo_blancas === 'number' && typeof data.tiempo_negras === 'number') {
+                    if (data.tiempo_blancas === 0 && data.tiempo_negras === 0) {
+                        sinTiempo = true;
+                        tiempoBlancas = 0; tiempoNegras = 0;
+                        iniciarRelojLocal();
+                    } else if (!sinTiempo) {
+                        tiempoBlancas = data.tiempo_blancas;
+                        tiempoNegras = data.tiempo_negras;
+                    }
+                    relojesListos = true;
+                    actualizarRelojesUI();
+                }
 
                 // Detectar si hubo un movimiento nuevo en el servidor
                 if (data.fen && data.fen !== ultimoFenRecibido) {
                     const eraPrimeraCarga = (ultimoFenRecibido === '');
+                    const tipoCambio = aplicarFenRemoto(data);
                     ultimoFenRecibido = data.fen;
-                    ultimoMovRegistrado = data.ultimo_mov || '';
+                    ultimoMovRegistrado = data.ultimo_mov || ultimoMovRegistrado;
 
-                    game.load(data.fen);
-                    board.position(game.fen());
-                    resaltarCasillas(ultimoMovRegistrado);
-
-                    if (data.pgn) {
-                        document.getElementById('historialBox').innerText = data.pgn;
-                    } else if (ultimoMovRegistrado) {
-                        document.getElementById('historialBox').innerText = `Última jugada: ${ultimoMovRegistrado}`;
+                    // Con la jugada nueva se adoptan los tiempos que reportó quien movió
+                    if (tipoCambio !== 'sin-cambio' && !sinTiempo && typeof data.tiempo_blancas === 'number' && typeof data.tiempo_negras === 'number') {
+                        tiempoBlancas = data.tiempo_blancas;
+                        tiempoNegras = data.tiempo_negras;
+                        relojesListos = true;
                     }
+                    actualizarRelojesUI();
+                    actualizarHistorialUI();
 
                     // Si el turno ahora es mío y no es la carga inicial, avisar que el rival acaba de mover
-                    if (!eraPrimeraCarga && game.turn() === miColor && data.estado === 'jugando') {
+                    if (!eraPrimeraCarga && tipoCambio === 'movimiento' && game.turn() === miColor && data.estado === 'jugando') {
                         if (game.in_check()) reproducirSonido('jaque');
                         else reproducirSonido('alertaRival');
                         mostrarAvisoRivalMovio(ultimoMovRegistrado);
@@ -590,48 +1041,6 @@
             } catch(e) {}
         }
 
-        // --- REALIZAR MOVIMIENTO ---
-        async function onDrop(source, target) {
-            if (estadoPartidaActual !== 'jugando' || game.turn() !== miColor) return 'snapback';
-
-            var move = game.move({ from: source, to: target, promotion: 'q' });
-            if (move === null) return 'snapback';
-
-            detenerParpadeoTitulo();
-            document.getElementById('avisoTurnoBanner').style.display = 'none';
-            reproducirSonido(game.in_check() ? 'jaque' : 'mover');
-
-            const etiquetaMov = `${source}-${target} (${move.san})`;
-            ultimoFenRecibido = game.fen();
-            ultimoMovRegistrado = etiquetaMov;
-            resaltarCasillas(etiquetaMov);
-
-            document.getElementById('estadoJuego').innerText = "Enviando jugada...";
-            document.getElementById('ultimoMovTexto').innerText = `Última: ${etiquetaMov}`;
-
-            await fetch(`${API_URL}/online/mover`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id: partidaId,
-                    fen: game.fen(),
-                    pgn: game.pgn(),
-                    ultimo_mov: etiquetaMov,
-                    tiempo_blancas: tiempoBlancas,
-                    tiempo_negras: tiempoNegras
-                })
-            });
-
-            // Comprobar si este movimiento terminó la partida
-            if (game.in_checkmate()) {
-                await reportarFinDePartida(username, 'Jaque Mate');
-            } else if (game.in_draw() || game.in_stalemate() || game.in_threefold_repetition()) {
-                await reportarFinDePartida('empate', 'Tablas reglamentarias');
-            } else {
-                monitorearPartida();
-            }
-        }
-
         async function reportarFinDePartida(ganador, motivo) {
             await fetch(`${API_URL}/online/finalizar`, {
                 method: 'POST',
@@ -662,13 +1071,6 @@
             }
         }
 
-        function onDragStart(source, piece) {
-            if (estadoPartidaActual !== 'jugando' || game.game_over() || game.turn() !== miColor) return false;
-            if ((miColor === 'w' && piece.search(/^b/) !== -1) || (miColor === 'b' && piece.search(/^w/) !== -1)) return false;
-        }
-
-        function onSnapEnd() { board.position(game.fen()); }
-
         function toggleConfig() {
             const modal = document.getElementById('configModal');
             modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
@@ -676,10 +1078,10 @@
 
         function actualizarAjustes() {
             configPiezas = document.getElementById('selPiezas').value;
-            $('#board').removeClass('board-classic board-juven');
-            $('#board').addClass(document.getElementById('selTablero').value);
-            board.position(game.fen());
-            resaltarCasillas(ultimoMovRegistrado);
+            boardEl.classList.remove('board-classic', 'board-juven');
+            boardEl.classList.add(document.getElementById('selTablero').value);
+            renderAll();
+            pintarResaltados();
         }
 
         function pieceTheme(piece) {
